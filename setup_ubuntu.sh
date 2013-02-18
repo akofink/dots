@@ -1,17 +1,25 @@
 #!/bin/bash
 
-current_file='.gitconfig'
-if [ -f "~/$current_file" ]; then
-	mv "~/$current_file" "$current_file.old"
-fi
-if [ ! -L "~/$current_file" ]; then
-	ln -s "~/dots/$current_file_ubuntu" "~/$current_file"
+declare -a files=('.gitconfig' '.zshrc')
+
+if [[ $1 = "--dry-run" || $1 = "-d" ]]; then
+	echo "This is a dry run."
+	dry=1
 fi
 
-current_file='.zshrc'
-if [ -f "~/$current_file" ]; then
-	mv "~/$current_file" "$current_file.old"
-fi
-if [ ! -L "~/$current_file" ]; then
-	ln -s "~/dots/$current_file_ubuntu" "~/$current_file"
-fi
+for i in "${files[@]}"
+do
+	if [ -e "${HOME}/${i}" ]; then
+	echo "Moving ${HOME}/${i} to ${i}.old"
+		if [ ! $dry ]; then
+			mv "${HOME}/${i}" "${i}.old"
+		fi
+	fi
+
+	if [ ! -L "${HOME}/${i}" ]; then
+		echo "Creating symlink from ${HOME}/dots/${i}_ubuntu to ${HOME}/${i}"
+		if [ ! $dry ]; then
+			ln -s "${HOME}/dots/${i}_ubuntu" "${HOME}/${i}"
+		fi
+	fi
+done
