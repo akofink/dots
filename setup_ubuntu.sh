@@ -12,7 +12,7 @@ do
 	if [ -e "${HOME}/${i}" ]; then
 	echo "Moving ${HOME}/${i} to ${i}.old"
 		if [ ! $dry ]; then
-			mv "${HOME}/${i}" "${i}.old"
+			mv "${HOME}/${i}" "${HOME}/${i}.old"
 		fi
 	fi
 
