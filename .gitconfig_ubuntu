@@ -1,0 +1,19 @@
+[alias]
+	c = commit
+	co = checkout
+	s = status
+[user]
+	name = Andrew Kofink
+	email = ajkofink@gmail.com
+[core]
+	editor = subl -w
+	autocrlf = input
+  	whitespace = cr-at-eol
+[color]
+    diff = auto
+    status = auto
+    branch = auto
+    interactive = auto
+    ui = auto
+[credential]
+	helper = cache

@@ -1,6 +1,5 @@
 *
-!.gitconfig
+!.gitignore
 !.README.md
+!.gitconfig*
 !.zshrc
-!.gitignore_osx
-!.gitignore_ubuntu
