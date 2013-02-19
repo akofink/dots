@@ -1,6 +1,7 @@
 #!/bin/bash
 
 declare -a files=('.gitconfig' '.zshrc')
+platform="osx"
 
 if [[ $1 = "--dry-run" || $1 = "-d" ]]; then
 	echo "This is a dry run."
@@ -19,8 +20,8 @@ do
 		continue
 	fi
 
-	echo "Creating symlink from ${HOME}/dots/${i}_ubuntu to ${HOME}/${i}"
+	echo "Creating symlink from ${HOME}/dots/${i}_${platform} to ${HOME}/${i}"
 	if [ ! $dry ]; then
-		ln -s "${HOME}/dots/${i}_ubuntu" "${HOME}/${i}"
+		ln -s "${HOME}/dots/${i}_${platform}" "${HOME}/${i}"
 	fi
 done
