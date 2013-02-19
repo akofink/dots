@@ -16,7 +16,7 @@ do
 		fi
 	elif [ -L "${HOME}/${i}" ]; then
 		echo "${i} is already set up!"
-		exit
+		continue
 	fi
 
 	echo "Creating symlink from ${HOME}/dots/${i}_ubuntu to ${HOME}/${i}"
