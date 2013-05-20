@@ -38,3 +38,5 @@ source $ZSH/oh-my-zsh.sh
 export PATH=/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358@global/bin:/Users/akofink/.rvm/rubies/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin
 
 alias l='ls -la'
+
+eval "$(rbenv init -)"

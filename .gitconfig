@@ -2,11 +2,12 @@
 	c = commit
 	co = checkout
 	s = status
+	l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 [user]
 	name = Andrew Kofink
 	email = ajkofink@gmail.com
 [core]
-	editor = mate -w
+	editor = vi
 	autocrlf = input
   whitespace = cr-at-eol
 [credential]
