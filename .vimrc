@@ -1,13 +1,21 @@
 " System
 set nocompatible
+filetype off
+
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+
+" Github Bundles
+Bundle 'gmarik/vundle'
+Bundle 'tpope/vim-rails.git'
+Bundle 'kien/ctrlp.vim'
+Bundle 'kchmck/vim-coffee-script'
+Bundle 'tpope/vim-fugitive'
+Bundle 'scrooloose/nerdtree'
 
 " Syntax Highlighting
 syntax enable
-
-" Color
-set t_Co=256 " 256 colors
-set background=dark
-color grb256
+filetype plugin indent on
 
 " Spacing and Wrapping
 set expandtab
@@ -26,11 +34,15 @@ set showmode
 set showmatch
 set list listchars=tab:>>,eol:¬,trail:·
 
-" No Arrow Keys
-map <Left> <Nop>
-map <Right> <Nop>
-map <Up> <Nop>
-map <Down> <Nop>
+" Multipurpose Tab Key
+function! InsertTabWrapper()
+  let col = col('.') - 1
+  if !col || getline('.')[col - 1] !~ '\k'
+    return "\<tab>"
+  else
+    return "\<c-p>"
+  endif
+endfunction
 
 " Searching
 set incsearch
@@ -45,12 +57,4 @@ set nowritebackup
 
 " Leader
 let mapleader = ','
-
-function! InsertTabWrapper()
-  let col = col('.') - 1
-  if !col || getline('.')[col - 1] !~ '\k'
-    return "\<tab>"
-  else
-    return "\<c-p>"
-  endif
-endfunction
+map <leader>f :CtrlPMixed<CR>
