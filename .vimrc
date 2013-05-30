@@ -11,9 +11,17 @@ Bundle 'tpope/vim-rails.git'
 Bundle 'kien/ctrlp.vim'
 Bundle 'kchmck/vim-coffee-script'
 Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-markdown'
+Bundle 'tpope/vim-surround'
 Bundle 'scrooloose/nerdtree'
+Bundle 'sjl/badwolf'
+Bundle 'altercation/vim-colors-solarized'
+Bundle 'vim-scripts/vimwiki'
+"Bundle 'wikitopian/hardmode'
 
 " Syntax Highlighting
+let g:solarized_termcolors=256
+set background=dark
 syntax enable
 filetype plugin indent on
 
@@ -25,7 +33,6 @@ set tabstop=2
 set textwidth=80
 
 " Interface
-set number
 set showcmd
 
 " Editing
@@ -33,6 +40,7 @@ set smartindent
 set showmode
 set showmatch
 set list listchars=tab:>>,eol:¬,trail:·
+set rnu
 
 " Multipurpose Tab Key
 function! InsertTabWrapper()
@@ -57,4 +65,17 @@ set nowritebackup
 
 " Leader
 let mapleader = ','
-map <leader>f :CtrlPMixed<CR>
+map <leader>f :CtrlP<CR>
+map <leader>n :NERDTreeToggle<CR>
+map <leader>b :CtrlPBuffer<CR>
+" move around with the arrow keys
+noremap <silent> <Right> <c-w>l
+noremap <silent> <Left> <c-w>h
+noremap <silent> <Up> <c-w>k
+noremap <silent> <Down> <c-w>j
+
+map <leader>v :e ~/.vimrc<CR>
+map <leader>r :so ~/.vimrc<CR>
+map <leader>lr :set rnu<CR>
+map <leader>ln :set number<CR>
+map <leader>t :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
