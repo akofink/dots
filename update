@@ -2,6 +2,6 @@
 
 cd ~/dots &&
 git add . &&
-(git c -am "Update from $HOST" || 1) &&
+git c -am "Update from $HOST" && 1
 git pull &&
 git push
