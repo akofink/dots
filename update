@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "$HOST"
+exit()
 cd ~/dots &&
 git add . &&
 git c -am "Update from $HOST" &&
