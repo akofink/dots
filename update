@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd ~/dots &&
+git add . &&
+git c -am "Update from $HOST" &&
+git pull &&
+git push

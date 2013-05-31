@@ -74,8 +74,19 @@ noremap <silent> <Left> <c-w>h
 noremap <silent> <Up> <c-w>k
 noremap <silent> <Down> <c-w>j
 
-map <leader>v :e ~/.vimrc<CR>
-map <leader>r :so ~/.vimrc<CR>
+"Command
+map <leader><leader> :
+"Quit
+map <leader>q :q<CR>
+"Config
+map <leader>c :e ~/.vimrc<CR>
+"Reload Config
+map <leader>R :so ~/.vimrc<CR>
+"Relative Line Numbers
 map <leader>lr :set rnu<CR>
+"Fixed Line Numbers
 map <leader>ln :set number<CR>
-map <leader>t :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
+"Reload Tags
+map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
+"Run
+map <leader>r :! . ./%<CR>
