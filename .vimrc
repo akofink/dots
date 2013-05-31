@@ -17,7 +17,8 @@ Bundle 'scrooloose/nerdtree'
 Bundle 'sjl/badwolf'
 Bundle 'altercation/vim-colors-solarized'
 Bundle 'vim-scripts/vimwiki'
-"Bundle 'wikitopian/hardmode'
+Bundle 'Shougo/neocomplcache'
+Bundle 'scrooloose/syntastic'
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
