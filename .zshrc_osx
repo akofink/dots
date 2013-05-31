@@ -8,9 +8,10 @@ ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="tjkirch"
 
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-alias l='la'
+alias l='la -la'
+alias server='rails s -p 8080'
+alias console='rails c'
+
 
 # Set to this to use case-sensitive completion
 # CASE_SENSITIVE="true"
@@ -35,8 +36,6 @@ plugins=(git nyan)
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
-export PATH=/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358@global/bin:/Users/akofink/.rvm/rubies/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin
-
-alias l='ls -la'
+export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358@global/bin:/Users/akofink/.rvm/rubies/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin
 
 eval "$(rbenv init -)"
