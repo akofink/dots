@@ -19,6 +19,7 @@ Bundle 'altercation/vim-colors-solarized'
 Bundle 'vim-scripts/vimwiki'
 Bundle 'Shougo/neocomplcache'
 Bundle 'scrooloose/syntastic'
+Bundle 'vim-scrips/loremipsum'
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
