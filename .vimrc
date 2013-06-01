@@ -19,7 +19,7 @@ Bundle 'altercation/vim-colors-solarized'
 Bundle 'vim-scripts/vimwiki'
 Bundle 'Shougo/neocomplcache'
 Bundle 'scrooloose/syntastic'
-Bundle 'vim-scrips/loremipsum'
+Bundle 'vim-scripts/loremipsum'
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
@@ -92,3 +92,5 @@ map <leader>ln :set number<CR>
 map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 " Run
 map <leader>r :! . ./%<CR>
+" Lorem Ipsum
+map <leader>li :Loremipsum<CR>
