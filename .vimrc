@@ -20,6 +20,8 @@ Bundle 'vim-scripts/vimwiki'
 Bundle 'Shougo/neocomplcache'
 Bundle 'scrooloose/syntastic'
 Bundle 'vim-scripts/loremipsum'
+Bundle 'tpope/vim-haml'
+
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
