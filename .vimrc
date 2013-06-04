@@ -43,6 +43,7 @@ set showmode
 set showmatch
 set list listchars=tab:>>,eol:¬,trail:·
 set rnu
+set backspace=indent,eol,start
 
 " Multipurpose Tab Key
 function! InsertTabWrapper()
