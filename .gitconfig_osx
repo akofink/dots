@@ -7,7 +7,7 @@
 	name = Andrew Kofink
 	email = ajkofink@gmail.com
 [core]
-	editor = vi
+	editor = vim
 	autocrlf = input
   whitespace = cr-at-eol
 [credential]
