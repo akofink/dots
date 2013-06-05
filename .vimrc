@@ -45,6 +45,7 @@ set showmode
 set showmatch
 set list listchars=tab:>>,eol:¬,trail:·
 set rnu
+set backspace=indent,eol,start
 
 " Multipurpose Tab Key
 function! InsertTabWrapper()
@@ -93,6 +94,6 @@ map <leader>ln :set number<CR>
 " Reload Tags
 map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 " Run
-map <leader>r :! . ./%<CR>
+map <leader>r :! ./%<CR>
 " Lorem Ipsum
 map <leader>li :Loremipsum<CR>
