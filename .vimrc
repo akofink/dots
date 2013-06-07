@@ -94,6 +94,8 @@ map <leader>ln :set number<CR>
 " Reload Tags
 map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 " Run
-map <leader>r :! ./%<CR>
+map <leader>r :!ruby %<CR>
 " Lorem Ipsum
 map <leader>li :Loremipsum<CR>
+" Bundle
+map <leader>bi :!bundle<CR>
