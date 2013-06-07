@@ -11,6 +11,7 @@ ZSH_THEME="tjkirch"
 alias l='la -la'
 alias server='rails s -p 8080'
 alias console='rails c'
+alias black='open ~/Documents/black.html'
 
 
 # Set to this to use case-sensitive completion
