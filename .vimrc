@@ -21,7 +21,7 @@ Bundle 'Shougo/neocomplcache'
 Bundle 'scrooloose/syntastic'
 Bundle 'vim-scripts/loremipsum'
 Bundle 'tpope/vim-haml'
-
+Bundle 'scrooloose/nerdcommenter'
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
