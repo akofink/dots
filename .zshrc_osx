@@ -13,6 +13,8 @@ alias server='rails s -p 8080'
 alias console='rails c'
 alias black='open ~/Documents/black.html'
 alias s='source ~/.zshrc'
+alias gpullr='git pull --rebase'
+alias gpush='git push'
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"
