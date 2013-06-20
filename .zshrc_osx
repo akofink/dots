@@ -15,7 +15,7 @@ alias black='open ~/Documents/black.html'
 alias s='source ~/.zshrc'
 alias gpullr='git pull --rebase'
 alias gpush='git push'
-alias gt="git commit -m 'task#$TASK' -e"
+alias gt="git commit -m 'task#$TASK' -e" # Commit with tempus task number appended
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"
