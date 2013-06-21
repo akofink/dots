@@ -29,6 +29,7 @@ let g:solarized_termcolors=256
 set background=dark
 syntax enable
 filetype plugin indent on
+let g:syntastic_ruby_exec = '~/.rbenv/shims/ruby'
 
 " Spacing and Wrapping
 set expandtab
