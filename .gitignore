@@ -4,3 +4,5 @@ log
 tags
 .vim/bundle/loremipsum
 .vim/bundle/vimwiki
+.vim/bundle/syntastic
+.vim/bundle/neocomplcache
