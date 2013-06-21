@@ -1,0 +1,12 @@
+# ~/.tmuxinator/libstatus.yml
+# you can make as many tabs as you wish...
+
+project_name: libstatus
+project_root: ~/dev/rails/libstatus
+pre:
+  - export RBENV_DIR=
+tabs:
+  - shell: git s
+  - editor: vim
+  - console: irb
+  - guard: guard
