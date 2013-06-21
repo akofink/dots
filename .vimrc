@@ -101,6 +101,6 @@ map <leader>li :Loremipsum<CR>
 " Rails Bundle
 map <leader>rbi :!bundle<CR>
 " VIM Bundle
-map <leader>bi :BundleInstall<CR>
+map <leader>bi :BundleInstall<CR>q
 " Update dots
 map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
