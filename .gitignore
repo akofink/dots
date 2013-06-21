@@ -2,3 +2,5 @@
 .ruby-version
 log
 tags
+.vim/bundle/loremipsum
+.vim/bundle/vimwiki
