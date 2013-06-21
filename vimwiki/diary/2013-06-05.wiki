@@ -1,0 +1,42 @@
+= Meeting with Mason, Jackson, and Tyler =
+* Merging two apps
+* First two apps built for Bayer
+* Point of both projects is to find good genes for selective breeding
+  * Corn and Soybeans
+  * Find genes from bacteria
+  * Good things
+    * Pest resistance
+    * Drought resistance
+    * Pesticide/Herbicide Resistance
+      * Roundup resistant
+  * Find - 'Localized Search'
+    * Strain
+      * 1. Getting genes/material from bacteria
+      * 2. See if it does 'good things'
+      * n. (Fractionation) Test again to make sure
+    * MiDAS
+      * 3. Extract the gene sequences
+      * 4. Compare genes with patented genes
+
+== Why to merge them ==
+* Shared Authentication
+* Shared reporting
+* Shared database
+* simpler upgrades
+* same UI/design
+  * Shared CSS/js
+* Infrastructure Outages
+  * Causes failures if one app is out but the other is not
+  * May lead to omissions/mistakes
+* Performance of two parallel apps
+* Test servers
+
+== Why not to merge them ==
+
+== Strain/Bioassay ==
+* 6 years old
+* None/password protected pages
+
+== MiDAS ==
+* 4 years old
+* 3 role authentication

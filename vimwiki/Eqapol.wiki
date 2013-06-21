@@ -1,0 +1,2 @@
+Donor has_many Protocols
+Protocol has_many Consents
