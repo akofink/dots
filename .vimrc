@@ -100,3 +100,5 @@ map <leader>r :!ruby %<CR>
 map <leader>li :Loremipsum<CR>
 " Bundle
 map <leader>bi :!bundle<CR>
+" Update dots
+map <leader>d :!cd ~/dots && ./test_update<CR>
