@@ -98,7 +98,9 @@ map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 map <leader>r :!ruby %<CR>
 " Lorem Ipsum
 map <leader>li :Loremipsum<CR>
-" Bundle
-map <leader>bi :!bundle<CR>
+" Rails Bundle
+map <leader>rbi :!bundle<CR>
+" VIM Bundle
+map <leader>bi :BundleInstall<CR>
 " Update dots
-map <leader>d :!cd ~/dots && ./test_update<CR><CR>
+map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
