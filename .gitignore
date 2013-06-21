@@ -1,1 +1,4 @@
-.vim/bundle
+.DS_Store
+.ruby-version
+log
+tags

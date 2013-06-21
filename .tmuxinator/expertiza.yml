@@ -1,0 +1,11 @@
+project_name: expertiza
+project_root: ~/dev/rails/expertiza
+pre:
+  - export RBENV_DIR
+  - export RBENV_VERSION
+tabs:
+  - shell: git s
+  - editor: vim
+  - console: ./script/console
+  - tests: rake
+  - server: ./script/server

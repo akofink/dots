@@ -1,0 +1,11 @@
+# ~/.tmuxinator/strain.yml
+# you can make as many tabs as you wish...
+
+project_name: strain
+project_root: ~/dev/strain
+tabs:
+  - shell: git pull
+  - editor: vim
+  - console: ./script/console
+  - tests: rspec spec
+  - server: ./script/server -p 8080

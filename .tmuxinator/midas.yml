@@ -1,0 +1,12 @@
+# ~/.tmuxinator/midas.yml
+# you can make as many tabs as you wish...
+
+project_name: wemux
+project_root: ~/dev/midas
+socket_path: /tmp/wemux-wemux
+tabs:
+  - shell: git pull
+  - editor: vim
+  - console: console
+  - tests: rspec spec
+  - server: server
