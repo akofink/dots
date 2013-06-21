@@ -10,5 +10,4 @@ tabs:
   - editor: vim
   - console: rails c
   - guard: guard
-  - logs: tail -f log/development.log
   - server: server
