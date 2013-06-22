@@ -17,6 +17,7 @@ alias gpullr='git pull --rebase'
 alias gpush='git push'
 alias gt="git commit -m 'task#$TASK' -e" # Commit with tempus task number appended
 alias 8080to80="sudo ipfw add 100 fwd 127.0.0.1,8080 tcp from any to me 80"
+alias ktmux='tmux kill-session'
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"
