@@ -1,3 +1,5 @@
-# Learned Today
+=== Learned Today ===
 * gsub! returns nil if the regex was not found. gsub returns the unmodified
 string.
+* Everything is an object in Ruby! This means that everything is passed by
+reference (pointers!), and mutates everywhere.

@@ -106,3 +106,7 @@ map <leader>rbi :!bundle<CR>
 map <leader>bi :BundleInstall<CR>q
 " Update dots
 map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
+" VIM wiki
+map <leader>wdiary :VimwikiDiaryIndex<CR>:VimwikiDiaryGenerateLinks<CR>
+map <leader>wb :VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
+map <leader>wB :VimwikiBacklinks<CR><CR>:VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
