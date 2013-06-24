@@ -1,0 +1,3 @@
+# Learned Today
+* gsub! returns nil if the regex was not found. gsub returns the unmodified
+string.
