@@ -1,8 +1,8 @@
-# ~/.tmuxinator/recipes.yml
+# ~/.tmuxinator/akofink.yml
 # you can make as many tabs as you wish...
 
-project_name: recipes
-project_root: ~/dev/rails/recipes
+project_name: akofink
+project_root: ~/dev/rails/akofink
 pre:
   - export RBENV_DIR=
 tabs:
