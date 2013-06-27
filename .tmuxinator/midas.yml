@@ -8,5 +8,5 @@ tabs:
   - shell: git pull
   - editor: vim
   - console: console
-  - tests: rspec spec
+  - tests: guard
   - server: server
