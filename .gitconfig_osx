@@ -1,22 +1,23 @@
 [alias]
-	c = commit
-	co = checkout
-	s = status
-	l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  c = commit
+  co = checkout
+  s = status
+  l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  b = branch
 [user]
-	name = Andrew Kofink
-	email = ajkofink@gmail.com
+  name = Andrew Kofink
+  email = ajkofink@gmail.com
 [core]
-	editor = vim
-	autocrlf = input
+  editor = vim
+  autocrlf = input
   whitespace = cr-at-eol
 [credential]
-	helper = osxkeychain
+  helper = osxkeychain
 [merge]
-	tool = opendiff
+  tool = opendiff
 [color]
-    diff = auto
-    status = auto
-    branch = auto
-    interactive = auto
-    ui = auto
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = auto
