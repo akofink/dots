@@ -4,6 +4,7 @@
   s = status
   l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   b = branch
+  delete = git rm `git status | grep deleted | awk '{print $3}'`
 [user]
   name = Andrew Kofink
   email = ajkofink@gmail.com
