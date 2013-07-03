@@ -58,6 +58,8 @@ function! InsertTabWrapper()
     return "\<c-p>"
   endif
 endfunction
+inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <s-tab> <c-n>
 
 " Searching
 set incsearch
