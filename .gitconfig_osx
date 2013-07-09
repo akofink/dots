@@ -11,6 +11,7 @@
   editor = vim
   autocrlf = input
   whitespace = cr-at-eol
+	excludesfile = /Users/andrew.kofink/.gitignore
 [credential]
   helper = osxkeychain
 [merge]
