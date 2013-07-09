@@ -7,7 +7,7 @@
   delete = git rm `git status | grep deleted | awk '{print $3}'`
 [user]
   name = Andrew Kofink
-  email = ajkofink@gmail.com
+  email = $GIT_EMAIL
 [core]
   editor = vim
   autocrlf = input
