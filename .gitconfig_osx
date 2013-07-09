@@ -22,3 +22,5 @@
   branch = auto
   interactive = auto
   ui = auto
+[push]
+	default = simple
