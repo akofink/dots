@@ -20,7 +20,6 @@ Bundle 'sjl/badwolf'
 Bundle 'altercation/vim-colors-solarized'
 Bundle 'vim-scripts/vimwiki'
 Bundle 'Shougo/neocomplcache'
-Bundle 'scrooloose/syntastic'
 Bundle 'vim-scripts/loremipsum'
 Bundle 'tpope/vim-haml'
 Bundle 'scrooloose/nerdcommenter'
@@ -59,6 +58,8 @@ function! InsertTabWrapper()
     return "\<c-p>"
   endif
 endfunction
+inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <s-tab> <c-n>
 
 " Searching
 set incsearch
@@ -106,3 +107,7 @@ map <leader>rbi :!bundle<CR>
 map <leader>bi :BundleInstall<CR>q
 " Update dots
 map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
+" VIM wiki
+map <leader>wdiary :VimwikiDiaryIndex<CR>:VimwikiDiaryGenerateLinks<CR>
+map <leader>wb :VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
+map <leader>wB :VimwikiBacklinks<CR><CR>:VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>

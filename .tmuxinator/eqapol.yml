@@ -1,5 +1,6 @@
-project_name: midas
-project_root: ~/dev/midas
+project_name: eqapol
+project_root: ~/dev/eqapol
+socket_path: /tmp/wemux-wemux
 tabs:
   - shell: git pull
   - editor: vim
