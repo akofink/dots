@@ -11,14 +11,16 @@ ZSH_THEME="tjkirch"
 alias l='la -la'
 alias server='rails s -p 8080'
 alias console='rails c'
-alias black='open ~/Documents/black.html'
+alias black='open http://black.akofink.com'
 alias s='source ~/.zshrc'
+alias es='vi ~/.zshrc'
 alias gpullr='git pull --rebase'
 alias gpush='git push'
 alias gt="git commit -m 'task#$TASK' -e" # Commit with tempus task number appended
 alias 8080to80="sudo ipfw add 100 fwd 127.0.0.1,8080 tcp from any to me 80"
 alias :e="vim"
 alias ktmux='tmux kill-session'
+alias be='bundle exec'
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"

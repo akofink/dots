@@ -72,6 +72,12 @@ set noswapfile
 set nobackup
 set nowritebackup
 
+" NERDTree
+let NERDTreeShowHidden=1
+
+" Ctrl-P
+let g:ctrlp_show_hidden = 1
+
 " Leader
 let mapleader = ','
 map <leader>f :CtrlP<CR>
