@@ -8,5 +8,5 @@ pre:
 tabs:
   - shell: git s
   - editor: vim
-  - console: irb
+  - console: ./script/console
   - guard: guard

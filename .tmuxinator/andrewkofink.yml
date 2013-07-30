@@ -1,0 +1,10 @@
+project_name: andrewkofink
+project_root: ~/dev/rails/andrewkofink
+pre:
+  - export RBENV_DIR=
+tabs:
+  - shell: git s
+  - editor: vim
+  - console: console
+  - guard: guard
+  - server: server

@@ -8,4 +8,4 @@ tabs:
   - editor: vim
   - console: ./script/console
   - tests: rspec spec
-  - server: ./script/server -p 8080
+  - server: ./script/server -p 3001

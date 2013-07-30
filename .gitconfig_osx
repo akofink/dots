@@ -7,12 +7,12 @@
   b = branch
 [user]
   name = Andrew Kofink
-  email = $GIT_EMAIL
+  email = andrew.kofink@scimedsolutions.com
 [core]
   editor = vim
   autocrlf = input
   whitespace = cr-at-eol
-	excludesfile = /Users/andrew.kofink/.gitignore
+  excludesfile = /Users/andrew.kofink/.gitignore
 [credential]
   helper = osxkeychain
 [merge]
@@ -24,4 +24,4 @@
   interactive = auto
   ui = auto
 [push]
-	default = simple
+  default = simple
