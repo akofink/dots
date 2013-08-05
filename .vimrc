@@ -26,6 +26,7 @@ Bundle 'scrooloose/nerdcommenter'
 Bundle 'elixir-lang/vim-elixir'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'taichouchou2/vim-rsense'
+Bundle 'othree/html5.vim'
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
@@ -33,6 +34,7 @@ set background=dark
 syntax enable
 filetype plugin indent on
 let g:syntastic_ruby_exec = '~/.rbenv/shims/ruby'
+colorscheme desert
 
 " Spacing and Wrapping
 set expandtab
@@ -80,6 +82,9 @@ let NERDTreeShowHidden=1
 
 " Ctrl-P
 let g:ctrlp_show_hidden = 1
+
+" Custom remappings
+map <Space> i<Space>
 
 " Leader
 let mapleader = ','

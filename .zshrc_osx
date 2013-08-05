@@ -19,6 +19,7 @@ alias gpush='git push'
 alias gt="git commit -m 'task#$TASK' -e" # Commit with tempus task number appended
 alias 8080to80="sudo ipfw add 100 fwd 127.0.0.1,8080 tcp from any to me 80"
 alias :e="vim"
+alias tmux="TERM=screen-256color-bce tmux"
 alias ktmux='tmux kill-session'
 alias be='bundle exec'
 
