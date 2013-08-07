@@ -34,7 +34,6 @@ set background=dark
 syntax enable
 filetype plugin indent on
 let g:syntastic_ruby_exec = '~/.rbenv/shims/ruby'
-colorscheme desert
 
 " Spacing and Wrapping
 set expandtab
@@ -82,9 +81,6 @@ let NERDTreeShowHidden=1
 
 " Ctrl-P
 let g:ctrlp_show_hidden = 1
-
-" Custom remappings
-map <Space> i<Space>
 
 " Leader
 let mapleader = ','
