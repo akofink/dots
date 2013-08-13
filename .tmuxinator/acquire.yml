@@ -8,4 +8,4 @@ tabs:
   - editor: vim
   - console: ./script/console
   - tests: rake
-  - server: ./script/server
+  - server: ./script/server -p 8080
