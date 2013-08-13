@@ -7,7 +7,7 @@
   b = branch
 [user]
   name = Andrew Kofink
-	email = andrew.kofink@scimedsolutions.com
+	email = ajkofink@gmail.com
 [core]
   editor = vim
   autocrlf = input
