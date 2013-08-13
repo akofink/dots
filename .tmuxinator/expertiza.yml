@@ -6,6 +6,6 @@ pre:
 tabs:
   - shell: git s
   - editor: vim
-  - console: ./script/console
-  - tests: rake
-  - server: ./script/server
+  - console: console
+  - tests: be rake
+  - server: server

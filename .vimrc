@@ -27,6 +27,13 @@ Bundle 'elixir-lang/vim-elixir'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'taichouchou2/vim-rsense'
 Bundle 'othree/html5.vim'
+Bundle 'rking/ag.vim'
+Bundle 'mattn/gist-vim'
+Bundle 'mattn/webapi-vim'
+
+" Gist setup
+let g:gist_use_password_in_gitconfig = 1
+let g:gist_open_browser_after_post = 1
 
 " Syntax Highlighting
 let g:solarized_termcolors=256
@@ -109,6 +116,8 @@ map <leader>ln :set number<CR>
 map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 " Run
 map <leader>r :!ruby %<CR>
+" Run Rspec
+map <leader>t :!rspec spec<CR>
 " Lorem Ipsum
 map <leader>li :Loremipsum<CR>
 " Rails Bundle
