@@ -29,6 +29,7 @@ Bundle 'taichouchou2/vim-rsense'
 Bundle 'othree/html5.vim'
 Bundle 'rking/ag.vim'
 Bundle 'mattn/gist-vim'
+let g:github_token = $GITHUB_TOKEN
 Bundle 'mattn/webapi-vim'
 
 " Gist setup
