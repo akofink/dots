@@ -1,0 +1,6 @@
+project_name: akofink_html
+project_root: ~/Desktop
+tabs:
+  - shell: l
+  - vim: vim
+  - console: irb
