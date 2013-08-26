@@ -1,0 +1,8 @@
+project_name: expertiza_old
+project_root: ~/dev/rails/expertiza_old
+tabs:
+  - shell: git s
+  - editor: vim
+  - console: ./script/console
+  - tests: be cucumber
+  - server: ./script/server
