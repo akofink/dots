@@ -1,6 +1,6 @@
 project_name: expertiza_old
 project_root: ~/dev/rails/expertiza_old
-tabs:
+windows:
   - shell: git s
   - editor: vim
   - console: ./script/console
