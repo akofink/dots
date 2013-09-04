@@ -23,6 +23,7 @@ alias tmux="TERM=screen-256color-bce tmux"
 alias ktmux='tmux kill-session'
 alias be='bundle exec'
 alias timestamp="ruby -e 'print Time.now.strftime(\"%Y%m%d_%H%M%S\")'"
+alias v='vim'
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"

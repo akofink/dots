@@ -1,0 +1,6 @@
+name: tekkit
+root: ~/dev/lua/tekkit
+windows:
+  - shell: g s
+  - editor: vim
+  - lua: lua
