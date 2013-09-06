@@ -1,6 +1,6 @@
 project_name: expertiza
 project_root: ~/dev/rails/expertiza
-tabs:
+windows:
   - shell: open http://lo && git s
   - editor: vim
   - console: console

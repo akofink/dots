@@ -3,7 +3,7 @@ project_root: ~/dev/acquire
 pre:
   - export RBENV_DIR
   - export RBENV_VERSION
-tabs:
+windows:
   - shell: git s
   - editor: vim
   - console: ./script/console

@@ -1,5 +1,5 @@
 # ~/.tmuxinator/recipes.yml
-# you can make as many tabs as you wish...
+# you can make as many windows as you wish...
 
 project_name: recipes
 project_root: ~/dev/rails/recipes

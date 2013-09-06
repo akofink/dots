@@ -1,9 +1,9 @@
 # ~/.tmuxinator/strain.yml
-# you can make as many tabs as you wish...
+# you can make as many windows as you wish...
 
 project_name: strain
 project_root: ~/dev/strain
-tabs:
+windows:
   - shell: git pull
   - editor: vim
   - console: ./script/console

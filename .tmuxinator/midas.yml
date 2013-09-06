@@ -1,6 +1,6 @@
 project_name: midas
 project_root: ~/dev/midas
-tabs:
+windows:
   - shell: git pull
   - editor: vim
   - console: console

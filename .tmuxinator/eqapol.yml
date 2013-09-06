@@ -1,7 +1,7 @@
 project_name: eqapol
 project_root: ~/dev/eqapol
 socket_path: /tmp/wemux-wemux
-tabs:
+windows:
   - shell: git pull
   - editor: vim
   - console: console

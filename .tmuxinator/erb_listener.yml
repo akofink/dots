@@ -1,6 +1,6 @@
 project_name: erb_listener
 project_root: ~/dev/ruby/erb_listener
-tabs:
+windows:
   - shell: g s
   - editor: vim
   - console: ./console.rb
