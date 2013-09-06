@@ -3,9 +3,7 @@
 
 project_name: recipes
 project_root: ~/dev/rails/recipes
-pre:
-  - export RBENV_DIR=
-tabs:
+windows:
   - shell: git s
   - editor: vim
   - console: console
