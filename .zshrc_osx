@@ -31,7 +31,7 @@ alias g='git'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(cap gem osx brew bundler git nyan rails ruby)
+plugins=(cap gem osx brew bundler git nyan rails rails3 rand-quote ruby)
 
 source $ZSH/oh-my-zsh.sh
 source ~/.secrets # Secret key environment variables
@@ -54,3 +54,5 @@ function rvm () {
 
 export EDITOR=vim
 git config --global user.email $GIT_EMAIL
+
+quote
