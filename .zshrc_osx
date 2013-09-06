@@ -21,7 +21,6 @@ alias 8080to80="sudo ipfw add 100 fwd 127.0.0.1,8080 tcp from any to me 80"
 alias :e="vim"
 alias tmux="TERM=screen-256color-bce tmux"
 alias ktmux='tmux kill-session'
-alias be='bundle exec'
 alias timestamp="ruby -e 'print Time.now.strftime(\"%Y%m%d_%H%M%S\")'"
 alias v='vim'
 alias g='git'
@@ -32,14 +31,14 @@ alias g='git'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git nyan rails ruby)
+plugins=(cap gem osx brew bundler git nyan rails ruby)
 
 source $ZSH/oh-my-zsh.sh
 source ~/.secrets # Secret key environment variables
 source ~/.env # Other environment variables
 
 # Customize to your needs...
-export PATH=~/dev/elixir/bin:/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358@global/bin:/Users/akofink/.rvm/rubies/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin
+export PATH=PATH:~/dev/elixir/bin:/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358@global/bin:/Users/akofink/.rvm/rubies/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./
 
 # rbenv - A replacement for RVM
 eval "$(rbenv init -)"
