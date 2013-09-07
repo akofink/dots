@@ -2,7 +2,7 @@
 set nocompatible
 filetype off
 set clipboard=unnamed
-set shell=/bin/bash
+"set shell=/bin/bash
 
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
