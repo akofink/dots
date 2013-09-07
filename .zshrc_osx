@@ -21,7 +21,7 @@ alias gt="git commit -m 'task#$TASK' -e" # Commit with tempus task number append
 alias 8080to80="sudo ipfw add 100 fwd 127.0.0.1,8080 tcp from any to me 80"
 alias :e="vim"
 alias tmux="TERM=screen-256color-bce tmux"
-alias ktmux='tmux kill-session'
+alias ktmux='tmux kill-server'
 alias timestamp="ruby -e 'print Time.now.strftime(\"%Y%m%d_%H%M%S\")'"
 alias v='vim'
 alias g='git'
@@ -36,6 +36,8 @@ plugins=(web-search tmux tmuxinator cap gem osx brew bundler git nyan rails rail
 
 # Tmux Options
 export ZSH_TMUX_AUTOSTART=true
+export ZSH_TMUX_AUTOCONNECT=false
+export ZSH_TMUX_AUTOQUIT=false
 
 source $ZSH/oh-my-zsh.sh
 source ~/.secrets # Secret key environment variables
