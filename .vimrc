@@ -54,6 +54,8 @@ set showcmd
 
 " Status bar
 hi StatusLine ctermbg=white ctermfg=blue
+hi StatusLine ctermbg=white ctermfg=blue
+set statusline=[%n]\ %<%.99f\ %h%w%m%r%{exists('*CapsLockStatusline')?CapsLockStatusline():''}%y%=%-16(\ %l,%c-%v\ %)%P
 
 " Editing
 set smartindent
