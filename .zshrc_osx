@@ -9,6 +9,7 @@ ZSH_THEME="tjkirch"
 
 # Example aliases
 alias l='la -la'
+alias mux=tmuxinator
 alias server='rails s -p 8080'
 alias console='rails c'
 alias black='open http://black.akofink.com'
@@ -31,7 +32,7 @@ alias g='git'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(cap gem osx brew bundler git nyan rails rails3 rand-quote ruby)
+plugins=(web-search tmux tmuxinator cap gem osx brew bundler git nyan rails rails3 rand-quote ruby)
 
 source $ZSH/oh-my-zsh.sh
 source ~/.secrets # Secret key environment variables
