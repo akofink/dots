@@ -2,6 +2,7 @@
 set nocompatible
 filetype off
 set clipboard=unnamed
+set shell=/bin/bash
 
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
@@ -17,7 +18,6 @@ Bundle 'tpope/vim-surround'
 Bundle 'tpope/vim-rbenv'
 Bundle 'scrooloose/nerdtree'
 Bundle 'sjl/badwolf'
-Bundle 'altercation/vim-colors-solarized'
 Bundle 'vim-scripts/vimwiki'
 Bundle 'Shougo/neocomplcache'
 Bundle 'vim-scripts/loremipsum'
@@ -37,7 +37,7 @@ let g:gist_use_password_in_gitconfig = 1
 let g:gist_open_browser_after_post = 1
 
 " Syntax Highlighting
-let g:solarized_termcolors=256
+set t_Co=256
 set background=dark
 syntax enable
 filetype plugin indent on
@@ -52,6 +52,8 @@ set textwidth=80
 
 " Interface
 set showcmd
+set cursorline
+hi CursorLine   cterm=NONE ctermbg=darkgray
 
 " Editing
 set smartindent
