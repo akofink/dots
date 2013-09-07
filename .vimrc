@@ -33,7 +33,6 @@ let g:github_token = $GITHUB_TOKEN
 Bundle 'mattn/webapi-vim'
 
 " Gist setup
-let g:gist_use_password_in_gitconfig = 1
 let g:gist_open_browser_after_post = 1
 
 " Syntax Highlighting
@@ -52,8 +51,9 @@ set textwidth=80
 
 " Interface
 set showcmd
-set cursorline
-hi CursorLine   cterm=NONE ctermbg=darkgray
+
+" Status bar
+hi StatusLine ctermbg=white ctermfg=blue
 
 " Editing
 set smartindent
