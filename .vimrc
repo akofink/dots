@@ -1,8 +1,8 @@
 " System
 set nocompatible
 filetype off
+set shell=/bin/bash
 set clipboard=unnamed
-"set shell=/bin/bash
 
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
@@ -31,6 +31,7 @@ Bundle 'rking/ag.vim'
 Bundle 'mattn/gist-vim'
 let g:github_token = $GITHUB_TOKEN
 Bundle 'mattn/webapi-vim'
+Bundle 'kana/vim-fakeclip'
 
 " Gist setup
 let g:gist_open_browser_after_post = 1
