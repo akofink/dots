@@ -4,7 +4,7 @@
 project_name: recipes
 project_root: ~/dev/rails/recipes
 windows:
-  - shell: git s
+  - shell: git s && open http://lo
   - editor: vim
   - console: console
   - guard: guard
