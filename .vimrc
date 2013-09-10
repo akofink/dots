@@ -32,6 +32,7 @@ Bundle 'mattn/gist-vim'
 let g:github_token = $GITHUB_TOKEN
 Bundle 'mattn/webapi-vim'
 Bundle 'kana/vim-fakeclip'
+Bundle 'jcf/vim-latex'
 
 " Gist setup
 let g:gist_open_browser_after_post = 1
