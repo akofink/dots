@@ -33,13 +33,13 @@ let g:github_token = $GITHUB_TOKEN
 Bundle 'mattn/webapi-vim'
 Bundle 'kana/vim-fakeclip'
 Bundle 'jcf/vim-latex'
+Bundle 'flazz/vim-colorschemes'
 
 " Gist setup
 let g:gist_open_browser_after_post = 1
 
 " Syntax Highlighting
 set t_Co=256
-set background=dark
 syntax enable
 filetype plugin indent on
 let g:syntastic_ruby_exec = '~/.rbenv/shims/ruby'
