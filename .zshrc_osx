@@ -35,7 +35,6 @@ alias g='git'
 plugins=(web-search tmux tmuxinator cap gem osx brew bundler git nyan rails rails3 rand-quote ruby)
 
 # Tmux Options
-export ZSH_TMUX_AUTOSTART=true
 export ZSH_TMUX_AUTOCONNECT=false
 export ZSH_TMUX_AUTOQUIT=false
 
