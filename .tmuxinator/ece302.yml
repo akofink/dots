@@ -1,0 +1,5 @@
+name: ece302
+root: ~/courses/ECE302/lab2/
+windows:
+  - shell: l
+  - editor: vim
