@@ -3,6 +3,6 @@ project_root: ~/dev/rails/expertiza
 windows:
   - shell: open http://lo && git s
   - editor: vim
-  - console: console
-  - tests: be cucumber
-  - server: server
+  - console: ./script/console || console
+  - tests:
+  - server: ./script/server -p8080 || server
