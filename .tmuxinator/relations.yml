@@ -1,0 +1,7 @@
+name: relations
+root: ~/dev/ruby/relations
+
+windows:
+  - shell: g s
+  - editor: vim
+  - console: irb
