@@ -1,5 +1,5 @@
-name: relations
-root: ~/dev/ruby/relations
+name: relationships
+root: ~/dev/ruby/relationships
 
 windows:
   - shell: g s
