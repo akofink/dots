@@ -1,5 +1,5 @@
 name: csc246
-root: ~/courses/CSC246/homework2
+root: ~/courses/CSC246/homework3
 windows:
   - shell: g s
   - editor: vim
