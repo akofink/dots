@@ -113,6 +113,8 @@ noremap <silent> <Left> <c-w>h
 noremap <silent> <Up> <c-w>k
 noremap <silent> <Down> <c-w>j
 
+" Editing macros
+map <leader>wsx :%s/\v +$//g<CR>
 " Command
 map <leader><leader> :
 " Quit
