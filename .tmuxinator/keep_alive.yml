@@ -1,0 +1,7 @@
+name: keep_alive
+root: ~/dev/ruby/keep_alive
+
+windows:
+  - shell: g s
+  - vim: vim
+  - console: irb
