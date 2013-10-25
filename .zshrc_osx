@@ -61,5 +61,3 @@ export EDITOR=vim
 git config --global user.email $GIT_EMAIL
 
 quote
-export PATH="$HOME/.jenv/bin:$PATH"
-eval "$(jenv init -)"
