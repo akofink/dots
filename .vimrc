@@ -145,3 +145,5 @@ map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
 map <leader>wdiary :VimwikiDiaryIndex<CR>:VimwikiDiaryGenerateLinks<CR>
 map <leader>wb :VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
 map <leader>wB :VimwikiBacklinks<CR><CR>:VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
+map <leader>fc :foldclose<CR>
+map <leader>fo :foldopen<CR>
