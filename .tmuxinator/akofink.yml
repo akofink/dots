@@ -1,10 +1,5 @@
-# ~/.tmuxinator/akofink.yml
-# you can make as many windows as you wish...
-
 project_name: akofink
 project_root: ~/dev/rails/akofink
-pre:
-  - export RBENV_DIR=
 windows:
   - shell: git s
   - editor: vim

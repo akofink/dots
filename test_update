@@ -5,10 +5,10 @@ source ./update
 if [ $? -eq 1 ]; then
   echo "Failed!"
 
-  filename="failure_email.txt"
-  command="echo"
-  email_body=`cat $filename`
-  params="$email_body >! failure_email.txt && mail -s 'Dot File Backup System' -v  ajkofink@gmail.com < $filename"
+  #filename="failure_email.txt"
+  #command="echo"
+  #email_body=`cat $filename`
+  #params="$email_body >! failure_email.txt && mail -s 'Dot File Backup System' -v  ajkofink@gmail.com < $filename"
 
-  ssh akofink@akkit.akofink.com $command $params $email_body
+  #ssh akofink@akkit.akofink.com $command $params $email_body
 fi

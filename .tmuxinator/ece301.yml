@@ -1,0 +1,6 @@
+name: ece301
+root: ~/courses/ECE301/project7
+
+windows:
+  - shell: l
+  - vim: vim

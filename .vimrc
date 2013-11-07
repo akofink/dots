@@ -99,6 +99,9 @@ let NERDTreeShowHidden=1
 " Ctrl-P
 let g:ctrlp_show_hidden = 1
 
+" Vim-latex
+let g:Tex_UseMakefile = 0
+
 " Leader
 let mapleader = ','
 map <leader>f :CtrlP<CR>
@@ -110,6 +113,8 @@ noremap <silent> <Left> <c-w>h
 noremap <silent> <Up> <c-w>k
 noremap <silent> <Down> <c-w>j
 
+" Editing macros
+map <leader>wsx :%s/\v +$//g<CR>
 " Command
 map <leader><leader> :
 " Quit
