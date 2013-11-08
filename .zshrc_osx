@@ -25,6 +25,7 @@ alias ktmux='tmux kill-server'
 alias timestamp="ruby -e 'print Time.now.strftime(\"%Y%m%d_%H%M%S\")'"
 alias v='vim'
 alias g='git'
+alias be='bundle exec'
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"
@@ -32,7 +33,7 @@ alias g='git'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(web-search tmux tmuxinator cap gem osx brew bundler git nyan rails rails3 rand-quote ruby)
+plugins=(web-search tmux tmuxinator cap gem osx brew git nyan rails rails3 rand-quote ruby)
 
 # Tmux Options
 export ZSH_TMUX_AUTOCONNECT=false
