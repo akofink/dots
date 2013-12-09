@@ -13,8 +13,6 @@
   autocrlf = input
   whitespace = cr-at-eol
   excludesfile = /Users/andrew.kofink/.gitignore
-[credential]
-  helper = osxkeychain
 [merge]
   tool = opendiff
 [color]
@@ -25,3 +23,5 @@
   ui = auto
 [push]
   default = simple
+[credential]
+	helper = cache --timeout=0
