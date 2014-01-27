@@ -44,7 +44,7 @@ source ~/.secrets # Secret key environment variables
 source ~/.env # Other environment variables
 
 # Customize to your needs...
-export PATH=PATH:~/dev/elixir/bin:/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/gems/ruby-1.8.7-p358@global/bin:/Users/akofink/.rvm/rubies/ruby-1.8.7-p358/bin:/Users/akofink/.rvm/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./
+export PATH=PATH:~/dev/elixir/bin:/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./
 
 # rbenv - A replacement for RVM
 export PATH="$HOME/.rbenv/bin:$PATH"

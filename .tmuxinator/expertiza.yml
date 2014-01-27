@@ -1,7 +1,7 @@
 project_name: expertiza
 project_root: ~/dev/rails/expertiza
 windows:
-  - shell: open http://lo && git s
+  - shell: which open && open http://lo; git s
   - editor: vim
   - console: ./script/console || console
   - tests:
