@@ -5,4 +5,4 @@ windows:
   - editor: vim
   - console: ./script/console || console
   - tests:
-  - server: ./script/server -p8080 || server
+  - server: ./script/server -p8080 || be server

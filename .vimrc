@@ -29,7 +29,6 @@ Bundle 'taichouchou2/vim-rsense'
 Bundle 'othree/html5.vim'
 Bundle 'rking/ag.vim'
 Bundle 'mattn/gist-vim'
-let g:github_token = $GITHUB_TOKEN
 Bundle 'mattn/webapi-vim'
 Bundle 'kana/vim-fakeclip'
 Bundle 'jcf/vim-latex'
@@ -37,6 +36,7 @@ Bundle 'flazz/vim-colorschemes'
 Bundle 'altercation/vim-colors-solarized'
 
 " Gist setup
+let g:github_token = $GITHUB_TOKEN
 let g:gist_open_browser_after_post = 1
 
 " Syntax Highlighting
@@ -145,5 +145,7 @@ map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
 map <leader>wdiary :VimwikiDiaryIndex<CR>:VimwikiDiaryGenerateLinks<CR>
 map <leader>wb :VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
 map <leader>wB :VimwikiBacklinks<CR><CR>:VimwikiAll2HTML<CR><CR>:Vimwiki2HTMLBrowse<CR><CR>
-map <leader>fc :foldclose<CR>
-map <leader>fo :foldopen<CR>
+map <leader>< :foldclose<CR>
+map <leader>> :foldopen<CR>
+
+map <leader><leader>m :!make

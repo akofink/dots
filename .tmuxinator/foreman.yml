@@ -1,0 +1,9 @@
+name: foreman
+root: ~/dev/rails/foreman
+
+windows:
+  - shell: l && g s
+  - vim: vim
+  - console: console
+  - tests:
+  - server: server

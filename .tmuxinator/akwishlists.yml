@@ -1,0 +1,9 @@
+name: akwishlists
+root: ~/dev/rails/akwishlists
+
+windows:
+  - shell: l && g s
+  - editor: vim
+  - console: rails console
+  - guard: be guard
+  - server: rails server

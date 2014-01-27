@@ -33,7 +33,7 @@ alias be='bundle exec'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(web-search tmux tmuxinator cap gem osx brew git nyan rails rails3 rand-quote ruby)
+plugins=(web-search tmux tmuxinator cap gem osx brew git nyan rails rand-quote ruby)
 
 # Tmux Options
 export ZSH_TMUX_AUTOCONNECT=false
@@ -61,3 +61,8 @@ function rvm () {
 
 export EDITOR=vim
 git config --global user.email $GIT_EMAIL
+
+export CATALINA_HOME=/usr/local/lib/apache-tomcat-6.0.37/
+export JAVA_HOME=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk
+
+test -s /usr/local/lib/xmipp/.xmipp.bashrc && . /usr/local/lib/xmipp/.xmipp.bashrc || true
