@@ -2,7 +2,11 @@
 set nocompatible
 filetype off
 set shell=/bin/bash
-set clipboard=unnamed
+
+" Copy and Paste to system clipboard
+if $TMUX == ''
+  set clipboard+=unnamed
+endif
 
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
