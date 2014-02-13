@@ -10,14 +10,11 @@ fi
 
 for i in "${files[@]}"
 do
-	if [[ -e "${HOME}/${i}" && ! -L "${HOME}/${i}" ]]; then
+	if [[ -e "${HOME}/${i}" ]]; then
 		echo "Moving ${HOME}/${i} to ${HOME}/${i}.old"
 		if [ ! $dry ]; then
 			mv "${HOME}/${i}" "${HOME}/${i}.old"
 		fi
-	elif [ -L "${HOME}/${i}" ]; then
-		echo "${i} is already set up!"
-		continue
 	fi
 
 	echo "Creating symlink from ${HOME}/dots/${i}_${platform} to ${HOME}/${i}"
