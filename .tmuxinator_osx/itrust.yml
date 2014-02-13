@@ -1,0 +1,7 @@
+name: itrust
+root: ~/dev/java/iTrust/iTrust
+
+windows:
+  - shell:
+  - vim: vim
+  - mysql: mysql -uroot itrust

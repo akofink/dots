@@ -2,11 +2,7 @@
 set nocompatible
 filetype off
 set shell=/bin/bash
-
-" Copy and Paste to system clipboard
-if $TMUX == ''
-  set clipboard+=unnamed
-endif
+set clipboard=unnamed
 
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
@@ -72,6 +68,7 @@ set showmode
 set showmatch
 set list listchars=tab:>>,eol:¬,trail:·
 set rnu
+set number
 set backspace=indent,eol,start
 
 " Multipurpose Tab Key

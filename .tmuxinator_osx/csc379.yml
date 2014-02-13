@@ -1,0 +1,6 @@
+name: csc379
+root: ~/courses/CSC379/CaseStudyAnalysis
+
+windows:
+  - shell:
+  - vim: vim

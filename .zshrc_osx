@@ -44,10 +44,9 @@ source ~/.secrets # Secret key environment variables
 source ~/.env # Other environment variables
 
 # Customize to your needs...
-export PATH=PATH:~/dev/elixir/bin:/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./
+export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:~/.rbenv/bin:~/.erlenv/bin:~/dev/elixir/bin:./PATH
 
 # rbenv - A replacement for RVM
-export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
 function rvm () {

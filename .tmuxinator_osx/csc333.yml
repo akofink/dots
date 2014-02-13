@@ -1,0 +1,6 @@
+name: csc333
+root: ~/courses/CSC333/homework/4
+
+windows:
+  - shell:
+  - vim: vim
