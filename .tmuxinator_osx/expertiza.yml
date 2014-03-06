@@ -1,8 +1,8 @@
 project_name: expertiza
 project_root: ~/dev/rails/expertiza
 windows:
-  - shell: which open && open http://lo || git s
+  - shell: git s
   - editor: vim
   - console: ./script/console || console
-  - tests:
+  - tests: be guard
   - server: ./script/server -p8080 || server

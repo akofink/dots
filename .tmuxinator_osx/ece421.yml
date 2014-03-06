@@ -1,0 +1,6 @@
+name: ece421
+root: ~/courses/ece421/homework/3/
+
+windows:
+  - shell:
+  - vim: vim
