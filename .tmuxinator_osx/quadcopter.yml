@@ -1,0 +1,6 @@
+name: quadcopter
+root: ~/dev/arduino/quadcopter
+
+windows:
+  - shell: open -a Arduino.app && g s
+  - vim: vim

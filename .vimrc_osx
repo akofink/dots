@@ -34,6 +34,10 @@ Bundle 'kana/vim-fakeclip'
 Bundle 'jcf/vim-latex'
 Bundle 'flazz/vim-colorschemes'
 Bundle 'altercation/vim-colors-solarized'
+Bundle 'danro/rename.vim'
+Bundle 'Raimondi/delimitMate'
+Bundle 'docunext/closetag.vim'
+Bundle 'vim-scripts/supertab'
 
 " Gist setup
 let g:github_token = $GITHUB_TOKEN

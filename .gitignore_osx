@@ -1,4 +1,6 @@
 .DS_Store
+../.DS_Store
+*.DS_Store
 .ruby-version
 log
 tags
@@ -9,3 +11,4 @@ config/midas.yml
 config/bioassay.yml
 config/midas.yml
 config/midas.yml
+.DS_Store
