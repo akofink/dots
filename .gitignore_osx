@@ -12,3 +12,4 @@ config/bioassay.yml
 config/midas.yml
 config/midas.yml
 .DS_Store
+bin

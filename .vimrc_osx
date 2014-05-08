@@ -8,6 +8,7 @@ set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
 " Github Bundles
+Bundle 'Floobits/floobits-vim'
 Bundle 'gmarik/vundle'
 Bundle 'tpope/vim-rails.git'
 Bundle 'kien/ctrlp.vim'
@@ -38,6 +39,7 @@ Bundle 'danro/rename.vim'
 Bundle 'Raimondi/delimitMate'
 Bundle 'docunext/closetag.vim'
 Bundle 'vim-scripts/supertab'
+Bundle 'majutsushi/tagbar'
 
 " Gist setup
 let g:github_token = $GITHUB_TOKEN
