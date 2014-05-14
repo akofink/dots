@@ -1,0 +1,6 @@
+name: research
+root: ~/dev/latex/estimation_accuracy
+
+windows:
+  - shell: l && g s
+  - vim: vim

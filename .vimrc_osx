@@ -36,6 +36,7 @@ Plugin 'danro/rename.vim'
 Plugin 'Raimondi/delimitMate'
 Plugin 'docunext/closetag.vim'
 Plugin 'vim-scripts/supertab'
+Plugin 'majutsushi/tagbar'
 
 " CtrlP Setup
 set runtimepath^=~/.vim/bundle/ctrlp.vim
@@ -48,7 +49,7 @@ let g:gist_open_browser_after_post = 1
 set t_Co=256
 syntax enable
 set background=light
-colorscheme solarized
+" colorscheme solarized
 filetype plugin indent on
 let g:syntastic_ruby_exec = '~/.rbenv/shims/ruby'
 
