@@ -10,14 +10,13 @@ call vundle#begin()
 " Github Bundles
 Plugin 'gmarik/vundle'
 Plugin 'tpope/vim-rails.git'
-Plugin 'kien/ctrlp.vim'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-markdown'
 Plugin 'tpope/vim-surround'
+Plugin 'kien/ctrlp.vim'
 Plugin 'tpope/vim-rbenv'
 Plugin 'scrooloose/nerdtree'
-Plugin 'sjl/badwolf'
 Plugin 'vim-scripts/vimwiki'
 Plugin 'Shougo/neocomplcache'
 Plugin 'vim-scripts/loremipsum'
@@ -33,11 +32,13 @@ Plugin 'mattn/webapi-vim'
 Plugin 'kana/vim-fakeclip'
 Plugin 'jcf/vim-latex'
 Plugin 'flazz/vim-colorschemes'
-Plugin 'altercation/vim-colors-solarized'
 Plugin 'danro/rename.vim'
 Plugin 'Raimondi/delimitMate'
 Plugin 'docunext/closetag.vim'
 Plugin 'vim-scripts/supertab'
+
+" CtrlP Setup
+set runtimepath^=~/.vim/bundle/ctrlp.vim
 
 " Gist setup
 let g:github_token = $GITHUB_TOKEN
@@ -109,7 +110,6 @@ let g:Tex_UseMakefile = 0
 
 " Leader
 let mapleader = ','
-map <leader>f :CtrlP<CR>
 map <leader>n :NERDTreeToggle<CR>
 map <leader>b :CtrlPBuffer<CR>
 " move around with the arrow keys
@@ -122,6 +122,8 @@ noremap <silent> <Down> <c-w>j
 map <leader>wsx :%s/\v +$//g<CR>
 " Command
 map <leader><leader> :
+" CtrlP
+map <leader>f :CtrlP<CR>
 " Quit
 map <leader>q :q<CR>
 " Config

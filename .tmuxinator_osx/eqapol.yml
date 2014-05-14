@@ -1,9 +1,8 @@
 project_name: eqapol
-project_root: ~/dev/eqapol
-socket_path: /tmp/wemux-wemux
+project_root: ~/dev/rails/eqapol
 windows:
-  - shell: git pull
+  - shell: g s
   - editor: vim
   - console: console
-  - tests: guard
+  - tests: be guard
   - server: server
