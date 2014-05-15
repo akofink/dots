@@ -7,5 +7,5 @@ windows:
   - shell: git s
   - editor: vim
   - console: console
-  - guard: be guard
+  - guard: guard
   - server: server

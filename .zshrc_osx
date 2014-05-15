@@ -10,8 +10,8 @@ ZSH_THEME="tjkirch"
 # Example aliases
 alias l='la -la'
 alias mux=tmuxinator
-alias server='rails s -p 8080'
-alias console='rails c'
+alias server='bundle exec rails s -p 8080'
+alias console='bundle exec rails c'
 alias black='open http://black.akofink.com'
 alias s='source ~/.zshrc'
 alias es='vi ~/.zshrc'
