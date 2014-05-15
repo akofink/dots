@@ -1,14 +1,14 @@
 " System
+set shell=/bin/zsh
+set clipboard=unnamed
 set nocompatible
 filetype off
-set shell=/bin/bash
-set clipboard=unnamed
 
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 " Github Bundles
-Plugin 'gmarik/vundle'
+Plugin 'gmarik/Vundle.vim'
 Plugin 'tpope/vim-rails.git'
 Plugin 'kien/ctrlp.vim'
 Plugin 'kchmck/vim-coffee-script'
@@ -39,6 +39,10 @@ Plugin 'Raimondi/delimitMate'
 Plugin 'docunext/closetag.vim'
 Plugin 'vim-scripts/supertab'
 Plugin 'majutsushi/tagbar'
+
+" All of your Plugins must be added before the following line
+call vundle#end()
+filetype plugin indent on
 
 " Gist setup
 let g:github_token = $GITHUB_TOKEN
