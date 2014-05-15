@@ -38,14 +38,12 @@ Plugin 'docunext/closetag.vim'
 Plugin 'vim-scripts/supertab'
 Plugin 'majutsushi/tagbar'
 
-<<<<<<< HEAD
 " All of your Plugins must be added before the following line
 call vundle#end()
 filetype plugin indent on
-=======
+"
 " CtrlP Setup
 set runtimepath^=~/.vim/bundle/ctrlp.vim
->>>>>>> f5a253f8295eb41b6bcdb4bdb730b1022fb1101b
 
 " Gist setup
 let g:github_token = $GITHUB_TOKEN
