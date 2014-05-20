@@ -2,6 +2,7 @@
 
 cd ~/dots &&
 git add . &&
+echo "Update from $HOST"
 git commit -am "Update from $HOST" && 1
 git pull &&
 git push

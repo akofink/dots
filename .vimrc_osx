@@ -142,7 +142,7 @@ map <leader>ln :set number<CR>
 " Reload Tags
 map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 " Run
-map <leader>r :!ruby %<CR>
+map <leader>r :!script %<CR>
 " Run Rspec
 map <leader>t :!rspec spec<CR>
 " Lorem Ipsum
