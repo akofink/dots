@@ -1,5 +1,5 @@
 " System
-set shell=/bin/zsh
+set shell=/bin/bash
 set clipboard=unnamed
 set nocompatible
 filetype off
@@ -40,8 +40,8 @@ Plugin 'majutsushi/tagbar'
 
 " All of your Plugins must be added before the following line
 call vundle#end()
-filetype plugin indent on
-"
+filetype plugin on
+
 " CtrlP Setup
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 
