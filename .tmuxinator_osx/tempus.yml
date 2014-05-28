@@ -1,0 +1,9 @@
+name: tempus
+root: ~/dev/rails/tempus
+
+windows:
+  - shell: g s
+  - editor: vim
+  - console: console
+  - tests: be guard
+  - server: server
