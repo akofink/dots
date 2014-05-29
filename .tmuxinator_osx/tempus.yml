@@ -4,6 +4,6 @@ root: ~/dev/rails/tempus
 windows:
   - shell: g s
   - editor: vim
-  - console: console
-  - tests: be guard
-  - server: server
+  - console: ./script/console || console
+  - tests: be autotest
+  - server: ./script/server -p 8080 || server
