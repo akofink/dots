@@ -1,8 +1,5 @@
 project_name: acquire
-project_root: ~/dev/acquire
-pre:
-  - export RBENV_DIR
-  - export RBENV_VERSION
+project_root: ~/dev/rails/acquire
 windows:
   - shell: git s
   - editor: vim

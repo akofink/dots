@@ -1,10 +1,7 @@
-# ~/.tmuxinator/strain.yml
-# you can make as many windows as you wish...
-
 project_name: strain
-project_root: ~/dev/strain
+project_root: ~/dev/rails/strain
 windows:
-  - shell: git pull
+  - shell: git s
   - editor: vim
   - console: ./script/console
   - tests: rspec spec
