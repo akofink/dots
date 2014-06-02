@@ -1,5 +1,5 @@
 project_name: midas
-project_root: ~/dev/midas
+project_root: ~/dev/rails/midas
 windows:
   - shell: git s
   - editor: vim
