@@ -1,13 +1,8 @@
-# ~/.tmuxinator/recipes.yml
-# you can make as many windows as you wish...
-
-project_name: ag_biome
-project_root: ~/dev/rails/ag_biome
-pre:
-  - export RBENV_DIR=
+project_name: agbiome
+project_root: ~/dev/rails/agbiome
 windows:
   - shell: git s
   - editor: vim
   - console: console
-  - guard: guard
+  - tests: be guard
   - server: server

@@ -1,8 +1,8 @@
 project_name: midas
 project_root: ~/dev/midas
 windows:
-  - shell: git pull
+  - shell: git s
   - editor: vim
   - console: console
-  - tests: guard
+  - tests: be guard
   - server: server
