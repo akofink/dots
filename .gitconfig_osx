@@ -7,7 +7,7 @@
   b = branch
 	mergens = merge -Xignore-all-space
 [user]
-	name = 
+	name = Andrew Kofink
 	email = ajkofink@gmail.com
 [core]
   editor = vim
