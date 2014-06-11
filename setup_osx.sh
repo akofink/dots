@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a files=('.env' '.gemrc' '.gitconfig' '.gitignore' 'NERDTreeBookmarks' '.tmux.conf' '.tmuxinator' '.vim' '.vimrc' '.zshrc')
+declare -a files=('.env' '.gemrc' '.gitconfig' '.gitignore' '.NERDTreeBookmarks' '.tmux.conf' '.tmuxinator' '.vim' '.vimrc' '.zshrc')
 platform="osx"
 
 if [[ $1 = "--dry-run" || $1 = "-d" ]]; then
@@ -22,3 +22,6 @@ do
 		ln -s "${HOME}/dots/${i}_${platform}" "${HOME}/${i}"
 	fi
 done
+
+# Install vundle
+git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
