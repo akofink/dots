@@ -1,0 +1,8 @@
+name: antibodyome
+root: ~/dev/rails/antibodyome
+windows:
+  - shell: g s
+  - editor: vim
+  - console: console
+  - tests: be guard
+  - server: server

@@ -7,6 +7,8 @@ set -g mouse-select-window on
 
 set -g base-index 1
 
+set -g terminal-overrides 'xterm*:smcup@:rmcup@'
+
 # RBENV
 set-environment -gu RBENV_VERSION
 set-environment -gu RBENV_DIR
