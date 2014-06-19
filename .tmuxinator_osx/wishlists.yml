@@ -1,0 +1,9 @@
+name: wishlists
+root: ~/dev/rails/wishlists
+
+windows:
+  - shell: g s
+  - editor: vim
+  - console: console
+  - guard: grd
+  - server: be thin start -p 8080
