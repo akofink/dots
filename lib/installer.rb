@@ -15,6 +15,10 @@ class Installer
     installer.usage
   end
 
+  def self.installer(args = {})
+    Installer.new(args)
+  end
+
   def install
     puts "#{black}This is a dry run!" if dry_run?
     install_dependencies
@@ -37,11 +41,8 @@ class Installer
 
   private
 
-  def self.installer(args = {})
-    Installer.new(args)
-  end
-
   def install_dependencies
+    puts "#{black}Installing dependencies"
   end
 
   def copy_erb_files
@@ -50,7 +51,7 @@ class Installer
     erb_file_pairs do |old, new|
       puts "#{black}Writing #{cyan}#{new}#{black} from #{cyan}#{old}#{black}"
       unless dry_run?
-        FileUtils.rm_rf new
+        FileUtils.mv new, "#{new}.old"
         File.open new, 'w' do |file|
           file.write(ERB.new(File.read old).result(binding))
         end
@@ -63,13 +64,11 @@ class Installer
     verbatim_file_pairs do |old, new|
       puts "#{black}Copying #{cyan}#{new}#{black} from #{cyan}#{old}#{black}"
       unless dry_run?
-        FileUtils.rm_rf new
+        FileUtils.mv new, "#{new}.old"
         FileUtils.cp_r old, new
       end
     end
   end
-
-  private
 
   def osx?
     akmacpro? || akscimed?
@@ -88,7 +87,7 @@ class Installer
   end
 
   def host
-    `echo $HOST`
+    `echo $HOSTNAME`
   end
 
   def erb_file_pairs
