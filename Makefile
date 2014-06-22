@@ -7,5 +7,5 @@ default:
 	@crontab -e
 
 install:
-	ruby install.rb || echo "Make sure a current version of Ruby is installed (https://www.ruby-lang.org/en)."
+	- ./bin/install.rb || echo "Make sure a current version of Ruby is installed (https://www.ruby-lang.org/en)."
 
