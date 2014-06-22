@@ -21,6 +21,8 @@
 [credential]
 <% if osx? %>
   helper = osxkeychain
+<% else %>
+  helper = cache --timeout=0
 <% end %>
 [merge]
   tool = opendiff
