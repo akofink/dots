@@ -1,0 +1,9 @@
+name: droppit
+root: ~/dev/elixir/droppit
+
+windows:
+  - editor: g s
+  - vim: vim
+  - console:
+  - test:
+  - server:

@@ -1,0 +1,44 @@
+[alias]
+  a = add
+  c = commit
+  co = checkout
+  s = status
+  l = <%= "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit" %>
+  b = branch
+  mergens = merge -Xignore-all-space
+[user]
+  name = Andrew Kofink
+<% if akmacpro? || akkit? %>
+  email = andrew.kofink@scimedsolutions.com
+<% elsif akscimed? %>
+  email = andrew.kofink@scimedsolutions.com
+<% end %>
+[core]
+  editor = vim
+  autocrlf = input
+  whitespace = cr-at-eol
+  excludesfile = /Users/ajkofink/.gitignore
+[credential]
+<% if osx? %>
+  helper = osxkeychain
+<% else %>
+  helper = cache --timeout=0
+<% end %>
+[merge]
+  tool = opendiff
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = auto
+[push]
+  default = simple
+[github]
+  user = akofink
+[difftool "sourcetree"]
+  cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+  path = 
+[mergetool "sourcetree"]
+  cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+  trustExitCode = true
