@@ -8,6 +8,7 @@ ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="tjkirch"
 
 # Example aliases
+alias rakedb='be rake db:drop db:create db:migrate db:seed db:seed:development:all'
 alias l='la -la'
 alias mux=tmuxinator
 alias server='bundle exec rails s -p 8080'
