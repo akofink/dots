@@ -51,7 +51,7 @@ class Installer
     erb_file_pairs do |old, new|
       puts "#{black}Writing #{cyan}#{new}#{black} from #{cyan}#{old}#{black}"
       unless dry_run?
-        FileUtils.mv new, "#{new}.old"
+        FileUtils.mv new, "#{new}.old" if File.exists?(new)
         File.open new, 'w' do |file|
           file.write(ERB.new(File.read old).result(binding))
         end
@@ -64,7 +64,7 @@ class Installer
     verbatim_file_pairs do |old, new|
       puts "#{black}Copying #{cyan}#{new}#{black} from #{cyan}#{old}#{black}"
       unless dry_run?
-        FileUtils.mv new, "#{new}.old"
+        FileUtils.mv new, "#{new}.old" if File.exists?(new)
         FileUtils.cp_r old, new
       end
     end
