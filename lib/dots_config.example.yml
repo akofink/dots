@@ -1,0 +1,12 @@
+symlinks:
+  NERDTreeBookmarks: '~'
+  .tmuxinator: '~'
+  .vim: '~'
+erbs:
+  .tmux.conf: '~'
+  .vimrc: '~'
+  .env: '~'
+  .gemrc: '~'
+  .gitconfig: '~'
+  .gitignore: '~'
+  .zshrc: '~'
