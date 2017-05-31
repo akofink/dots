@@ -1,0 +1,6 @@
+name: qe
+root: ~/dev/forklift
+
+windows:
+  - shell: vagrant status
+  - vim: vim boxes.yaml

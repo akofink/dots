@@ -1,5 +1,0 @@
-name: ece302
-root: ~/courses/ECE302/lab7/
-windows:
-  - shell: l
-  - editor: vim

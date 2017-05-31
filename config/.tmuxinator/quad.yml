@@ -1,6 +1,0 @@
-name: quad
-root: ~/dev/arduino/quad/
-
-windows:
-  - shell: g s && open quad.ino
-  - vim: vim

@@ -1,6 +1,0 @@
-name: seedsow
-root: ~/dev/ruby/seedsow
-windows:
-  - shell: g s
-  - editor: vim
-  - console: irb

@@ -1,8 +1,0 @@
-project_name: akofink
-project_root: ~/dev/rails/akofink
-windows:
-  - shell: git s
-  - editor: vim
-  - console: console
-  - guard: be guard
-  - server: server

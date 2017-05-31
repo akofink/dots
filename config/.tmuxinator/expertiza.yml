@@ -1,8 +1,0 @@
-project_name: expertiza
-project_root: ~/dev/rails/expertiza
-windows:
-  - shell: git s
-  - editor: vim
-  - console: ./script/console || console
-  - tests: be guard
-  - server: ./script/server -p8080 || server

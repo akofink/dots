@@ -1,8 +1,0 @@
-project_name: strain
-project_root: ~/dev/rails/strain
-windows:
-  - shell: git s
-  - editor: vim
-  - console: ./script/console
-  - tests: rspec spec
-  - server: ./script/server -p 3001

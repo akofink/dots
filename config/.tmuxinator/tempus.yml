@@ -1,9 +1,0 @@
-name: tempus
-root: ~/dev/rails/tempus
-
-windows:
-  - shell: g s
-  - editor: vim
-  - console: ./script/console || console
-  - tests: be autotest
-  - server: ./script/server -p 8080 || server

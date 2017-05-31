@@ -1,6 +1,0 @@
-name: spcup
-root: ~/spcup
-
-windows:
-  - shell:
-  - vim: vim

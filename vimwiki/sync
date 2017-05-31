@@ -1,6 +1,0 @@
-#!/bin/bash
-
-git add .
-git c -am 'Updated wiki to latest changes'
-git pull
-git push

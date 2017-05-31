@@ -1,3 +1,0 @@
-= Model Tricks =
-
-* Use serializers to control what is passed in a response

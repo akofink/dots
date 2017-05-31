@@ -1,6 +1,0 @@
-name: technic
-root: ~/dev/java/technic
-
-windows:
-  - shell: l && g s
-  - editor: vim

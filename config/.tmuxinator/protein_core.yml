@@ -1,8 +1,0 @@
-name: protein_core
-root: ~/dev/rails/protein_core
-windows:
-  - shell: g s
-  - editor: vim
-  - console: console
-  - tests: be guard
-  - server: server

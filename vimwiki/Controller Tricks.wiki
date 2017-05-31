@@ -1,2 +1,0 @@
-= Controller Tricks =
-* Use `respond_to` inside a controller method to add file types

@@ -1,8 +1,0 @@
-project_name: acquire
-project_root: ~/dev/rails/acquire
-windows:
-  - shell: git s
-  - editor: vim
-  - console: ./script/console
-  - tests: rake
-  - server: ./script/server -p 8080

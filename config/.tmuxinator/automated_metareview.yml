@@ -1,7 +1,0 @@
-name: automated_metareview
-root: ~/dev/ruby/automated_metareview
-
-windows:
-  - shell: l && g s
-  - editor: vim
-  - console: irb

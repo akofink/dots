@@ -1,0 +1,9 @@
+name: katello_org
+root: ~/dev/katello.org
+
+windows:
+  - shell: g s
+  - vim: vim
+  - server:
+    - echo 'server up at http://localhost:4000'
+    - jekyll serve --watch --host localhost

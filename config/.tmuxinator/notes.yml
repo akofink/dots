@@ -1,9 +1,0 @@
-name: notes
-root: ~/dev/rails/notes
-
-windows:
-  - shell: l && g s
-  - vim: vim
-  - console: console
-  - guard: guard
-  - server: server

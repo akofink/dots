@@ -1,8 +1,0 @@
-= 17 June 2013 =
-== Lessons Learned ==
-* You can separate chaining by a preceeding dot on the next line.
-{{{
-String
-.new 'test'
-}}}
-

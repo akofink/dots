@@ -1,8 +1,0 @@
-name: csc246
-root: ~/courses/CSC246/homework6
-windows:
-  - shell: g s
-  - editor: vim
-  - console:
-    - vagrant ssh
-    - cd /vagrant

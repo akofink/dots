@@ -1,0 +1,34 @@
+name: sat
+root: ~/dev/forklift
+pre:
+  # - vagrant up sat-ga-rhel7 sat62-host akofink-capsule-test-rhel7
+  #- vagrant up sat-ga-rhel7
+  # - vagrant up sat61-rhel7
+  # - vagrant up sat-618-rhel7
+  # - vagrant up sat63-nightly-rhel7
+  # - vagrant up sat-clone-test-rhel7
+  #- vagrant up sat-snap-rhel7
+  - vagrant up sat-628-rhel7
+windows:
+  - zsh: l
+  - vim: vim
+  - sat-628-rhel7:
+      - vagrant ssh sat-628-rhel7
+      - sudo su
+      - screen -R akofink
+  #- sat-snap-rhel7: vagrant ssh sat-snap-rhel7
+  # - rhel7: vagrant ssh sat-clone-test-rhel7
+  # - sat61: vagrant ssh sat61-rhel7
+  # - sat61-host:
+  #   - vagrant ssh sat61-host
+  #   - sudo su
+  #   - rpm -Uvh http://sat61-rhel7.example.com/pub/katello-ca-consumer-latest.noarch.rpm
+  #   - subscription-manager register --org="Default_Organization" --environment="Library" --username admin --password changeme
+  #- sat-ga-rhel7: vagrant ssh sat-ga-rhel7
+  # - sat62-host:
+  #   - vagrant ssh sat62-host
+  #   - sudo su
+  #   - rpm -Uvh http://sat-rhel7.example.com/pub/katello-ca-consumer-latest.noarch.rpm
+  #   - subscription-manager register --org="Default_Organization" --environment="Library" --username admin --password changeme
+  # - capsule-test-rhel7: vagrant ssh akofink-capsule-test-rhel7
+  # - sat63: vagrant ssh sat63-nightly-rhel7

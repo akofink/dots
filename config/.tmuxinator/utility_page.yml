@@ -1,6 +1,0 @@
-project_name: utility_page
-project_root: ~/dev/html/utility
-windows:
-  - shell: l && open index.html
-  - vim: vim
-  - console: irb

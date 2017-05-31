@@ -1,9 +1,0 @@
-name: katello
-root: ~/dev/rails/katello
-
-windows:
-  - shell: l && g s
-  - vim: vim
-  - console: rails c
-  - tests:
-  - server: rails s

@@ -1,7 +1,0 @@
-= Learned Today =
-* _Reciprocity_ - In antenna theory
-* CPUs must be small because of the high frequency signals
-* Bounce diagrams in networking
-
-= To Look Into =
-* The mother of all demos http://en.wikipedia.org/wiki/The_Mother_of_All_Demos

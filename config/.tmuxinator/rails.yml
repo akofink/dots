@@ -1,7 +1,0 @@
-name: rails
-root: ~/dev/rails/rails/rails
-windows:
-  - shell: g s
-  - editor: vim
-  - console: irb
-  - ssh: cd ../ && vagrant up && vagrant ssh
