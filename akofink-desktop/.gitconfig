@@ -1,19 +1,19 @@
 [user]
-	email = akofink@redhat.com
-	signingkey = 2B08B15F
-	name = Andrew Kofink
+  email = akofink@redhat.com
+  signingkey = 2B08B15F
+  name = Andrew Kofink
 [alias]
-	s = status
-	co = checkout
-	c = commit -S
-	l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-	log-release = log --color --pretty=format:'%Cred%h%Creset - %s %Cgreen(%ci) %C(bold blue)*%an*%Creset' --abbrev-commit
-	b = branch
+  s = status
+  co = checkout
+  c = commit -S
+  l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  log-release = log --color --pretty=format:'%Cred%h%Creset - %s %Cgreen(%ci) %C(bold blue)*%an*%Creset' --abbrev-commit
+  b = branch
 [core]
-	excludesfile = /home/akofink/.gitignore
-	editor = vimx
+  excludesfile = /home/akofink/.gitignore
+  editor = vimx
 [github]
-	user = akofink
+  user = akofink
 [http]
-	sslverify = true
-	sslCAPath = /etc/pki/tls/certs
+  sslverify = true
+  sslCAPath = /etc/pki/tls/certs

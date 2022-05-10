@@ -1,0 +1,31 @@
+[alias]
+  a = add
+  c = commit -sS
+  co = checkout
+  s = status
+  l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  b = branch
+[user]
+  name = Andrew Kofink
+	email = $GIT_EMAIL
+	signingkey = $GIT_SIGNINGKEY
+[core]
+  editor = vim
+  autocrlf = false
+  whitespace = cr-at-eol
+  excludesfile = /Users/ajkofink/.gitignore
+  filemode = false
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = auto
+[push]
+  default = simple
+[github]
+  user = $GITHUB_USER
+[branch]
+  autosetuprebase = always
+[init]
+  defaultBranch = main
