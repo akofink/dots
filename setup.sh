@@ -54,7 +54,10 @@ $PKG_MGR $PKG_INSTALL git
 
 mkdir -p "$DEV_REPOS"
 
-if [[ ! -d "$DOTS_REPO" ]]
+if [[ -d "/app" ]] # For local testing in docker (see Dockerfile)
+then
+  ln -s /app $DOTS_REPO
+elif [[ ! -d "$DOTS_REPO" ]]
 then
   git clone https://github.com/akofink/dots.git $DOTS_REPO
 fi

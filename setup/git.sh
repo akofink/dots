@@ -8,5 +8,5 @@ GITHUB_USER=${GITHUB_USER:-"akofink"}
 
 source "$DOTS_REPO/util.sh"
 
-eval_template "templates/.gitignore" "~/.gitignore"
-eval_template "templates/.gitconfig" "~/.gitconfig"
+eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
