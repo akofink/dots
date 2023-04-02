@@ -6,7 +6,7 @@ My dot and config files and scripts to install them.
 ### Set up a new machine (OS X, Linux):
 
 ```
-bash -c $(curl -fsSL https://raw.githubusercontent.com/akofink/dots/master/setup.sh)
+bash -c $(curl -fsSL https://raw.githubusercontent.com/akofink/dots/main/setup.sh)
 ```
 
 ### Contributing
