@@ -25,6 +25,8 @@
   branch = auto
   interactive = auto
   ui = auto
+[credential]
+  helper = $GIT_CREDENTIAL_HELPER
 [push]
   default = simple
 [github]

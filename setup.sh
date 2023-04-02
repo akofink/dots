@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-PLATFORM="$(uname)" # Linux | Darwin
-DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
-DOTS_REPO="$DEV_REPOS/dots"
+export PLATFORM="$(uname)" # Linux | Darwin
+export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
+export DOTS_REPO="$DEV_REPOS/dots"
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
@@ -19,6 +19,7 @@ then
 else
   SUDO="sudo "
 fi
+export SUDO
 
 if [[ "$PLATFORM" == "Darwin" ]]
 then
