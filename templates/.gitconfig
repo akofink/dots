@@ -1,3 +1,7 @@
+#
+# This file was auto-generated from a template:
+# https://github.com/akofink/dots/blob/main/templates/.gitconfig
+#
 [alias]
   a = add
   c = commit -sS
@@ -13,7 +17,7 @@
   editor = vim
   autocrlf = false
   whitespace = cr-at-eol
-  excludesfile = /Users/ajkofink/.gitignore
+  excludesfile = $HOME/.gitignore
   filemode = false
 [color]
   diff = auto

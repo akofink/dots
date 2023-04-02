@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 PLATFORM="$(uname)" # Linux | Darwin
 DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
@@ -32,34 +32,39 @@ then
     PKG_MGR="${SUDO}yum"
     PKG_INDEX_UPDATE="check-update"
     PKG_INSTALL="install -y"
+    PKG_LIST="gettext-envsubst"
   elif command -v apt &> /dev/null
   then
     PKG_MGR="${SUDO}apt"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="install -y"
+    PKG_LIST="gettext"
   elif command -v apk &> /dev/null
   then
     PKG_MGR="${SUDO}apk"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="add"
+    PKG_LIST="gettext"
   else
-    fatal "Failed to identify a package manager (yum, apt, ?)"
+    fatal "Failed to identify a package manager (yum, apt, apk, ?)"
   fi
 fi
 
 ####################################################
 
 $PKG_MGR $PKG_INDEX_UPDATE
-$PKG_MGR $PKG_INSTALL git
+$PKG_MGR $PKG_INSTALL git $PKG_LIST
 
 mkdir -p "$DEV_REPOS"
 
-if [[ -d "/app" ]] # For local testing in docker (see Dockerfile)
+if [[ ! -d "$DOTS_REPO" ]]
 then
-  ln -s /app $DOTS_REPO
-elif [[ ! -d "$DOTS_REPO" ]]
-then
-  git clone https://github.com/akofink/dots.git $DOTS_REPO
+  if [[ -d "/app" ]] # For local testing in docker (see Dockerfile)
+  then
+    ln -s /app $DOTS_REPO
+  else
+    git clone https://github.com/akofink/dots.git $DOTS_REPO
+  fi
 fi
 
 source $DOTS_REPO/setup/*.sh

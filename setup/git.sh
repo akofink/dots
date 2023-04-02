@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
-DOTS_REPO="$DEV_REPOS/dots"
-GIT_EMAIL=${GIT_EMAIL:-"ajkofink@gmail.com"}
-GIT_SIGNINGKEY=${GIT_SIGNINGKEY:-"2C911B0A"}
-GITHUB_USER=${GITHUB_USER:-"akofink"}
+export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
+export DOTS_REPO="$DEV_REPOS/dots"
+export GIT_EMAIL=${GIT_EMAIL:-"ajkofink@gmail.com"}
+export GIT_SIGNINGKEY=${GIT_SIGNINGKEY:-"2C911B0A"}
+export GITHUB_USER=${GITHUB_USER:-"akofink"}
 
 source "$DOTS_REPO/util.sh"
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
+err() { echo "$@" 1>&2; }
+fatal() { err "$@" 1>&2; exit 1; }
+
 # eval_template templates/.vimrc.template ~/.vimrc
+# Safely applies envsubst
+# Archives existing destination files in place by appending a timestamp
 # 1: template file
 # 2: destination file
 eval_template() {
@@ -10,8 +15,10 @@ eval_template() {
     then
       mv "$2" "$2.$(date +%y%m%d%H%M%S)"
     fi
-    eval "cat <<EOF
-      $(<$1)
-    EOF" > "$2"
+    if ! command -v envsubst &> /dev/null
+    then
+      fatal "No envsubst command found!"
+    fi
+    cat "$1" | envsubst > "$2"
   fi
 }
