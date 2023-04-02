@@ -1,8 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 PLATFORM="$(uname)" # Linux | Darwin
-DEV_REPOS=${DEV_REPOS:-"~/dev/repos"}
+DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 DOTS_REPO="$DEV_REPOS/dots"
+
+err() { echo "$@" 1>&2; }
+fatal() { err "$@" 1>&2; exit 1; }
 
 if [[ -z "${USER-}" ]]
 then
@@ -20,24 +23,34 @@ fi
 if [[ "$PLATFORM" == "Darwin" ]]
 then
   PKG_MGR="brew"
+  PKG_INDEX_UPDATE="update"
+  PKG_INSTALL="install"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
   if command -v yum &> /dev/null
   then
     PKG_MGR="${SUDO}yum"
-    ${SUDO}yum check-update # update package index
+    PKG_INDEX_UPDATE="check-update"
+    PKG_INSTALL="install -y"
   elif command -v apt &> /dev/null
   then
     PKG_MGR="${SUDO}apt"
-    ${SUDO}apt-get update # update package index
+    PKG_INDEX_UPDATE="update"
+    PKG_INSTALL="install -y"
+  elif command -v apk &> /dev/null
+  then
+    PKG_MGR="${SUDO}apk"
+    PKG_INDEX_UPDATE="update"
+    PKG_INSTALL="add"
+  else
+    fatal "Failed to identify a package manager (yum, apt, ?)"
   fi
 fi
 
-err() { echo "$@" 1>&2; }
+####################################################
 
-###################################################
-
-$PKG_MGR install -y git
+$PKG_MGR $PKG_INDEX_UPDATE
+$PKG_MGR $PKG_INSTALL git
 
 mkdir -p "$DEV_REPOS"
 
@@ -46,4 +59,4 @@ then
   git clone https://github.com/akofink/dots.git $DOTS_REPO
 fi
 
-source "$DEV_REPOS/setup/*.sh"
+source $DOTS_REPO/setup/*.sh
