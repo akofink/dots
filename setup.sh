@@ -4,6 +4,8 @@ export PLATFORM="$(uname)" # Linux | Darwin
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
+DEFAULT_PKGS="git neovim tmux gpg2 nodejs pass"
+
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
 
@@ -26,6 +28,10 @@ then
   PKG_MGR="brew"
   PKG_INDEX_UPDATE="update"
   PKG_INSTALL="install"
+  if [ ! -f /opt/homebrew/bin/brew ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
   if command -v yum &> /dev/null
@@ -54,7 +60,7 @@ fi
 ####################################################
 
 $PKG_MGR $PKG_INDEX_UPDATE
-$PKG_MGR $PKG_INSTALL git $PKG_LIST
+$PKG_MGR $PKG_INSTALL $DEFAULT_PKGS $PKG_LIST
 
 mkdir -p "$DEV_REPOS"
 
@@ -68,4 +74,11 @@ then
   fi
 fi
 
-source $DOTS_REPO/setup/*.sh
+for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,pass,tmux,vim}.sh; do
+  if [ -f $script ]; then
+    echo "Running $script"
+    source $script
+  else
+    echo "Error - script does not exist: $script"
+  fi
+done

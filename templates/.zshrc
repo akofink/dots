@@ -41,27 +41,30 @@ alias ipaddr='ifconfig | ag "(\d+\.)+\d+"'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(tmux tmuxinator gem osx brew git rails ruby zsh-autosuggestions)
+plugins=(tmux tmuxinator gem brew git rails ruby zsh-autosuggestions)
 
 # Tmux Options
 export ZSH_TMUX_AUTOCONNECT=false
 export ZSH_TMUX_AUTOQUIT=false
 
-source $ZSH/oh-my-zsh.sh
-source ~/.secrets # Secret key environment variables
-source ~/.env # Other environment variables
+if [ -f $ZSH/oh-my-zsh.sh ]; then source $ZSH/oh-my-zsh.sh; fi
+if [ -f ~/.secrets ]; then source ~/.secrets; fi # Secret key environment variables
+if [ -f ~/.env ]; then source ~/.env; fi # Other environment variables
 
 # Customize to your needs...
 export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/sbin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./PATH
-source $HOME/.cargo/env
+[ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
+
+# Homebrew env setup
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 export GOPATH=$HOME/go
 
 # Tmuxinator
 [[ -s $HOME/.tmuxinator/scripts/tmuxinator ]] && source $HOME/.tmuxinator/scripts/tmuxinator
 
-export EDITOR=vim
-git config --global user.email $GIT_EMAIL
+export EDITOR=nvim
+git config --global user.email $GIT_EMAIL >/dev/null
 
 export DISPLAY=:0
 export GPG_TTY=$(tty)
