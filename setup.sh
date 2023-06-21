@@ -4,7 +4,7 @@ export PLATFORM="$(uname)" # Linux | Darwin
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
-DEFAULT_PKGS="git neovim tmux gpg2 nodejs pass"
+DEFAULT_PKGS="git neovim tmux gpg2 nodejs pass tmuxinator"
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
@@ -27,7 +27,7 @@ if [[ "$PLATFORM" == "Darwin" ]]
 then
   PKG_MGR="brew"
   PKG_INDEX_UPDATE="update"
-  PKG_INSTALL="install"
+  PKG_INSTALL="install -q"
   if [ ! -f /opt/homebrew/bin/brew ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
@@ -74,7 +74,8 @@ then
   fi
 fi
 
-for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,pass,tmux,vim}.sh; do
+# NB: Order matters
+for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,pass,tmux,tmuxinator,vim}.sh; do
   if [ -f $script ]; then
     echo "Running $script"
     source $script
