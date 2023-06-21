@@ -13,7 +13,7 @@ eval_template() {
   then
     if [[ -f "$2" ]]
     then
-      mv "$2" "$2.$(date +%y%m%d%H%M%S)"
+      mv "$2" "$2.old.$(date +%y%m%d%H%M%S)"
     fi
     if ! command -v envsubst &> /dev/null
     then
