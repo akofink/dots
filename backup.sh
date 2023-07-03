@@ -1,7 +1,20 @@
 #!/bin/bash
 
-files=( "$HOME/.zshrc" "$HOME/.vimrc" "$HOME/.tmux.conf" "$HOME/.tmuxinator" "$HOME/.gitconfig" )
+files=(
+  ".zshrc"
+  ".vimrc"
+  ".tmux.conf"
+  ".tmuxinator"
+  ".gitconfig"
+  ".gitignore"
+)
+
+if [ ! -d $(hostname -s) ]; then
+  mkdir $(hostname -s)
+fi
 
 for file in "${files[@]}"; do
-  cp -r $file $(hostname -s)/
+  if [ -f "$HOME/$file" ]; then
+    cp -r "$HOME/$file" $(hostname -s)/
+  fi
 done

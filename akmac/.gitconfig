@@ -1,0 +1,37 @@
+#
+# This file was auto-generated from a template:
+# https://github.com/akofink/dots/blob/main/templates/.gitconfig
+#
+[alias]
+  a = add
+  c = commit -sS
+  co = checkout
+  s = status
+  l = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  b = branch
+[user]
+  name = Andrew Kofink
+	email = ajkofink@gmail.com
+	signingkey = 2C911B0A
+[core]
+  editor = nvim
+  autocrlf = false
+  whitespace = cr-at-eol
+  excludesfile = /Users/akofink/.gitignore
+  filemode = false
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = auto
+[credential]
+  helper = osxkeychain
+[push]
+  default = simple
+[github]
+  user = akofink
+[branch]
+  autosetuprebase = always
+[init]
+  defaultBranch = main
