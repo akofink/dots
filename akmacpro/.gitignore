@@ -1,0 +1,14 @@
+.DS_Store
+.ruby-version
+log
+tags
+config/*.yml
+.sass-cache
+"Icon\r"
+"*/Icon\r"
+"*/*/Icon\r"
+.RData
+.RHistory
+_site
+.DS_Store
+.DS_Store
