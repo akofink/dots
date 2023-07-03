@@ -1,0 +1,6 @@
+name: dots
+root: ~/dev/repos/dots
+
+windows:
+  - zsh:
+  - nvim: nvim

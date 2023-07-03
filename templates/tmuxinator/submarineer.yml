@@ -1,0 +1,6 @@
+name: submarineer
+root: ~/dev/repos/submarineer
+
+windows:
+  - zsh:
+  - nvim: nvim
