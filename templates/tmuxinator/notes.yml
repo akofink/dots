@@ -1,0 +1,6 @@
+name: notes
+root: ~/dev/notes
+
+windows:
+  - zsh:
+  - nvim: nvim

@@ -1,0 +1,7 @@
+name: baronfenwick
+root: ~/dev/repos/baronfenwick.github.io
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker: 
