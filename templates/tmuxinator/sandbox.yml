@@ -1,0 +1,6 @@
+name: sandbox
+root: ~/dev/sandbox
+
+windows:
+  - zsh:
+  - nvim:
