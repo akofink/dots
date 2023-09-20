@@ -34,7 +34,6 @@ Plugin 'othree/html5.vim'
 Plugin 'pangloss/vim-javascript'
 Plugin 'peitalin/vim-jsx-typescript'
 Plugin 'Raimondi/delimitMate'
-Plugin 'rking/ag.vim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/syntastic'
 Plugin 'Shougo/neocomplcache'
@@ -136,6 +135,12 @@ inoremap <s-tab> <c-n>
 set incsearch
 set hlsearch
 set ignorecase smartcase
+
+if executable('rg')
+  let g:ackprg = 'rg --vimgrep'
+elseif executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
 
 " File Storage
 set autoread
