@@ -151,6 +151,8 @@ set nowritebackup
 " NERDTree
 let NERDTreeShowHidden=1
 au FileType nerdtree set number rnu
+map <C-n> :NERDTreeToggle<CR>
+map <leader>n :NERDTreeToggle<CR>
 
 " Vim-latex
 let g:Tex_MultipleCompileFormats = 'dvi,pdf'
@@ -159,7 +161,6 @@ map <leader>lb :!bibtexc %:r<CR>
 " Leader
 let mapleader = ' '
 
-map <leader>n :NERDTreeToggle<CR>
 map <leader>b :CtrlPBuffer<CR>
 " move around with the arrow keys
 noremap <silent> <Right> <c-w>l
