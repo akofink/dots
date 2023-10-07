@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! command -v tmuxinator &> /dev/null
+then
+  gem install tmuxinator
+fi
+
 if [ ! -h ~/.config/tmuxinator ]; then
   if [ -d "$HOME/.config/tmuxinator" ]; then
     mv $HOME/.config/tmuxinator{,.old.$(date +"%Y%m%dT%H%M%S")}

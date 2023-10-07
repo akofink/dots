@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
+echo
+echo "🍄 Dots setup.sh started..."
+echo
+
 export PLATFORM="$(uname)" # Linux | Darwin
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
-DEFAULT_PKGS="git neovim tmux gpg2 nodejs pass tmuxinator"
+DEFAULT_PKGS="git neovim tmux gpg nodejs pass"
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
@@ -34,6 +38,7 @@ then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
+  LINUX_COMMON_PKG_LIST="vim ruby"
   if command -v yum &> /dev/null
   then
     PKG_MGR="${SUDO}yum"
@@ -45,13 +50,13 @@ then
     PKG_MGR="${SUDO}apt"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="install -y"
-    PKG_LIST="gettext"
+    PKG_LIST="gettext tmuxinator"
   elif command -v apk &> /dev/null
   then
     PKG_MGR="${SUDO}apk"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="add"
-    PKG_LIST="gettext"
+    PKG_LIST="gettext tmuxinator"
   else
     fatal "Failed to identify a package manager (yum, apt, apk, ?)"
   fi
@@ -60,7 +65,7 @@ fi
 ####################################################
 
 $PKG_MGR $PKG_INDEX_UPDATE
-$PKG_MGR $PKG_INSTALL $DEFAULT_PKGS $PKG_LIST
+$PKG_MGR $PKG_INSTALL $DEFAULT_PKGS $LINUX_COMMON_PKG_LIST $PKG_LIST
 
 mkdir -p "$DEV_REPOS"
 
@@ -77,9 +82,14 @@ fi
 # NB: Order matters
 for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,pass,tmux,tmuxinator,vim}.sh; do
   if [ -f $script ]; then
-    echo "Running $script"
+    echo
+    echo "🍄 Running $script"
     source $script
   else
     echo "Error - script does not exist: $script"
   fi
 done
+
+echo
+echo "🎉🎉🎉🎉 Dots setup.sh success! 🎉🎉🎉🎉"
+echo

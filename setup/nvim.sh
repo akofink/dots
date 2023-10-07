@@ -4,7 +4,7 @@ mkdir -p ~/dev/repos/
 
 # Clone NvChad
 if [ ! -d ~/dev/repos/NvChad ]; then
-  git clone https://github.com/NvChad/NvChad ~/dev/repos/NvChad --depth 1 && nvim
+  git clone https://github.com/NvChad/NvChad ~/dev/repos/NvChad --depth 1
 fi
 
 # Clone personal nvim configs
@@ -13,6 +13,7 @@ if [ ! -d ~/dev/repos/nvim ]; then
 fi
 
 # Set up NvChad
+mkdir -p ~/.config
 if [ ! -h ~/.config/nvim ]; then
   if [ -d ~/.config/nvim ]; then
     mv ~/.config/{nvim,nvim.old.$(date +"%Y%m%dT%H%M%S")}
