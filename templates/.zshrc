@@ -12,28 +12,12 @@ ZSH_THEME="akofink"
 # Example aliases
 alias l='la -la'
 alias mux=tmuxinator
-alias server='bundle exec rails s -p 8080'
-alias console='bundle exec rails c'
-alias black='open http://black.akofink.com'
 alias s='source ~/.zshrc'
-alias es='vi ~/.zshrc'
-alias gpom='git push origin master'
 alias gpullr='git pull --rebase'
 alias gpush='git push'
-alias gt="git commit -m 'task#$TASK' -e" # Commit with tempus task number appended
-alias 8080to80="sudo ipfw add 100 fwd 127.0.0.1,8080 tcp from any to me 80"
 alias :e="vim"
-alias tmux="tmux -2"
-alias ktmux='tmux kill-server'
-alias timestamp="ruby -e 'print Time.now.strftime(\"%Y%m%d_%H%M%S\")'"
 alias v='vim'
 alias g='git'
-alias be='bundle exec'
-alias rakedb='bundle exec rake db:drop db:create db:migrate db:seed'
-alias akkit="ssh akkit.akofink.com"
-alias pi="ssh pi.akofink.com"
-alias shuf="perl -MList::Util=shuffle -e 'print shuffle(<STDIN>);'"
-alias ipaddr='ifconfig | ag "(\d+\.)+\d+"'
 
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 # COMPLETION_WAITING_DOTS="true"
