@@ -25,6 +25,7 @@ Plug 'mattn/vim-lsp-settings'
 Plug 'mattn/webapi-vim'
 Plug 'MaxMEllon/vim-jsx-pretty'
 Plug 'mileszs/ack.vim'
+Plug 'milkypostman/vim-togglelist'
 Plug 'moll/vim-node'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'mv/mv-vim-puppet'
@@ -46,7 +47,6 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-haml'
 Plug 'tpope/vim-liquid'
 Plug 'tpope/vim-markdown'
-Plug 'tpope/vim-rails.git'
 Plug 'tpope/vim-rbenv'
 Plug 'tpope/vim-surround'
 Plug 'vim-ruby/vim-ruby'
@@ -79,7 +79,9 @@ set backupdir=~/.vim/backups
 " CtrlP Setup
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 let g:ctrlp_show_hidden = 1
-if executable('ag')
+if executable('rg')
+  let g:ctrlp_user_command = 'rg %s --files --color=never --hidden --glob ""'
+elseif executable('ag')
   let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
 endif
 
@@ -167,9 +169,11 @@ set hlsearch
 set ignorecase smartcase
 
 if executable('rg')
-  let g:ackprg = 'rg --vimgrep'
+  " let g:ackprg = 'rg --vimgrep'
+  let g:grepprg = 'rg --vimgrep'
 elseif executable('ag')
-  let g:ackprg = 'ag --vimgrep'
+  " let g:ackprg = 'ag --vimgrep'
+  let g:grepprg = 'ag --vimgrep'
 endif
 
 " File Storage
@@ -223,10 +227,10 @@ map <leader>t :!rspec spec<CR>
 " Lorem Ipsum
 map <leader>li :Loremipsum<CR>
 " VIM Plug
-map <leader>BI :PlugInstall<CR>q
-map <leader>PI :PlugInstall<CR>q
-map <leader>BU :PlugUpdate<CR>q
-map <leader>PU :PlugUpdate<CR>q
+map <leader>BI :PlugInstall<CR>
+map <leader>PI :PlugInstall<CR>
+map <leader>BU :PlugUpdate<CR>
+map <leader>PU :PlugUpdate<CR>
 " Update dots
 map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
 " VIM wiki
