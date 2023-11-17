@@ -4,59 +4,57 @@ set clipboard^=unnamed
 set nocompatible
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
 
-" Github Bundles
-Plugin 'airblade/vim-gitgutter'
-Plugin 'danro/rename.vim'
-Plugin 'docunext/closetag.vim'
-Plugin 'editorconfig/editorconfig-vim'
-Plugin 'ekalinin/Dockerfile.vim'
-Plugin 'elixir-lang/vim-elixir'
-Plugin 'fatih/vim-go'
-Plugin 'flazz/vim-colorschemes'
-Plugin 'jcf/vim-latex'
-Plugin 'kana/vim-fakeclip'
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'kien/ctrlp.vim'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'majutsushi/tagbar'
-Plugin 'mattn/gist-vim'
-Plugin 'mattn/webapi-vim'
-Plugin 'MaxMEllon/vim-jsx-pretty'
-Plugin 'mileszs/ack.vim'
-Plugin 'moll/vim-node'
-Plugin 'mustache/vim-mustache-handlebars'
-Plugin 'mv/mv-vim-puppet'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'OrangeT/vim-csharp'
-Plugin 'othree/html5.vim'
-Plugin 'pangloss/vim-javascript'
-Plugin 'peitalin/vim-jsx-typescript'
-Plugin 'Raimondi/delimitMate'
-Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/syntastic'
-Plugin 'Shougo/neocomplcache'
-Plugin 'sjl/gundo.vim'
-Plugin 'styled-components/vim-styled-components'
-Plugin 'tpope/vim-abolish'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-haml'
-Plugin 'tpope/vim-liquid'
-Plugin 'tpope/vim-markdown'
-Plugin 'tpope/vim-rails.git'
-Plugin 'tpope/vim-rbenv'
-Plugin 'tpope/vim-surround'
-Plugin 'vim-ruby/vim-ruby'
-Plugin 'vim-scripts/c.vim'
-Plugin 'vim-scripts/loremipsum'
-Plugin 'vim-scripts/supertab'
-Plugin 'vim-scripts/vimwiki'
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin()
+Plug 'airblade/vim-gitgutter'
+Plug 'danro/rename.vim'
+Plug 'docunext/closetag.vim'
+Plug 'editorconfig/editorconfig-vim'
+Plug 'ekalinin/Dockerfile.vim'
+Plug 'elixir-lang/vim-elixir'
+Plug 'fatih/vim-go'
+Plug 'flazz/vim-colorschemes'
+Plug 'jcf/vim-latex'
+Plug 'kana/vim-fakeclip'
+Plug 'kchmck/vim-coffee-script'
+Plug 'kien/ctrlp.vim'
+Plug 'leafgarland/typescript-vim'
+Plug 'majutsushi/tagbar'
+Plug 'mattn/gist-vim'
+Plug 'mattn/webapi-vim'
+Plug 'MaxMEllon/vim-jsx-pretty'
+Plug 'mileszs/ack.vim'
+Plug 'moll/vim-node'
+Plug 'mustache/vim-mustache-handlebars'
+Plug 'mv/mv-vim-puppet'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'OrangeT/vim-csharp'
+Plug 'othree/html5.vim'
+Plug 'pangloss/vim-javascript'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'Raimondi/delimitMate'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/syntastic'
+Plug 'Shougo/neocomplcache'
+Plug 'sjl/gundo.vim'
+Plug 'styled-components/vim-styled-components'
+Plug 'tpope/vim-abolish'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-haml'
+Plug 'tpope/vim-liquid'
+Plug 'tpope/vim-markdown'
+Plug 'tpope/vim-rails.git'
+Plug 'tpope/vim-rbenv'
+Plug 'tpope/vim-surround'
+Plug 'vim-ruby/vim-ruby'
+Plug 'vim-scripts/c.vim'
+Plug 'vim-scripts/loremipsum'
+Plug 'vim-scripts/supertab'
+Plug 'vim-scripts/vimwiki'
+Plug 'VundleVim/Vundle.vim'
+call plug#end()
 
-" All of your Plugins must be added before the following line
-call vundle#end()
 filetype plugin indent on
 
 " Indent Guides
@@ -192,9 +190,11 @@ map <leader>r :!./%<CR>
 map <leader>t :!rspec spec<CR>
 " Lorem Ipsum
 map <leader>li :Loremipsum<CR>
-" VIM Bundle
-map <leader>BI :BundleInstall<CR>q
-map <leader>BU :BundleUpdate<CR>q
+" VIM Plug
+map <leader>BI :PlugInstall<CR>q
+map <leader>PI :PlugInstall<CR>q
+map <leader>BU :PlugUpdate<CR>q
+map <leader>PU :PlugUpdate<CR>q
 " Update dots
 map <leader>dots :!cd ~/dots && ./test_update<CR><CR>
 " VIM wiki

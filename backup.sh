@@ -9,12 +9,12 @@ files=(
   ".gitignore"
 )
 
-if [ ! -d $(hostname -s) ]; then
-  mkdir $(hostname -s)
+if [ ! -d backups/$(hostname -s) ]; then
+  mkdir -p backups/$(hostname -s)
 fi
 
 for file in "${files[@]}"; do
   if [ -f "$HOME/$file" ]; then
-    cp -r "$HOME/$file" $(hostname -s)/
+    cp -r "$HOME/$file" backups/$(hostname -s)/
   fi
 done
