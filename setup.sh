@@ -8,7 +8,7 @@ export PLATFORM="$(uname)" # Linux | Darwin
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
-DEFAULT_PKGS="git neovim tmux gpg nodejs pass"
+DEFAULT_PKGS="git neovim tmux gpg nodejs pass zsh curl"
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
@@ -56,7 +56,7 @@ then
     PKG_MGR="${SUDO}apk"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="add"
-    PKG_LIST="gettext tmuxinator"
+    PKG_LIST="gettext tmuxinator shadow"
   else
     fatal "Failed to identify a package manager (yum, apt, apk, ?)"
   fi
