@@ -44,7 +44,7 @@ then
     PKG_MGR="${SUDO}yum"
     PKG_INDEX_UPDATE="check-update"
     PKG_INSTALL="install -y"
-    PKG_LIST="gettext-envsubst"
+    PKG_LIST="gettext"
   elif command -v apt &> /dev/null
   then
     PKG_MGR="${SUDO}apt"
