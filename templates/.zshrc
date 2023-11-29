@@ -25,7 +25,7 @@ alias g='git'
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(tmux tmuxinator gem brew git rails ruby zsh-autosuggestions)
+plugins=(tmux tmuxinator gem git rails ruby zsh-autosuggestions)
 
 # Tmux Options
 export ZSH_TMUX_AUTOCONNECT=false
@@ -40,7 +40,9 @@ export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/sbin:/usr/local/
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 
 # Homebrew env setup
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if [-d /opt/homebrew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 export GOPATH=$HOME/go
 
