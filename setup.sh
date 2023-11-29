@@ -8,7 +8,7 @@ export PLATFORM="$(uname)" # Linux | Darwin
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
-DEFAULT_PKGS="git neovim tmux gpg nodejs zsh curl"
+DEFAULT_PKGS="git tmux gpg nodejs zsh curl"
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
@@ -38,7 +38,7 @@ then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
-  LINUX_COMMON_PKG_LIST="vim ruby"
+  LINUX_COMMON_PKG_LIST=""
   if command -v yum &> /dev/null
   then
     PKG_MGR="${SUDO}yum"
