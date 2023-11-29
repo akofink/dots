@@ -8,7 +8,7 @@ export PLATFORM="$(uname)" # Linux | Darwin
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
-DEFAULT_PKGS="git neovim tmux gpg nodejs pass zsh curl"
+DEFAULT_PKGS="git neovim tmux gpg nodejs zsh curl"
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
@@ -80,7 +80,7 @@ then
 fi
 
 # NB: Order matters
-for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,pass,tmux,tmuxinator,vim}.sh; do
+for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,tmux,tmuxinator,vim}.sh; do
   if [ -f $script ]; then
     echo
     echo "🍄 Running $script"
