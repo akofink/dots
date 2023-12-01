@@ -40,7 +40,7 @@ export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/sbin:/usr/local/
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 
 # Homebrew env setup
-if [-d /opt/homebrew ]; then
+if [ -d /opt/homebrew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
