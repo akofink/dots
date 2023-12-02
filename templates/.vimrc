@@ -54,7 +54,6 @@ Plug 'vim-scripts/c.vim'
 Plug 'vim-scripts/loremipsum'
 Plug 'vim-scripts/supertab'
 Plug 'vim-scripts/vimwiki'
-Plug 'VundleVim/Vundle.vim'
 call plug#end()
 
 filetype plugin indent on
@@ -66,6 +65,7 @@ let g:indent_guides_guide_size=1
 
 " Spell check
 set spell
+map <leader>s :set spell!<CR>
 
 " Global undo
 silent !mkdir -p ~/.vim/undo > /dev/null 2>&1
@@ -175,6 +175,7 @@ elseif executable('ag')
   " let g:ackprg = 'ag --vimgrep'
   let g:grepprg = 'ag --vimgrep'
 endif
+command -nargs=* Ag :copen | Ggrep <args>
 
 " File Storage
 set autoread
@@ -241,7 +242,6 @@ map <leader>< :foldclose<CR>
 map <leader>> :foldopen<CR>
 
 map <leader>m :!make<CR>
-map <leader>s :set spell!<CR>
 
 " FileType specific settings
 au FileType cs set shiftwidth=4 tabstop=4
