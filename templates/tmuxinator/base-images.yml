@@ -1,0 +1,7 @@
+name: base-images
+root: ~/dev/repos/base-images
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

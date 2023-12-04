@@ -1,0 +1,6 @@
+name: artifactory-proxy
+root: ~/dev/repos/artifactory-proxy
+
+windows:
+  - zsh:
+  - nvim: nvim

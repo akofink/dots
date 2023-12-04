@@ -1,0 +1,8 @@
+# /Users/akofink/.config/tmuxinator/terraform-signalfx.yml
+
+name: terraform-signalfx
+root: ~/dev/repos/terraform-signalfx
+
+windows:
+  - zsh:
+  - nvim: nvim

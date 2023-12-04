@@ -1,0 +1,7 @@
+name: bbc-streamhub-events
+root: ~/dev/repos/bbc-streamhub-events
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

@@ -1,0 +1,7 @@
+name: repo-access
+root: ~/dev/repos/repo-access
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

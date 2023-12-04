@@ -1,34 +1,21 @@
-name: default
-root: ~/
+# /Users/akofink/.config/tmuxinator/bitbucket.yml
+
+name: bitbucket
+root: ~/dev/repos/bitbucket/core
+
+on_project_start:
+  - if [ ! -d .venv ]; then python3.7 -m venv .venv; fi
+  - source .venv/bin/activate
+  - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
+  - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
+  - pip install --no-deps -r requirements/development.txt
+
+pre_window:
+  - source .venv/bin/activate
+  - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
+  - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
 windows:
   - zsh:
-      layout: even-vertical
-      panes:
-        - bbc:
-            - cd ~/dev/repos/bitbucket
-            - source /opt/python/bitbucket/.venv/bin/activate
-        - bbbs:
-            - cd ~/dev/repos/moneybucket
-            - source /opt/python/moneybucket/.venv/bin/activate
-  - repl:
-      layout: even-vertical
-      panes:
-        - bbc:
-            - cd ~/dev/repos/bitbucket
-            - source /opt/python/bitbucket/.venv/bin/activate
-            - DJANGO_SETTINGS_MODULE=bitbucket.settings.settings_dev ./manage.py magicshell
-            - import base64; import json; from uuid import uuid4; from bitbucket.apps.branchrestrictions.models import *; from bitbucket.apps.groups.models import *; from django.conf import settings; from bitbucket.apps.authorization.public.client import *; from bitbucket.apps.billing.models import *; from bitbucket.apps.provisioning.client import *; from bitbucket.apps.authorization.public.workspace import *; from bitbucket.apps.billing.billing_service import *; from bitbucket.apps.authorization.public.types import *; from bitbucket.apps.groups.client import *; from bitbucket_analytics import fact; from bitbucket.apps.authorization.public.project import *; from bitbucket.apps.authorization.public.repo import *; from bitbucket.apps.account.client import *
-        - bbbs:
-            - cd ~/dev/repos/moneybucket
-            - source /opt/python/moneybucket/.venv/bin/activate
-            - export $(ladle service env moneybucket)
-            - ./manage.py shell
-        - zsh:
-  - logs:
-      layout: even-vertical
-      panes:
-        - logs:
-            - ladle service logs supervisord
-        - zsh:
-        - zsh:
+  - nvim:
+    - nvim

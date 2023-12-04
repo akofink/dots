@@ -1,0 +1,7 @@
+name: orochi
+root: ~/dev/repos/orochi
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

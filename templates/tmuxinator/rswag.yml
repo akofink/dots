@@ -1,0 +1,8 @@
+# /Users/akofink/.config/tmuxinator/rswag.yml
+
+name: rswag
+root: ~/dev/repos/rswag
+
+windows:
+  - zsh:
+  - vim: vim

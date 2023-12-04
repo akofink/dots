@@ -1,0 +1,7 @@
+name: python-hams-client
+root: ~/dev/repos/python-hams-client
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

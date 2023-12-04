@@ -1,0 +1,11 @@
+# /Users/akofink/.config/tmuxinator/pdvs.yml
+
+name: pdvs
+root: ~/dev/repos/pdvs
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - yarn:
+    - nvm use
+    - yarn

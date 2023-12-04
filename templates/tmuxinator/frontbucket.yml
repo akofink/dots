@@ -1,0 +1,12 @@
+# /Users/akofink/.config/tmuxinator/frontbucket.yml
+
+name: frontbucket
+root: ~/dev/repos/frontbucket
+
+windows:
+  - zsh: nvm use
+  - nvim: nvim
+  - yarn:
+    - nvm use
+    # - yarn --check-files
+    # - yarn start --https

@@ -1,6 +1,34 @@
+# /Users/akofink/.config/tmuxinator/notes.yml
+
 name: notes
-root: ~/dev/notes
+root: ~/notes
 
 windows:
   - zsh:
-  - nvim: nvim
+  - nvim: nvim atlassian.md
+  - http:
+      root: ~/dev/http
+      layout: main-horizontal
+      panes:
+        - http:
+        - nvim:
+            - nvim
+            - ' n'
+  - mock-ssh-keys:
+      root: ~/dev/mock-ssh-keys
+      layout: main-horizontal
+      panes:
+        - zsh:
+        - nvim:
+            - nvim
+            - ' n'
+  - devbucket-git:
+      root: ~/tmp/devbucket-repos/
+      layout: main-horizontal
+      panes:
+        - zsh:
+  - atlas:
+  - docker:
+  - psql:
+  - ads: which ads_setup && ads_setup
+

@@ -1,0 +1,10 @@
+name: bbc-perms
+root: ~/dev/repos/bbc-perms
+
+pre_window:
+  - source .venv/bin/activate
+
+windows:
+  - zsh: zsh
+  - nvim: nvim
+  - docker: docker ps

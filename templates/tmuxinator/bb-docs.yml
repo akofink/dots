@@ -1,0 +1,7 @@
+name: bb-docs
+root: ~/dev/repos/bb-docs
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docs: atlas dac watch -p 8081

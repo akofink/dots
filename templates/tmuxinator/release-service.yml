@@ -1,0 +1,7 @@
+name: release-service
+root: ~/dev/repos/release-service
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

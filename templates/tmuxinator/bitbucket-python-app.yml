@@ -1,0 +1,7 @@
+name: bitbucket-python-app
+root: ~/dev/repos/bitbucket-python-app
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

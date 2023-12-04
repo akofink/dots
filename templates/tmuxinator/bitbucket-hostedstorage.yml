@@ -1,0 +1,7 @@
+name: bitbucket-hostedstorage
+root: ~/dev/repos/bitbucket-hostedstorage
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

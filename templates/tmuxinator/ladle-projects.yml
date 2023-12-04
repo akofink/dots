@@ -1,0 +1,6 @@
+name: ladle-projects
+root: ~/dev/repos/ladle-projects
+
+windows:
+  - zsh:
+  - vim: vim

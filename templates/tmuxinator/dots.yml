@@ -3,4 +3,4 @@ root: ~/dev/repos/dots
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim

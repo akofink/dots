@@ -1,0 +1,6 @@
+name: nvim
+root: ~/.config/nvim/lua/custom/
+
+windows:
+  - zsh:
+  - nvim: nvim

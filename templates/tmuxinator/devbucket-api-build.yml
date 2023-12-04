@@ -1,0 +1,6 @@
+name: devbucket-api-build
+root: ~/dev/repos/devbucket-ami-build
+
+windows:
+  - zsh:
+  - nvim: nvim

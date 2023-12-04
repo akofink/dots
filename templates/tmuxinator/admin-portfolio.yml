@@ -1,0 +1,6 @@
+name: admin-portfolio
+root: ~/dev/repos/admin-portfolio
+
+windows:
+  - zsh:
+  - nvim: nvim

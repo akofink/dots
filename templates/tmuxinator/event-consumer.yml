@@ -1,0 +1,7 @@
+name: event-consumer
+root: ~/dev/repos/event-consumer
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker: 

@@ -1,0 +1,7 @@
+name: dev-pulumi-py
+root: ~/dev/repos/dev-pulumi-py
+
+windows:
+  - zsh:
+  - vim: vim
+  - zsh:

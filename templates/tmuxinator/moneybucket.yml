@@ -1,0 +1,11 @@
+# /Users/akofink/.config/tmuxinator/moneybucket.yml
+
+name: moneybucket
+root: ~/dev/repos/bitbucket-billing-service
+
+windows:
+  - zsh:
+      - source .venv/bin/activate
+  - nvim:
+      - source .venv/bin/activate
+      - nvim

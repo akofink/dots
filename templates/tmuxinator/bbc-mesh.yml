@@ -1,0 +1,7 @@
+name: bbc-mesh
+root: ~/dev/repos/bbc-mesh
+
+windows:
+  - zsh:
+  - nvim: nvim
+  - docker:

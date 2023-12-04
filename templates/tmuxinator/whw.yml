@@ -1,0 +1,9 @@
+# /Users/akofink/.config/tmuxinator/whw.yml
+
+name: whw
+root: ~/dev/repos/what-happens-when/
+
+windows:
+  - zsh:
+  - vim: vim
+  - zsh:
