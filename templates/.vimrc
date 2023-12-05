@@ -5,6 +5,9 @@ set nocompatible
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 
+" Leader
+let mapleader = ' '
+
 call plug#begin()
 Plug 'airblade/vim-gitgutter'
 Plug 'danro/rename.vim'
@@ -80,7 +83,7 @@ set backupdir=~/.vim/backups
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 let g:ctrlp_show_hidden = 1
 if executable('rg')
-  let g:ctrlp_user_command = 'rg %s --files --color=never --hidden --glob ""'
+  let g:ctrlp_user_command = 'rg %s --files -g "!.git/" --color=never --hidden --glob ""'
 elseif executable('ag')
   let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
 endif
@@ -96,7 +99,7 @@ function! s:on_lsp_buffer_enabled() abort
   nmap <buffer> gr <plug>(lsp-references)
   nmap <buffer> gi <plug>(lsp-implementation)
   nmap <buffer> gt <plug>(lsp-type-definition)
-  nmap <buffer> <leader>rn <plug>(lsp-rename)
+  " nmap <buffer> <leader>rn <plug>(lsp-rename)
   nmap <buffer> [g <plug>(lsp-previous-diagnostic)
   nmap <buffer> ]g <plug>(lsp-next-diagnostic)
   nmap <buffer> K <plug>(lsp-hover)
@@ -188,13 +191,11 @@ let NERDTreeShowHidden=1
 au FileType nerdtree set number rnu
 map <C-n> :NERDTreeToggle<CR>
 map <leader>n :NERDTreeToggle<CR>
+map <leader>r :NERDTreeFind<CR>
 
 " Vim-latex
 let g:Tex_MultipleCompileFormats = 'dvi,pdf'
 map <leader>lb :!bibtexc %:r<CR>
-
-" Leader
-let mapleader = ' '
 
 map <leader>b :CtrlPBuffer<CR>
 " move around with the arrow keys
@@ -222,7 +223,7 @@ map <leader>ln :set number<CR>
 " Reload Tags
 map <leader>T :!/usr/local/bin/ctags -R --exclude=.git --exclude=log *<CR><CR>
 " Run
-map <leader>r :!./%<CR>
+" map <leader>r :!./%<CR>
 " Run Rspec
 map <leader>t :!rspec spec<CR>
 " Lorem Ipsum
