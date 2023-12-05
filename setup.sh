@@ -80,7 +80,7 @@ then
 fi
 
 # NB: Order matters
-for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,tmux,tmuxinator,vim}.sh; do
+for script in $DOTS_REPO/setup/{gpg,git,zsh,nvim,tmux,rbenv,tmuxinator,vim}.sh; do
   if [ -f $script ]; then
     echo
     echo "🍄 Running $script"
