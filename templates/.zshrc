@@ -39,6 +39,11 @@ if [ -f ~/.env ]; then source ~/.env; fi # Other environment variables
 export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/sbin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./PATH
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 
+# Atlas CLI env setup
+if [ -d /opt/atlassian/bin ]; then
+  export PATH=$PATH:/opt/atlassian/bin
+fi
+
 # Homebrew env setup
 if [ -d /opt/homebrew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
