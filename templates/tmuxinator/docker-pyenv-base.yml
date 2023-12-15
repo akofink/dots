@@ -1,0 +1,6 @@
+name: docker-pyenv-base
+root: ~/dev/repos/docker-pyenv-base/
+
+windows:
+  - zsh:
+  - vim: vim
