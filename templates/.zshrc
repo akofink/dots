@@ -59,7 +59,7 @@ export GOPATH=$HOME/go
 # Tmuxinator
 [[ -s $HOME/.tmuxinator/scripts/tmuxinator ]] && source $HOME/.tmuxinator/scripts/tmuxinator
 
-export EDITOR=nvim
+export EDITOR=vim
 git config --global user.email $GIT_EMAIL >/dev/null
 
 export DISPLAY=:0
