@@ -3,5 +3,5 @@ root: ~/dev/repos/release-service
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

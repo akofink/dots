@@ -3,5 +3,5 @@ root: ~/dev/repos/bbc-mesh
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

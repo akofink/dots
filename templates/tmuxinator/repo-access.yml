@@ -3,5 +3,5 @@ root: ~/dev/repos/repo-access
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

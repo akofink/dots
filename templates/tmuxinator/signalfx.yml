@@ -5,4 +5,4 @@ root: ~/dev/repos/terraform-signalfx
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim

@@ -3,5 +3,5 @@ root: ~/dev/repos/bb-docs
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docs: atlas dac watch -p 8081

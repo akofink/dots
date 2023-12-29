@@ -6,5 +6,5 @@ pre_window:
 
 windows:
   - zsh: zsh
-  - nvim: nvim
+  - vim: vim
   - docker: docker ps

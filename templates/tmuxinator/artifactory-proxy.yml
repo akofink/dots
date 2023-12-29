@@ -3,4 +3,4 @@ root: ~/dev/repos/artifactory-proxy
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim

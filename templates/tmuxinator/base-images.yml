@@ -3,5 +3,5 @@ root: ~/dev/repos/base-images
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

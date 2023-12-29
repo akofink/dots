@@ -5,7 +5,7 @@ root: ~/dev/repos/frontbucket
 
 windows:
   - zsh: nvm use
-  - nvim: nvim
+  - vim: vim
   - yarn:
     - nvm use
     # - yarn --check-files

@@ -3,5 +3,5 @@ root: ~/dev/repos/orochi
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

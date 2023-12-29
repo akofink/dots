@@ -1,0 +1,7 @@
+name: recipes-ui
+root: ~/dev/repos/recipes-ui
+
+windows:
+  - zsh:
+  - vim: vim
+  - zsh:

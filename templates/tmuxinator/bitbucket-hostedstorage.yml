@@ -3,5 +3,5 @@ root: ~/dev/repos/bitbucket-hostedstorage
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

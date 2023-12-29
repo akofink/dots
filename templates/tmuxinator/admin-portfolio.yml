@@ -3,4 +3,4 @@ root: ~/dev/repos/admin-portfolio
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim

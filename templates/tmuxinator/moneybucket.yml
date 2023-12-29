@@ -6,6 +6,6 @@ root: ~/dev/repos/bitbucket-billing-service
 windows:
   - zsh:
       - source .venv/bin/activate
-  - nvim:
+  - vim:
       - source .venv/bin/activate
-      - nvim
+      - vim

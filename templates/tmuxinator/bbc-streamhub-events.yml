@@ -3,5 +3,5 @@ root: ~/dev/repos/bbc-streamhub-events
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker:

@@ -5,22 +5,22 @@ root: ~/notes
 
 windows:
   - zsh:
-  - nvim: nvim atlassian.md
+  - vim: vim atlassian.md
   - http:
       root: ~/dev/http
       layout: main-horizontal
       panes:
         - http:
-        - nvim:
-            - nvim
+        - vim:
+            - vim
             - ' n'
   - mock-ssh-keys:
       root: ~/dev/mock-ssh-keys
       layout: main-horizontal
       panes:
         - zsh:
-        - nvim:
-            - nvim
+        - vim:
+            - vim
             - ' n'
   - devbucket-git:
       root: ~/tmp/devbucket-repos/

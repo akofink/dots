@@ -3,4 +3,4 @@ root: ~/dev/repos/submarineer
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim

@@ -3,5 +3,5 @@ root: ~/dev/repos/event-consumer
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker: 

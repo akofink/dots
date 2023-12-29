@@ -3,5 +3,5 @@ root: ~/dev/repos/akofink.github.io
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
   - docker: 

@@ -3,4 +3,4 @@ root: ~/dev/repos/site-addon-scripts
 
 windows:
   - zsh:
-  - nvim: nvim
+  - vim: vim
