@@ -1,0 +1,6 @@
+name: python-bbbs-client
+root: ~/dev/repos/python-bbbs-client
+
+windows:
+  - editor:
+  - vim: vim

@@ -5,6 +5,6 @@ pre_window:
   - source .venv/bin/activate
 
 windows:
-  - zsh: zsh
+  - zsh:
   - vim: vim
   - docker: docker ps
