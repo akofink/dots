@@ -1,0 +1,5 @@
+name: test
+root: ~/
+windows:
+  - zsh:
+    - tmux link-window -s 0:1

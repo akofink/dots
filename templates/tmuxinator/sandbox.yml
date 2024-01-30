@@ -3,4 +3,4 @@ root: ~/dev/sandbox
 
 windows:
   - zsh:
-  - nvim:
+  - vim:
