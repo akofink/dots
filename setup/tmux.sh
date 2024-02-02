@@ -13,3 +13,10 @@ if [ ! -h $TMUX_CONF ]; then
 
   ln -s $TEMPLATE $TMUX_CONF
 fi
+
+# Set up TPM
+if [ ! -d ~/.tmux/plugins/tpm ]; then
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+(cd ~/.tmux/plugins/tpm && git pull)

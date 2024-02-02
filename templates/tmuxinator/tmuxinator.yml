@@ -1,0 +1,7 @@
+name: tmuxinator
+root: ~/dev/repos/tmuxinator
+
+
+windows:
+  - zsh:
+  - vim: vim

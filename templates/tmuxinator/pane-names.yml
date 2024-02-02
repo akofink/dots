@@ -1,0 +1,15 @@
+name: pane-names
+root: ~/dev/sandbox
+
+# In tmux:
+# set -g pane-border-format "#{pane_index} #{pane_title}"
+# set -g pane-border-status bottom
+
+windows:
+  - editor:
+      layout: tiled
+      panes:
+        - vim:
+          - vim
+        - docker:
+          - docker ps
