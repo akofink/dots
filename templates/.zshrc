@@ -35,8 +35,13 @@ if [ -f $ZSH/oh-my-zsh.sh ]; then source $ZSH/oh-my-zsh.sh; fi
 if [ -f ~/.secrets ]; then source ~/.secrets; fi # Secret key environment variables
 if [ -f ~/.env ]; then source ~/.env; fi # Other environment variables
 
+# Rubygems user binary path setup
+if which ruby >/dev/null && which gem >/dev/null; then
+    PATH="$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH"
+fi
+
 # Customize to your needs...
-export PATH=/usr/local/heroku/bin:/Users/akofink/bin:/usr/local/sbin:/usr/local/bin:/usr/local/mysql/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:./PATH
+export PATH=/Users/akofink/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 
 # Atlas CLI env setup
