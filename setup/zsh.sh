@@ -10,7 +10,7 @@ fi
 
 # oh-my-zsh plugins
 ZSH_CUSTOM_PLUGIN_DIR=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins
-if [ ! -d $ZSH_CUSTOM_PLUGIN_DIR ]; then
+if [ ! -d $ZSH_CUSTOM_PLUGIN_DIR/zsh-autosuggestions ]; then
   git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM_PLUGIN_DIR/zsh-autosuggestions
 fi
 
