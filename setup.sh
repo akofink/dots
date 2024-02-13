@@ -50,13 +50,13 @@ then
     PKG_MGR="${SUDO}apt"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="install -y"
-    PKG_LIST="gettext tmuxinator"
+    PKG_LIST="gettext build-essential"
   elif command -v apk &> /dev/null
   then
     PKG_MGR="${SUDO}apk"
     PKG_INDEX_UPDATE="update"
     PKG_INSTALL="add"
-    PKG_LIST="gettext tmuxinator shadow"
+    PKG_LIST="gettext shadow"
   else
     fatal "Failed to identify a package manager (yum, apt, apk, ?)"
   fi
