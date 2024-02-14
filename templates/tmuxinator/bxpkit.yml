@@ -1,0 +1,7 @@
+name: bxpkit
+root: ~/dev/repos/bxpkit
+
+windows:
+  - zsh: nvm use
+  - vim: nvm use; vim
+  - yarn: nvm use
