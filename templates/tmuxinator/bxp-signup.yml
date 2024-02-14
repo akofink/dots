@@ -1,0 +1,6 @@
+name: bxp-signup
+root: ~/dev/repos/bxp-signup
+
+windows:
+  - zsh:
+  - vim: vim
