@@ -4,4 +4,14 @@ root: ~/dev/repos/tmuxinator
 
 windows:
   - zsh:
-  - vim: vim
+  - vim:
+      panes:
+        - vim: vim
+  - docker:
+      panes:
+        - tmux:
+            # - cd ~/dev/sandbox/docker-sandbox/tmuxinator
+            # - TMUX=2.4 docker build -t tmux${TMUX} .
+  - man:
+      panes:
+        - man: man tmux
