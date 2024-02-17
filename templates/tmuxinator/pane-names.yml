@@ -6,10 +6,10 @@ root: ~/dev/sandbox
 # set -g pane-border-status bottom
 
 windows:
-  - editor:
+  - editor (and others):
       layout: tiled
       panes:
-        - vim:
+        - vim and things:
           - vim
-        - docker:
+        - mostly just docker (maybe compose):
           - docker ps
