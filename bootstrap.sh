@@ -141,5 +141,6 @@ then
     git clone https://github.com/akofink/dots.git $DOTS_REPO
   fi
 fi
+rm -f bootstrap.sh
 cd $DOTS_REPO
 source setup.sh

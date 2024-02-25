@@ -6,7 +6,7 @@ My dot and config files and scripts to install them.
 ### Set up a new machine (OS X, Linux):
 
 ```
-curl -fsSLO https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && source bootstrap.sh
+curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && source bootstrap.sh
 ```
 
 ### Contributing
