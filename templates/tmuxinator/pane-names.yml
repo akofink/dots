@@ -1,9 +1,5 @@
-name: pane-names
+name: pane-names (a test! | let's find out)
 root: ~/dev/sandbox
-
-# In tmux:
-# set -g pane-border-format "#{pane_index} #{pane_title}"
-# set -g pane-border-status bottom
 
 windows:
   - editor (and others):
