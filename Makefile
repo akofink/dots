@@ -27,6 +27,7 @@ docker-run-centos-7:
 	docker run -itv $(PWD):/app -v $(PWD)/centos-7/var/cache:/var/cache -v $(PWD)/centos-7/root:/root dots-centos-7
 
 docker-build-all: docker-build-alpine docker-build-fedora docker-build-debian docker-build-centos-7
-docker-build: docker-build-all
+docker-build:
+	make -j4 docker-build-all
 
 .PHONY: default docker-build docker-build-all docker-build-alpine docker-build-fedora docker-build-debian docker-build-centos-7 docker-run-alpine docker-run-debian docker-run-fedora docker-run-centos-7

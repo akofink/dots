@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 
-if [ $ENV_SETUP_COMPLETE ]; then
-  return
-fi
+if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
+  if [ $ENV_SETUP_COMPLETE ]; then
+    return
+  fi
 
-echo "Setting up common environment variables..."
+  echo "Setting up common environment variables..."
+fi
 
 export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 
-source "$DOTS_REPO/util.sh"
+if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
+  source "$DOTS_REPO/setup/util.sh"
+fi
 
 # Ensure USER
 if [[ -z "${USER-}" ]]
@@ -32,14 +36,14 @@ if [[ "$PLATFORM" == "Darwin" ]]
 then
   PKG_MGR=(brew)
   PKG_INDEX_UPDATE_SUBCOMMAND="update"
-  PKG_INSTALL_SUBCOMMAND="install -q"
+  PKG_INSTALL_SUBCOMMAND=(install -q)
   if [ ! -f /opt/homebrew/bin/brew ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
-  LINUX_COMMON_PKG_LIST=""
+  # LINUX_COMMON_PKG_LIST=""
   if command -v yum &> /dev/null
   then
     PKG_MGR=($SUDO yum)

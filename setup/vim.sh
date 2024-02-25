@@ -4,7 +4,7 @@ export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
 export DOTS_REPO="$DEV_REPOS/dots"
 export GITHUB_TOKEN=${GITHUB_TOKEN:-"''"}
 
-source "$DOTS_REPO/util.sh" # eval_template
+source "$DOTS_REPO/setup/util.sh" # eval_template
 
 eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc"
 

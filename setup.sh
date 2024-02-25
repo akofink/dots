@@ -3,8 +3,6 @@
 echo
 echo "🍄 Dots setup.sh started..."
 
-# source setup/env.sh
-
 # DEFAULT_PKGS=(${DEFAULT_PKGS:-tmux gpg nodejs zsh curl})
 
 # $PKG_INDEX_UPDATE

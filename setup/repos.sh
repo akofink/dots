@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-source setup/env.sh
-source setup/git.sh
+if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
+  source setup/env.sh
+  source setup/git.sh
+fi
 
 mkdir -p "$DEV_REPOS"
 

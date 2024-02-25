@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
-if [ $GIT_SETUP_COMPLETE ]; then
-  return
+if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
+  if [ $GIT_SETUP_COMPLETE ]; then
+    return
+  fi
+
+  source setup/env.sh
 fi
 
-source setup/env.sh
-
-$PKG_INSTALL git
+command -v git &>/dev/null || $PKG_INSTALL git
 
 export GIT_EMAIL=${GIT_EMAIL:-"ajkofink@gmail.com"}
 export GIT_SIGNINGKEY=${GIT_SIGNINGKEY:-"2C911B0A"}
