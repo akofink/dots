@@ -1,0 +1,7 @@
+name: stargate-route-configurations
+root: ~/dev/repos/stargate-route-configurations
+
+windows:
+  - zsh:
+  - vim: vim
+  - docker:

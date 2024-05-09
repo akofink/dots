@@ -1,0 +1,6 @@
+name: constellation
+root: ~/dev/repos/constellation
+
+windows:
+  - zsh: zsh
+  - vim: vim

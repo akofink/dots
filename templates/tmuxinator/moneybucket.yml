@@ -9,3 +9,5 @@ windows:
   - vim: vim
       # - source .venv/bin/activate
       # - vim
+  - logs:
+    - docker logs -f $(docker ps -qf name=bitbucket-billing-service-1)

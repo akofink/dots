@@ -1,0 +1,7 @@
+name: tlt-services
+root: ~/dev/repos/tlt-services
+
+windows:
+  - zsh:
+  - vim: vim
+  - docker:

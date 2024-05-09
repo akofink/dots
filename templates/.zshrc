@@ -76,3 +76,8 @@ git config --global user.email $GIT_EMAIL >/dev/null
 
 export DISPLAY=:0
 export GPG_TTY=$(tty)
+
+# libpq from homebrew
+if [ -d /opt/homebrew/opt/libpq ]; then
+  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi

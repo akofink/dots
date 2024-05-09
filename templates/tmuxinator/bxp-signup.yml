@@ -2,5 +2,7 @@ name: bxp-signup
 root: ~/dev/repos/bxp-signup
 
 windows:
-  - zsh:
-  - vim: vim
+  - zsh: nvm use
+  - vim:
+      - nvm use
+      - vim

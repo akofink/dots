@@ -19,3 +19,11 @@ on_project_start:
 windows:
   - zsh:
   - vim: vim
+  - logs:
+      layout: tiled
+      panes:
+        - logs:
+          - docker ps
+          # - docker logs -f $(docker ps -f name=website)
+        - docker:
+          - docker ps
