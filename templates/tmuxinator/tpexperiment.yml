@@ -1,0 +1,13 @@
+name: tpexperiment
+root: /tmp
+
+windows:
+  - main:
+      layout: even-vertical
+      panes:
+        - core:
+          - ls -al
+          - cat core.txt
+        - other:
+          - ls -al
+          - cat other.txt

@@ -1,0 +1,15 @@
+name: fullpush
+windows:
+  - main:
+      layout: tiled
+      panes:
+        - service:
+            - ' cd ~/tmp && clear'
+        - library:
+            - ' cd ~/tmp && clear'
+        - simulator:
+            - ' cd ~/tmpor && clear'
+        - webapp:
+            - ' cd ~/tmp && clear'
+  - helm:
+      - ' cd ~/tmp && clear'

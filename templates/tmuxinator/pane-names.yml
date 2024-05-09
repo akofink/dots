@@ -1,11 +1,22 @@
 name: pane-names (a test! | let's find out)
 root: ~/dev/sandbox
 
+enable_pane_titles: true
+
 windows:
   - editor (and others):
       layout: tiled
       panes:
         - vim and things:
+          - sleep 5
+          - vim
+        - mostly just docker (maybe compose):
+          - docker ps
+  - editor (and others):
+      layout: tiled
+      panes:
+        - vim and things:
+          - sleep 5
           - vim
         - mostly just docker (maybe compose):
           - docker ps
