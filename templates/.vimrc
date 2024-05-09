@@ -99,6 +99,8 @@ silent !mkdir -p ~/.vim/backups > /dev/null 2>&1
 set backupdir=~/.vim/backups
 
 " CtrlP Setup
+" let g:ctrlp_max_files=0
+" let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git\|.venv|local'
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 let g:ctrlp_show_hidden = 1
 if executable('rg')
@@ -170,8 +172,8 @@ augroup END
 " let g:vsnip_filetypes.typescriptreact = ['typescript']
 
 " Gist setup
-let g:github_token = $GITHUB_TOKEN
-let g:gist_open_browser_after_post = 1
+" let g:github_token = $GITHUB_TOKEN
+" let g:gist_open_browser_after_post = 1
 
 " Syntax Highlighting
 set t_Co=256
@@ -180,7 +182,6 @@ syntax on
 set background=light
 colorscheme solarized
 filetype plugin indent plugin on
-let g:syntastic_ruby_exec = '~/.rbenv/shims/ruby'
 
 " Spacing and Wrapping
 set expandtab
