@@ -11,6 +11,9 @@ eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc"
 if [ ! -d ~/dev/repos/vim ]; then
   mkdir -p ~/dev/repos
   git clone https://github.com/vim/vim.git ~/dev/repos/vim
+fi
+
+if ! which vim; then
   (
     cd ~/dev/repos/vim;
     make && sudo make install
