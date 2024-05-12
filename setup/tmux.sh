@@ -6,6 +6,8 @@ DOTS_REPO="$DEV_REPOS/dots"
 TEMPLATE="$DOTS_REPO/templates/.tmux.conf"
 TMUX_CONF="$HOME/.tmux.conf"
 
+# ${PKG_INSTALL[@]} ${TMUX_BUILD_DEPS[@]}
+
 if [ ! -h $TMUX_CONF ]; then
   if [ -f $TMUX_CONF ]; then
     mv $TMUX_CONF{,.old.$(date +"%Y%m%dT%H%M%S")}

@@ -14,4 +14,4 @@ RUN command -v bash || (\
     command -v apk && apk add bash\
   )
 
-CMD ["sh", "-c", "./setup.sh; bash"]
+CMD ["bash", "-c", "source bootstrap.sh; bash"]

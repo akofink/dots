@@ -24,6 +24,5 @@ make docker-build # build all three Linux variants
 make docker-run-alpine
 make docker-run-debian
 make docker-run-fedora
-make docker-run-centos-7
 ```
 

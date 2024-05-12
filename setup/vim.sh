@@ -13,10 +13,16 @@ if [ ! -d ~/dev/repos/vim ]; then
   git clone https://github.com/vim/vim.git ~/dev/repos/vim
 fi
 
+if [ ! $ENV_SETUP_COMPLETE ]; then
+  source setup/env.sh
+fi
+
+${PKG_INSTALL[@]} ${VIM_BUILD_DEPS[@]}
+
 if ! which vim; then
   (
     cd ~/dev/repos/vim;
-    make && sudo make install
+    make && $SUDO make install
   )
 fi
 

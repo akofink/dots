@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+if [ ! $ENV_SETUP_COMPLETE ]; then
+  source setup/env.sh
+fi
+
+if [ $UTIL_SETUP_COMPLETE ]; then
+  return
+fi
+
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
 
@@ -22,3 +30,5 @@ eval_template() {
     cat "$1" | envsubst > "$2"
   fi
 }
+
+export UTIL_SETUP_COMPLETE=1
