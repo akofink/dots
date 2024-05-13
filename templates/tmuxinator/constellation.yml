@@ -2,5 +2,5 @@ name: constellation
 root: ~/dev/repos/constellation
 
 windows:
-  - zsh: zsh
+  - zsh:
   - vim: vim

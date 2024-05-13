@@ -1,0 +1,6 @@
+name: slauth
+root: ~/dev/repos/atlassian/slauth
+
+windows:
+  - zsh:
+  - vim: vim

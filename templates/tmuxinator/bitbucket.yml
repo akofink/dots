@@ -1,7 +1,7 @@
 # /Users/akofink/.config/tmuxinator/bitbucket.yml
 
 name: bitbucket
-root: ~/dev/repos/bitbucket/core
+root: ~/dev/repos/atlassian/bitbucket/core
 
 on_project_start:
   - pipx upgrade atlassian-constellation

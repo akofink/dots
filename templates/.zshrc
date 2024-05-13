@@ -66,6 +66,18 @@ if [ -d ~/.rbenv ]; then
   eval "$(~/.rbenv/bin/rbenv init - zsh)"
 fi
 
+# pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+# goenv
+if [ -d ~/.goenv ]; then
+  export GOENV_ROOT="$HOME/.goenv"
+  export PATH="$GOENV_ROOT/bin:$PATH"
+  eval "$(goenv init -)"
+fi
+
 export GOPATH=$HOME/go
 
 # Tmuxinator
