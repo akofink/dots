@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-if [ ! $ENV_SETUP_COMPLETE ]; then
-  source setup/env.sh
-fi
-
 if [ $UTIL_SETUP_COMPLETE ]; then
   return
+fi
+
+if [ ! $ENV_SETUP_COMPLETE ]; then
+  source setup/env.sh
 fi
 
 err() { echo "$@" 1>&2; }

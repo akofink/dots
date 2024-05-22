@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
-export DOTS_REPO="$DEV_REPOS/dots"
-export GITHUB_TOKEN=${GITHUB_TOKEN:-"''"}
-
-source "$DOTS_REPO/setup/util.sh" # eval_template
+if [ ! $REPOS_SETUP_COMPLETE ]; then
+  source setup/repos.sh
+fi
 
 eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc"
 
@@ -13,9 +11,7 @@ if [ ! -d ~/dev/repos/vim ]; then
   git clone https://github.com/vim/vim.git ~/dev/repos/vim
 fi
 
-if [ ! $ENV_SETUP_COMPLETE ]; then
-  source setup/env.sh
-fi
+(cd ~/dev/repos/vim && git pull)
 
 ${PKG_INSTALL[@]} ${VIM_BUILD_DEPS[@]}
 

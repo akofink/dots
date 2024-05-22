@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
-  source setup/env.sh
+
+if [ $REPOS_SETUP_COMPLETE ]; then
+  return
+fi
+
+if [ ! $GIT_SETUP_COMPLETE ]; then
   source setup/git.sh
 fi
 
@@ -16,3 +20,6 @@ then
     git clone https://github.com/akofink/dots.git $DOTS_REPO
   fi
 fi
+
+
+export REPOS_SETUP_COMPLETE=1

@@ -7,4 +7,4 @@ cat setup/git.sh >> bootstrap.sh
 cat setup/repos.sh >> bootstrap.sh
 
 echo '(cd $DOTS_REPO && source setup.sh)' >> bootstrap.sh
-echo 'rm -f bootstrap.sh' >> bootstrap.sh
+chmod +x bootstrap.sh

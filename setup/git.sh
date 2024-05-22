@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
-if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
-  if [ $GIT_SETUP_COMPLETE ]; then
-    return
-  fi
+if [ $GIT_SETUP_COMPLETE ]; then
+  return
+fi
 
-  if [ ! $ENV_SETUP_COMPLETE ]; then
-    source setup/env.sh
-  fi
+if [ ! $UTIL_SETUP_COMPLETE ]; then
+  source setup/util.sh
 fi
 
 command -v git &>/dev/null || ${PKG_INSTALL[@]} git
@@ -22,9 +20,7 @@ elif [ "$PLATFORM" == "Darwin" ]; then
 fi
 export GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"store"}
 
-if [ -d "$DOTS_REPO/templates" ]; then
-  eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
-  eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
-fi
+eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 
 export GIT_SETUP_COMPLETE=1

@@ -1,20 +1,39 @@
 #!/usr/bin/env bash
 
-DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
-DOTS_REPO="$DEV_REPOS/dots"
+TMUX_VERSION=${TMUX_VERSION:-2.4}
 
-TEMPLATE="$DOTS_REPO/templates/.tmux.conf"
-TMUX_CONF="$HOME/.tmux.conf"
-
-# ${PKG_INSTALL[@]} ${TMUX_BUILD_DEPS[@]}
-
-if [ ! -h $TMUX_CONF ]; then
-  if [ -f $TMUX_CONF ]; then
-    mv $TMUX_CONF{,.old.$(date +"%Y%m%dT%H%M%S")}
-  fi
-
-  ln -s $TEMPLATE $TMUX_CONF
+if [ ! $REPOS_SETUP_COMPLETE ]; then
+  source setup/repos.sh
 fi
+
+${PKG_INSTALL[@]} ${TMUX_BUILD_DEPS[@]}
+
+if [ ! -d ~/dev/repos/tmux ]; then
+  mkdir -p ~/dev/repos
+  git clone https://github.com/tmux/tmux.git ~/dev/repos/tmux
+else
+  cd ~/dev/repos/tmux
+  git fetch
+fi
+
+CONFIGURE_ARGS=()
+if ! which tmux; then
+  if [[ "$PLATFORM" == "Darwin" ]]; then
+    ${PKG_INSTALL[@]} tmux
+  else
+    (
+      cd ~/dev/repos/tmux
+      git checkout $TMUX_VERSION
+      bash autogen.sh
+      echo bash ./configure ${CONFIGURE_ARGS[@]}
+      bash ./configure ${CONFIGURE_ARGS[@]}
+      make
+      $SUDO make install
+    )
+  fi
+fi
+
+eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf"
 
 # Set up TPM
 if [ ! -d ~/.tmux/plugins/tpm ]; then

@@ -97,3 +97,89 @@ ${PKG_INSTALL[@]} ${PKG_LIST[@]}
 
 export ENV_SETUP_COMPLETE=1
 
+#!/usr/bin/env bash
+
+if [ $UTIL_SETUP_COMPLETE ]; then
+  return
+fi
+
+if [ ! $ENV_SETUP_COMPLETE ]; then
+  source setup/env.sh
+fi
+
+err() { echo "$@" 1>&2; }
+fatal() { err "$@" 1>&2; exit 1; }
+
+# eval_template templates/.vimrc.template ~/.vimrc
+# Safely applies envsubst
+# Archives existing destination files in place by appending a timestamp
+# 1: template file
+# 2: destination file
+eval_template() {
+  if [[ ! -z $2 ]]
+  then
+    if [[ -f "$2" ]]
+    then
+      mv "$2" "$2.old.$(date +%y%m%d%H%M%S)"
+    fi
+    if ! command -v envsubst &> /dev/null
+    then
+      fatal "No envsubst command found!"
+    fi
+    cat "$1" | envsubst > "$2"
+  fi
+}
+
+export UTIL_SETUP_COMPLETE=1
+#!/usr/bin/env bash
+
+if [ $GIT_SETUP_COMPLETE ]; then
+  return
+fi
+
+if [ ! $UTIL_SETUP_COMPLETE ]; then
+  source setup/util.sh
+fi
+
+command -v git &>/dev/null || ${PKG_INSTALL[@]} git
+
+export GIT_EMAIL=${GIT_EMAIL:-"ajkofink@gmail.com"}
+export GIT_SIGNINGKEY=${GIT_SIGNINGKEY:-"2C911B0A"}
+export GITHUB_USER=${GITHUB_USER:-"akofink"}
+if [ ! -z "$WSL_DISTRO_NAME" ]; then
+  GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"/mnt/c/Program\\\\ Files/Git/mingw64/bin/git-credential-manager.exe"}
+elif [ "$PLATFORM" == "Darwin" ]; then
+  GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"osxkeychain"}
+fi
+export GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"store"}
+
+eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
+
+export GIT_SETUP_COMPLETE=1
+#!/usr/bin/env bash
+
+
+if [ $REPOS_SETUP_COMPLETE ]; then
+  return
+fi
+
+if [ ! $GIT_SETUP_COMPLETE ]; then
+  source setup/git.sh
+fi
+
+mkdir -p "$DEV_REPOS"
+
+if [[ ! -d "$DOTS_REPO" ]]
+then
+  if [[ -d "/app" ]] # For local testing in docker (see Dockerfile)
+  then
+    ln -s /app $DOTS_REPO
+  else
+    git clone https://github.com/akofink/dots.git $DOTS_REPO
+  fi
+fi
+
+
+export REPOS_SETUP_COMPLETE=1
+(cd $DOTS_REPO && source setup.sh)

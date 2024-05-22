@@ -14,4 +14,9 @@ RUN command -v bash || (\
     command -v apk && apk add bash\
   )
 
+RUN \
+  --mount=target=. \
+  ls -la \
+  && bash -c "source bootstrap.sh"
+
 CMD ["bash", "-c", "source bootstrap.sh; bash"]
