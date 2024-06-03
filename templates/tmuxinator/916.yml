@@ -1,0 +1,8 @@
+name: 916
+root: ~/tmp
+
+windows:
+  - a: ls -la
+      root: ~/tmp/a
+  - b: ls -la .tmux.conf
+      root: ~/tmp/b

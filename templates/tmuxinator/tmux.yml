@@ -1,0 +1,6 @@
+name: tmux
+root: ~/dev/repos/tmux
+
+windows:
+  - zsh:
+  - vim: vim

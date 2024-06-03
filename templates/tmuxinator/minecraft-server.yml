@@ -1,0 +1,13 @@
+name: minecraft-server
+root: ~/dev/sandbox/minecraft-server
+
+windows:
+  - minecraft-server:
+      layout: even-vertical
+      panes:
+        - minecraft-server:
+            - make stop
+            - make build
+            - make start
+            - make logs
+        - vim: vim Makefile
