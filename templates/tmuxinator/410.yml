@@ -1,0 +1,14 @@
+name: 410
+# root: /tmp/project
+
+windows:
+  - relative: # /tmp/project/relative
+      root: relative
+  - dotrelative: # /tmp/project/relative
+      root: ./relative
+  - absolute: # /tmp/project/absolute
+      root: /tmp/project/absolute
+  - home: # $HOME/tmp
+      root: ~/tmp
+  - cwdabsolute: # $PWD/lib
+      root: <%= ENV['PWD'] %>/lib

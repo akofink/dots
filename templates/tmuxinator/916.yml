@@ -2,7 +2,7 @@ name: 916
 root: ~/tmp
 
 windows:
-  - a: ls -la
-      root: ~/tmp/a
-  - b: ls -la .tmux.conf
-      root: ~/tmp/b
+  - a:
+      root: a
+  - b:
+      root: b

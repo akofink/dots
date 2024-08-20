@@ -1,0 +1,7 @@
+name: 924
+root: ~/tmp
+windows:
+  - editor:
+      layout: main-horizontal
+      panes:
+        - vim
