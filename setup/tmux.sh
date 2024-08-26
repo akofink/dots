@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TMUX_VERSION=${TMUX_VERSION:-2.4}
+TMUX_VERSION=${TMUX_VERSION:-3.4}
 
 if [ ! $REPOS_SETUP_COMPLETE ]; then
   source setup/repos.sh
