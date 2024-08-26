@@ -1,13 +1,34 @@
 name: minecraft-server
 root: ~/dev/sandbox/minecraft-server
 
+enable_pane_titles: true
 windows:
   - minecraft-server:
       layout: even-vertical
       panes:
-        - minecraft-server:
+        - minecraft-proxy:
+            - cd ~/dev/sandbox/minecraft-server-proxy
             - make stop
             - make build
             - make start
             - make logs
-        - vim: vim Makefile
+        - minecraft-server-world:
+            - PORT=25600 make stop
+            - PORT=25600 make build
+            - PORT=25600 make start
+            - PORT=25600 make logs
+        - minecraft-server-freedom:
+            - PORT=25601 WORLD=freedom make stop
+            - PORT=25601 WORLD=freedom make build
+            - PORT=25601 WORLD=freedom make start
+            - PORT=25601 WORLD=freedom make logs
+        - minecraft-server-anew:
+            - PORT=25602 WORLD=anew make stop
+            - PORT=25602 WORLD=anew make build
+            - PORT=25602 WORLD=anew make start
+            - PORT=25602 WORLD=anew make logs
+        - minecraft-server-bandrew:
+            - PORT=25603 WORLD=bandrew make stop
+            - PORT=25603 WORLD=bandrew make build
+            - PORT=25603 WORLD=bandrew make start
+            - PORT=25603 WORLD=bandrew make logs
