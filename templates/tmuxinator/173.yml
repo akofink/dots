@@ -1,0 +1,24 @@
+# /Users/akofink/.config/tmuxinator/173.yml
+
+name: 173
+root: ~/tmp
+
+post_session: tmux set-option history-limit=50
+
+windows:
+  - Main:
+      layout: e1ef,425x28,0,0{111x28,0,0,0,313x28,112,0,2}
+      panes:
+        - tig:
+          - cd /Users/dbingham/Development/git/main
+          - ls -la
+        - sh:
+          - cd /Users/dbingham/Development/git/main
+          - clear
+  - dev:
+      layout: e1ef,425x28,0,0{111x28,0,0,0,313x28,112,0,2}
+      panes:
+        - tig:
+          - tmux set-window-option automatic-rename on
+          - ls -la
+        - sh:

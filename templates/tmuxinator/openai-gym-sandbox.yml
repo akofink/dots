@@ -1,0 +1,6 @@
+name: openai-gym-sandbox
+root: ~/dev/repos/openai-gym-sandbox
+
+windows:
+  - zsh:
+  - vim: vim

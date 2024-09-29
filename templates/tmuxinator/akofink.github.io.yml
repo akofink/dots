@@ -3,5 +3,7 @@ root: ~/dev/repos/akofink.github.io
 
 windows:
   - zsh:
+      panes:
+        - docker: docker compose up
+        - zsh:
   - vim: vim
-  - docker: 

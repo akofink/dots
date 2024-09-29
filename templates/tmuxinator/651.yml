@@ -1,0 +1,13 @@
+name: 651
+root: /tmp
+windows:
+   - editor:
+       layout: b6b8,282x71,0,0{141x71,0,0,3,140x71,142,0[140x35,142,0{70x35,142,0,5,69x35,213,0,7},140x35,142,36,6]}
+       # Synchronize all panes of this window, can be enabled before or after the pane commands run.
+       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
+       # synchronize: after
+       panes:
+         - vim
+         -
+         - task
+         -
