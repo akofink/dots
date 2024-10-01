@@ -26,6 +26,9 @@ Plug 'preservim/vim-indent-guides'
 Plug 'scrooloose/nerdtree'
 Plug 'sjl/gundo.vim'
 
+" AI / LLM
+Plug 'github/copilot.vim'
+
 " LSP
 " Plug 'hrsh7th/vim-vsnip'
 " Plug 'hrsh7th/vim-vsnip-integ'
