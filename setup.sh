@@ -3,18 +3,6 @@
 echo
 echo "🍄 Dots setup.sh started..."
 
-# if [ ! $ENV_SETUP_COMPLETE ]; then
-#   source setup/env.sh
-# fi
-
-# if [ ! $UTIL_SETUP_COMPLETE ]; then
-#   source setup/util.sh
-# fi
-
-# if [ ! $GIT_SETUP_COMPLETE ]; then
-#   source setup/git.sh
-# fi
-
 if [ ! $REPOS_SETUP_COMPLETE ]; then
   source setup/repos.sh
 fi
