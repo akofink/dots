@@ -1,0 +1,6 @@
+name: forge-kitchen-sink
+root: ~/dev/repos/atlassian/bitbucket-forge-kitchen-sink
+
+windows:
+  - zsh:
+  - vim: vim

@@ -1,0 +1,9 @@
+name: perf-bucket
+root: ~/dev/repos/atlassian/perf-bucket
+
+windows:
+  - zsh:
+      - source .venv/bin/activate
+  - vim:
+      - source .venv/bin/activate
+      - vim

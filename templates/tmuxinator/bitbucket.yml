@@ -3,8 +3,8 @@
 name: bitbucket
 root: ~/dev/repos/atlassian/bitbucket/core
 
-on_project_start:
-  - pipx upgrade atlassian-constellation
+# on_project_start:
+  # - pipx upgrade atlassian-constellation
   # - if [ ! -d .venv-local ]; then python3.7 -m venv .venv-local; fi
   # - source .venv-local/bin/activate
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
@@ -18,9 +18,18 @@ on_project_start:
 
 windows:
   - zsh:
-  - vim: vim
+      layout: even-vertical
+      panes:
+        - magicshell:
+          - docker compose -f .devcontainer/docker-compose.yml down && docker compose -f .devcontainer/docker-compose.yml up -d
+          - docker compose -f .devcontainer/docker-compose.yml exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py magicshell
+        - zsh: g s
+        - zsh:
+  - vim:
+    - ls ~/dev/.venvs/bitbucket-core/bin/activate && source ~/dev/.venvs/bitbucket-core/bin/activate
+    - vim
   - logs:
-      layout: tiled
+      layout: even-vertical
       panes:
         - logs:
           - docker ps

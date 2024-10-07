@@ -1,0 +1,6 @@
+name: atlassian-pymarkup
+root: ~/dev/repos/atlassian-pymarkup
+
+windows:
+  - zsh:
+  - vim: vim

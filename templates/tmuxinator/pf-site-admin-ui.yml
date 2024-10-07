@@ -1,0 +1,13 @@
+name: pf-site-admin-ui
+root: ~/dev/repos/atlassian/pf-site-admin-ui
+
+windows:
+  - zsh:
+    - nvm use
+  - vim:
+    - nvm use
+    - vim
+  - yarn:
+    - nvm use
+    - yarn
+    - yarn start:stg

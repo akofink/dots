@@ -5,9 +5,18 @@ root: ~/dev/repos/bitbucket-billing-service
 
 windows:
   - zsh:
-      # - source .venv/bin/activate
-  - vim: vim
-      # - source .venv/bin/activate
-      # - vim
+      layout: even-vertical
+      panes:
+        - zsh:
+            - source ~/dev/.venvs/bitbucket-billing-service/bin/activate
+            - docker exec -it $(docker ps -qf name=bitbucket-billing-service-1) ./manage.py shell
+        - zsh:
+            - source ~/dev/.venvs/bitbucket-billing-service/bin/activate
+  - vim:
+      - source ~/dev/.venvs/bitbucket-billing-service/bin/activate
+      - vim
   - logs:
-    - docker logs -f $(docker ps -qf name=bitbucket-billing-service-1)
+      layout: even-vertical
+      panes:
+        - docker logs -f $(docker ps -qf name=bitbucket-billing-service-1)
+        - zsh:

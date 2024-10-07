@@ -1,7 +1,7 @@
 # /Users/akofink/.config/tmuxinator/pdvs.yml
 
 name: pdvs
-root: ~/dev/repos/pdvs
+root: ~/dev/repos/atlassian/pdvs
 
 windows:
   - zsh:

@@ -1,0 +1,6 @@
+name: shadow-it-policy
+root: ~/dev/repos/atlassian/shadow-it-policy
+
+windows:
+  - zsh:
+  - vim: vim

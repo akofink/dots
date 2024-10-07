@@ -1,0 +1,6 @@
+name: spring-webflux-migration
+root: ~/dev/repos/atlassian/spring-webflux-migration
+
+windows:
+  - zsh:
+  - vim: vim

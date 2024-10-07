@@ -5,8 +5,9 @@ root: ~/dev/repos/frontbucket
 
 windows:
   - zsh: nvm use
-  - vim: vim
+  - vim:
+    - nvm use
+    - vim
   - yarn:
     - nvm use
-    # - yarn --check-files
-    # - yarn start --https
+    - yarn && yarn start --https

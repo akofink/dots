@@ -1,0 +1,7 @@
+name: org-policy
+root: ~/dev/repos/atlassian/org-policy
+
+windows:
+  - zsh:
+  - vim: vim
+  - docker: docker ps

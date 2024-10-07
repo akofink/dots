@@ -1,0 +1,6 @@
+name: xp-gen-ai
+root: ~/dev/repos/atlassian/xp-gen-ai
+
+windows:
+  - zsh:
+  - vim: vim

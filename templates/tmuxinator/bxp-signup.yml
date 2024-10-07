@@ -6,3 +6,8 @@ windows:
   - vim:
       - nvm use
       - vim
+  - yarn:
+      - nvm use
+      - yarn cache clean
+      - yarn
+      - yarn start:local

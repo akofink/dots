@@ -1,0 +1,6 @@
+name: admin-task
+root: ~/dev/repos/atlassian/admin-task
+
+windows:
+  - zsh:
+  - vim: vim
