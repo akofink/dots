@@ -1,6 +1,8 @@
 name: minecraft-server
 root: ~/dev/sandbox/minecraft-server
 
+on_project_start: make build
+
 enable_pane_titles: true
 windows:
   - minecraft-server:
@@ -32,3 +34,19 @@ windows:
             - PORT=25603 WORLD=bandrew make build
             - PORT=25603 WORLD=bandrew make start
             - PORT=25603 WORLD=bandrew make logs
+        - minecraft-server-test:
+            - PORT=25604 WORLD=test make stop
+            - PORT=25604 WORLD=test make build
+            - PORT=25604 WORLD=test make start
+            - PORT=25604 WORLD=bandrew make logs
+  - config:
+      layout: even-vertical
+      panes:
+        - proxy:
+            - cd ~/dev/sandbox/minecraft-server-proxy
+            - vim
+        - minecraft-server:
+            - cd ~/dev/sandbox/minecraft-server
+            - vim
+        - etc-hosts:
+          - 'echo Open this file in VS Code: C:\\Windows\\System32\\drivers\\etc\\hosts'
