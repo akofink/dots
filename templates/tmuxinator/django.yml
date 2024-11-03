@@ -1,0 +1,11 @@
+name: django
+root: ~/dev/repos/django
+
+windows:
+  - zsh:
+    - pyenv shell 3.10
+    - source .venv/bin/activate
+  - vim:
+    - pyenv shell 3.10
+    - source .venv/bin/activate
+    - vim
