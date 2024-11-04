@@ -3,4 +3,5 @@ root: ~/dev/repos/atlassian-pymarkup
 
 windows:
   - zsh:
+    - maturin develop
   - vim: vim

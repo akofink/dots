@@ -1,7 +1,7 @@
 # /Users/akofink/.config/tmuxinator/frontbucket.yml
 
 name: frontbucket
-root: ~/dev/repos/frontbucket
+root: ~/dev/repos/atlassian/frontbucket
 
 windows:
   - zsh: nvm use
