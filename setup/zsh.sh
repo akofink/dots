@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
-export DOTS_REPO="$DEV_REPOS/dots"
+if [ ! $REPOS_SETUP_COMPLETE ]; then
+  source setup/repos.sh
+fi
+
+${PKG_INSTALL[@]} ${ZSH_BUILD_DEPS[@]}
 
 # oh-my-zsh
-if [ ! -d ~/.oh-my-zsh ]; then
+if [ ! -d ~/.oh-my-zsh/lib ]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
@@ -17,3 +20,5 @@ fi
 mkdir -p "$HOME/.oh-my-zsh/custom/themes/"
 cp "$DOTS_REPO/templates/akofink.zsh-theme" "$HOME/.oh-my-zsh/custom/themes/akofink.zsh-theme"
 cp "$DOTS_REPO/templates/.zshrc" "$HOME/.zshrc"
+
+sudo chsh -s $(which zsh) $USER

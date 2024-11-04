@@ -46,6 +46,8 @@ then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
+  ZSH_BUILD_DEPS=(zsh)
+
   # LINUX_COMMON_PKG_LIST=""
   if command -v yum &> /dev/null
   then
@@ -81,8 +83,8 @@ fi
 
 
 export PKG_MGR
-export PKG_INSTALL=($PKG_MGR ${PKG_INSTALL_SUBCOMMAND[@]})
-export PKG_INDEX_UPDATE=($PKG_MGR ${PKG_INDEX_UPDATE_SUBCOMMAND[@]})
+export PKG_INSTALL=(${PKG_MGR[@]} ${PKG_INSTALL_SUBCOMMAND[@]})
+export PKG_INDEX_UPDATE=(${PKG_MGR[@]} ${PKG_INDEX_UPDATE_SUBCOMMAND[@]})
 
 set +e
 
@@ -96,4 +98,3 @@ ${PKG_INSTALL[@]} ${PKG_LIST[@]}
 
 
 export ENV_SETUP_COMPLETE=1
-
