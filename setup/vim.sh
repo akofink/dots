@@ -14,14 +14,14 @@ done
 # Clone vim upstream
 if [ ! -d ~/dev/repos/vim ]; then
   mkdir -p ~/dev/repos
-  git clone https://github.com/vim/vim.git ~/dev/repos/vim
+  git clone -q https://github.com/vim/vim.git ~/dev/repos/vim
 fi
 
 # Pull latest vim
-(cd ~/dev/repos/vim && git pull)
+(cd ~/dev/repos/vim && git pull -q)
 
 # Build vim from source
-if ! which vim; then
+if ! which vim >/dev/null; then
   (
     ${PKG_INSTALL[@]} ${VIM_BUILD_DEPS[@]}
     cd ~/dev/repos/vim;
