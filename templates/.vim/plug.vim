@@ -68,3 +68,10 @@ Plug 'tpope/vim-rhubarb'
 " Plug 'tpope/vim-abolish'
 " Plug 'ervandew/supertab'
 call plug#end()
+
+
+" Plug related keybindings
+map <leader>BI :PlugInstall<CR>
+map <leader>PI :PlugInstall<CR>
+map <leader>BU :PlugUpdate<CR>
+map <leader>PU :PlugUpdate<CR>
