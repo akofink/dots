@@ -1,7 +1,9 @@
 name: minecraft-server
 root: ~/dev/sandbox/minecraft-server
 
-on_project_start: make build
+on_project_start:
+  - make build
+  - (cd ~/dev/sandbox/minecraft-server-proxy && make build)
 
 enable_pane_titles: true
 windows:
@@ -38,7 +40,7 @@ windows:
             - PORT=25604 WORLD=test make stop
             - PORT=25604 WORLD=test make build
             - PORT=25604 WORLD=test make start
-            - PORT=25604 WORLD=bandrew make logs
+            - PORT=25604 WORLD=test make logs
   - config:
       layout: even-vertical
       panes:
