@@ -1,7 +1,7 @@
 # /Users/akofink/.config/tmuxinator/bitbucket.yml
 
 name: bitbucket
-root: ~/dev/repos/atlassian/bitbucket/core
+root: ~/dev/repos/atlassian/bitbucket/bitbucket
 
 # on_project_start:
   # - pipx upgrade atlassian-constellation
@@ -11,7 +11,11 @@ root: ~/dev/repos/atlassian/bitbucket/core
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
   # - pip install --no-deps -r requirements/development.txt
 
-# pre_window:
+pre_window:
+  - alias bbc-website='docker ps -f ancestor=devbucket:core-latest -f name=website'
+  - alias bbc-api='docker ps -f ancestor=devbucket:core-latest -f name=api'
+  - alias bbc-background-tasks='docker ps -f ancestor=devbucket:core-latest -f name=background-tasks'
+  - alias devcontainer='docker compose -f .devcontainer/docker-compose.yml'
   # - source .venv-local/bin/activate
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
@@ -21,8 +25,8 @@ windows:
       layout: even-vertical
       panes:
         - magicshell:
-          - docker compose -f .devcontainer/docker-compose.yml down && docker compose -f .devcontainer/docker-compose.yml up -d
-          - docker compose -f .devcontainer/docker-compose.yml exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py magicshell
+          - devcontainer down && devcontainer up -d
+          - devcontainer exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py magicshell
         - zsh: g s
         - zsh:
   - vim:
@@ -32,7 +36,8 @@ windows:
       layout: even-vertical
       panes:
         - logs:
-          - docker ps
-          # - docker logs -f $(docker ps -f name=website)
-        - docker:
-          - docker ps
+          - docker logs -f $(bbc-website)
+        - logs:
+          - docker logs -f $(bbc-api)
+        - logs:
+          - docker logs -f $(bbc-background-tasks)

@@ -1,7 +1,11 @@
 name: event-consumer
-root: ~/dev/repos/event-consumer
+root: ~/dev/repos/atlassian/event-consumer
+
+pre_window:
+  - pyenv shell 3.11.9
+  - source .venv/bin/activate
 
 windows:
   - zsh:
   - vim: vim
-  - docker: 
+  - docker:
