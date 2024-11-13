@@ -1,6 +1,9 @@
 name: allocated-seating
 root: ~/dev/repos/atlassian/allocated-seating
 
+pre_window:
+  - source .venv/bin/activate
+
 windows:
   - zsh:
   - vim: vim

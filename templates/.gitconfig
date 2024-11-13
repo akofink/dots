@@ -14,7 +14,7 @@
 	email = $GIT_EMAIL
 	signingkey = $GIT_SIGNINGKEY
 [core]
-  editor = nvim
+  editor = vim
   autocrlf = false
   whitespace = cr-at-eol
   excludesfile = $HOME/.gitignore
