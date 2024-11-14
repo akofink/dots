@@ -30,6 +30,8 @@ set backupdir=~/.vim/backups
 set autoread
 set noswapfile
 
+set statusline=%F
+
 " Spacing and Wrapping
 set expandtab
 set softtabstop=2
