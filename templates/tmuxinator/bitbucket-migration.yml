@@ -1,11 +1,12 @@
 name: bitbucket-migration
 root: ~/dev/repos/atlassian/bitbucket-migration
 
+pre_window:
+  - sdk use java 17.0.12-amzn
+
 windows:
   - zsh:
-      - sdk use java 17.0.12-amzn
   - vim:
-      - sdk use java 17.0.12-amzn
       - vim
   - docker:
       - sdk use java 17.0.12-amzn

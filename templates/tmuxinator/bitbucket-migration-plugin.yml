@@ -1,0 +1,16 @@
+# /Users/akofink/.config/tmuxinator/bitbucket-migration-plugin.yml
+
+name: bitbucket-migration-plugin
+root: ~/dev/repos/atlassian/bitbucket-migration-plugin
+
+pre_window:
+  - #sdk use java 11.0.25-amzn # main
+  - sdk use java 17.0.12-amzn # platform 7
+
+windows:
+  - zsh:
+  - vim: vim
+  - bbdc:
+      - cd bitbucket-migration-plugin
+      - mvn clean install
+      - atlas-run
