@@ -1,0 +1,21 @@
+name: 937
+root: /tmp
+
+windows:
+  - window1:
+      panes:
+        - pane1:
+          - echo foo
+          - echo bar
+        - pane2:
+          - echo foo
+          - echo bar
+  - window2:
+      panes:
+        - pane1:
+          - echo foo
+          - echo bar
+        - pane2:
+          - tmux link-window -s dots:1 -t :3
+          - echo foo
+          - echo bar
