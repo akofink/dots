@@ -1,6 +1,9 @@
 name: openai-gym-sandbox
 root: ~/dev/repos/openai-gym-sandbox
 
+pre_window:
+  - source .venv/bin/activate
+
 windows:
   - zsh:
   - vim: vim
