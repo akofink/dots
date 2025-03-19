@@ -2,7 +2,7 @@ name: tmuxinator
 root: ~/dev/repos/tmuxinator
 
 pre_window:
-  - rbenv shell 3.0.6
+  - rbenv shell 3.3.7
 
 windows:
   - zsh:
