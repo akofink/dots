@@ -64,7 +64,12 @@ fi
 # rbenv
 if [ -d ~/.rbenv ]; then
   eval "$(~/.rbenv/bin/rbenv init - zsh)"
+  FPATH=~/.rbenv/completions:"$FPATH"
+
+  autoload -U compinit
+  compinit
 fi
+
 
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
