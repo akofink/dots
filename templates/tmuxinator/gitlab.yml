@@ -1,0 +1,11 @@
+name: gitlab
+root: ~/dev/repos/gitlab
+
+pre_window:
+  - rbenv install
+  - rbenv shell
+
+windows:
+  - zsh:
+  - vim:
+  - docker:

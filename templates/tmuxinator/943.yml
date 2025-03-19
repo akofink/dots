@@ -1,7 +1,5 @@
-name: test
+name: 943
 root: /tmp
-
-pre_window: echo pre_window
 
 windows:
   - window1:
@@ -9,3 +7,4 @@ windows:
         - echo 'window 1, pane 1'
         - echo 'window 1, pane 2'
   - window2: echo window2
+  - window3: echo window3

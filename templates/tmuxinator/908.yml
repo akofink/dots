@@ -1,0 +1,15 @@
+# A test template for this PR which adds the --append option:
+# https://github.com/tmuxinator/tmuxinator/pull/908
+
+name: 908
+root: ~/tmp
+
+pre_window: echo 'pre_window'
+
+windows:
+  - window1:
+      panes:
+        - echo 'window 1, pane 1'
+        - echo 'window 1, pane 2'
+  - window2: echo 'window 2'
+  - window3: echo 'window 3'

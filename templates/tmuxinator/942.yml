@@ -1,4 +1,4 @@
-name: test
+name: 942
 root: /tmp
 
 pre_window: echo pre_window
@@ -9,3 +9,4 @@ windows:
         - echo 'window 1, pane 1'
         - echo 'window 1, pane 2'
   - window2: echo window2
+  - window3: echo window3
