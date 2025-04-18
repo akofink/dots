@@ -1,0 +1,6 @@
+name: vim
+root: ~/dev/repos/vim
+
+windows:
+  - zsh:
+  - vim: vim

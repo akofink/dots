@@ -64,6 +64,11 @@ if [ -d ~/.rbenv ]; then
   compinit
 fi
 
+rbenv_update() {
+  git -C "$HOME/.rbenv" pull --ff-only
+  git -C "$HOME/.rbenv/plugins/ruby-build" pull --ff-only
+}
+
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
@@ -92,9 +97,4 @@ export GPG_TTY=$(tty)
 # libpq from homebrew
 if [ -d /opt/homebrew/opt/libpq ]; then
   export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-fi
-
-# codex CLI completions
-if command -v codex >/dev/null 2>&1; then
-  source <(codex completion zsh)
 fi
