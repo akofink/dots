@@ -1,3 +1,7 @@
+#
+# This file was auto-generated from a template:
+# https://github.com/akofink/dots/blob/main/templates/.gitconfig
+#
 [alias]
   a = add
   c = commit -sS
@@ -13,18 +17,16 @@
   editor = vim
   autocrlf = false
   whitespace = cr-at-eol
-  excludesfile = /Users/ajkofink/.gitignore
+  excludesfile = /Users/akofink/.gitignore
   filemode = false
-[credential]
-  helper = osxkeychain
-[merge]
-  tool = opendiff
 [color]
   diff = auto
   status = auto
   branch = auto
   interactive = auto
   ui = auto
+[credential]
+  helper = osxkeychain
 [push]
   default = simple
 [github]
@@ -32,4 +34,4 @@
 [branch]
   autosetuprebase = always
 [init]
-	defaultBranch = main
+  defaultBranch = main

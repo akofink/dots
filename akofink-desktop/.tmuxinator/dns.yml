@@ -1,9 +1,0 @@
-name: dns
-root: ~/
-
-windows:
-  - zsh:
-  - vim:
-    - sudo su
-    - cd /etc/named/zones
-    - sudo vim .

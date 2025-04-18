@@ -1,9 +1,0 @@
-name: foreman
-root: ~/dev/foreman
-
-windows:
-  - shell: g fetch --all && g s
-  - vim: vim
-  - console: be rails c
-  - tests:
-  - server: be rails s

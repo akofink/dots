@@ -1,6 +1,0 @@
-name: forklift
-root: ~/dev/forklift
-
-windows:
-  - zsh: vagrant status
-  - vim: vim

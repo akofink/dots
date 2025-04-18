@@ -4,7 +4,7 @@ files=(
   ".zshrc"
   ".vimrc"
   ".tmux.conf"
-  ".tmuxinator"
+  ".config/tmuxinator"
   ".gitconfig"
   ".gitignore"
 )
