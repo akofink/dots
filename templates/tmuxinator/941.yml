@@ -1,0 +1,18 @@
+name: 941
+root: /tmp
+
+windows:
+  - window1:
+      layout: main-vertical
+      panes:
+        - pane1:
+        - pane2:
+        - pane3:
+        - pane4:
+  - window2:
+      layout: even-vertical
+      panes:
+        - pane1:
+        - pane2:
+        - pane3:
+        - pane4:

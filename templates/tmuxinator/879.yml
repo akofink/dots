@@ -1,0 +1,10 @@
+name: 879
+root: /tmp
+
+<%
+  @settings["value"] ||= "set value = this"
+%>
+
+# create and cd into client/testing folder before running
+windows:
+  - testing: echo '"<%= @settings["value"] %>"'
