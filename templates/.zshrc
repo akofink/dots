@@ -1,5 +1,3 @@
-# motd
-
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
@@ -19,12 +17,6 @@ alias :e="vim"
 alias v='vim'
 alias g='git'
 
-# Uncomment following line if you want red dots to be displayed while waiting for completion
-# COMPLETION_WAITING_DOTS="true"
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(gem git rails ruby zsh-autosuggestions)
 
 # Tmux Options
@@ -72,7 +64,6 @@ if [ -d ~/.rbenv ]; then
   compinit
 fi
 
-
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
@@ -101,4 +92,9 @@ export GPG_TTY=$(tty)
 # libpq from homebrew
 if [ -d /opt/homebrew/opt/libpq ]; then
   export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi
+
+# codex CLI completions
+if command -v codex >/dev/null 2>&1; then
+  source <(codex completion zsh)
 fi
