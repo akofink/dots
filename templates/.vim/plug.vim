@@ -18,8 +18,8 @@ Plug 'sjl/gundo.vim'
 
 " AI / LLM
 Plug 'github/copilot.vim'
-" imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
-" let g:copilot_no_tab_map = v:true
+imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
 
 " LSP
 " Plug 'hrsh7th/vim-vsnip'
