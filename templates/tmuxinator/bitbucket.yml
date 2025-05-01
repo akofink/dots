@@ -3,8 +3,8 @@
 name: bitbucket
 root: ~/dev/repos/atlassian/bitbucket/bitbucket
 
-# on_project_start:
-  # - pipx upgrade atlassian-constellation
+on_project_start:
+  - pipx upgrade atlassian-constellation
   # - if [ ! -d .venv-local ]; then python3.7 -m venv .venv-local; fi
   # - source .venv-local/bin/activate
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
@@ -15,7 +15,7 @@ pre_window:
   - alias bbc-website='docker ps -f ancestor=devbucket:core-latest -f name=website'
   - alias bbc-api='docker ps -f ancestor=devbucket:core-latest -f name=api'
   - alias bbc-background-tasks='docker ps -f ancestor=devbucket:core-latest -f name=background-tasks'
-  - alias devcontainer='docker compose -f .devcontainer/docker-compose.yml'
+  - alias devcompose='docker compose -f .devcontainer/docker-compose.yml'
   # - source .venv-local/bin/activate
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
@@ -25,8 +25,8 @@ windows:
       layout: even-vertical
       panes:
         - magicshell:
-          - devcontainer down && devcontainer up -d
-          - devcontainer exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py magicshell
+          - devcompose down && devcompose up -d
+          - devcompose exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py magicshell
         - zsh: g s
         - zsh:
   - vim:
@@ -36,8 +36,14 @@ windows:
       layout: even-vertical
       panes:
         - logs:
-          - docker logs -f $(bbc-website)
+          - docker logs -f $(bbc-website -q)
         - logs:
-          - docker logs -f $(bbc-api)
+          - docker logs -f $(bbc-api -q)
         - logs:
-          - docker logs -f $(bbc-background-tasks)
+          - docker logs -f $(bbc-background-tasks -q)
+  - orochi:
+      root: ~/dev/repos/atlassian/orochi
+      layout: even-vertical
+      panes:
+        - vim:
+          - vim

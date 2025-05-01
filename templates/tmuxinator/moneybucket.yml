@@ -3,17 +3,17 @@
 name: moneybucket
 root: ~/dev/repos/bitbucket-billing-service
 
+pre_window:
+  - source ~/dev/.venvs/bitbucket-billing-service-3.9/bin/activate
+
 windows:
   - zsh:
       layout: even-vertical
       panes:
         - zsh:
-            - source ~/dev/.venvs/bitbucket-billing-service/bin/activate
             - docker exec -it $(docker ps -qf name=bitbucket-billing-service-1) ./manage.py shell
         - zsh:
-            - source ~/dev/.venvs/bitbucket-billing-service/bin/activate
   - vim:
-      - source ~/dev/.venvs/bitbucket-billing-service/bin/activate
       - vim
   - logs:
       layout: even-vertical

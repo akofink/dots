@@ -1,6 +1,8 @@
 name: admin-portfolio
-root: ~/dev/repos/admin-portfolio
+root: ~/dev/repos/atlassian/admin-portfolio
 
 windows:
   - zsh:
   - vim: vim
+  - nebulae:
+    - atlas start nebulae

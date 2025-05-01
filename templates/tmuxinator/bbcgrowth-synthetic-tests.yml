@@ -1,0 +1,9 @@
+# /Users/akofink/.config/tmuxinator/bbcgrowth-synthetic-tests.yml
+
+name: bbcgrowth-synthetic-tests
+root: ~/dev/repos/atlassian/bbcgrowth-synthetic-tests
+
+windows:
+  - zsh:
+  - vim:
+    - vim

@@ -1,0 +1,6 @@
+name: bitbucket-synthetic-emau-tests
+root: ~/dev/repos/atlassian/bitbucket-synthetic-emau-tests
+
+windows:
+  - zsh:
+  - vim: vim

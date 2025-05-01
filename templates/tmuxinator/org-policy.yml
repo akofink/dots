@@ -1,7 +1,14 @@
 name: org-policy
 root: ~/dev/repos/atlassian/org-policy
 
+pre_window:
+  - sdk use java 17.0.9-amzn
+
 windows:
   - zsh:
   - vim: vim
   - docker: docker ps
+  - org-policy-service:
+    - cd org-policy-service
+    - docker-compose up -d dynamodb tcs-sidecar tracing platform-statsd elasticmq
+    - mvn spring-boot:run -Dspotbugs.skip=true

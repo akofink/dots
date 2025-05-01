@@ -1,6 +1,21 @@
 name: spring-webflux-migration
 root: ~/dev/repos/atlassian/spring-webflux-migration
 
+pre_window:
+  - sdk use java 21.0.4-amzn
+
 windows:
   - zsh:
   - vim: vim
+  - server:
+      layout: even-vertical
+      panes:
+        - docker:
+            - mvn clean compile
+            - docker compose up -d
+        - web:
+            - cd web
+            - mvn spring-boot:run
+        - flux:
+            - cd flux
+            - mvn spring-boot:run

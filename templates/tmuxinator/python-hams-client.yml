@@ -1,7 +1,14 @@
 name: python-hams-client
 root: ~/dev/repos/python-hams-client
 
+pre_window:
+  - source .venv/bin/activate
+
 windows:
   - zsh:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
   - vim: vim
   - docker:

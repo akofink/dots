@@ -1,0 +1,6 @@
+name: zoekt-atlassian
+root: ~/dev/repos/atlassian/zoekt-atlassian
+
+windows:
+  - zsh:
+  - vim: vim

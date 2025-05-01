@@ -1,0 +1,11 @@
+name: playwright-pdvs
+root: ~/dev/repos/atlassian/playwright-pdvs
+
+pre_window:
+  - nvm use
+
+windows:
+  - zsh:
+  - vim:
+    - vim
+  - yarn:

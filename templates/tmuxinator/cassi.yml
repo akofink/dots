@@ -1,0 +1,12 @@
+# /Users/akofink/.config/tmuxinator/cassi.yml
+
+name: cassi
+root: ~/dev/repos/atlassian/cassi
+
+pre_window:
+  - nvm install
+  - nvm use
+
+windows:
+  - zsh:
+  - vim: vim

@@ -1,0 +1,9 @@
+name: identity-mailer
+root: ~/dev/repos/atlassian/identity-mailer
+pre_window:
+  - nvm use
+
+windows:
+  - zsh:
+  - vim:
+    - vim

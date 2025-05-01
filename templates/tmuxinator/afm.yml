@@ -1,0 +1,6 @@
+name: afm
+root: ~/dev/repos/atlassian/atlassian-frontend-monorepo
+
+windows:
+  - zsh:
+  - vim: vim

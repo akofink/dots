@@ -1,5 +1,9 @@
 name: orochi
-root: ~/dev/repos/orochi
+root: ~/dev/repos/atlassian/orochi
+
+pre_window:
+  - pyenv shell 3.11.9
+  - source .venv/bin/activate
 
 windows:
   - zsh:
