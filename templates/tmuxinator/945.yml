@@ -1,0 +1,6 @@
+name: 945
+root: ~/tmp
+
+windows:
+  - zsh:
+  - vim: vim
