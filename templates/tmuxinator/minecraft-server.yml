@@ -13,7 +13,6 @@ windows:
         - minecraft-proxy:
             - cd ~/dev/sandbox/minecraft-server-proxy
             - make stop
-            - make build
             - make start
             - make logs
         - minecraft-server-world:
@@ -41,6 +40,11 @@ windows:
             - PORT=25604 WORLD=test make build
             - PORT=25604 WORLD=test make start
             - PORT=25604 WORLD=test make logs
+        - minecraft-server-endgame:
+            - PORT=25605 WORLD=endgame make stop
+            - PORT=25605 WORLD=endgame make build
+            - PORT=25605 WORLD=endgame make start
+            - PORT=25605 WORLD=endgame make logs
   - config:
       layout: even-vertical
       panes:
