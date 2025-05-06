@@ -1,0 +1,8 @@
+name: usage-tracking-service
+root: ~/dev/repos/atlassian/usage-tracking-service
+
+windows:
+  - zsh:
+  - vim:
+    - nvm use --lts
+    - vim
