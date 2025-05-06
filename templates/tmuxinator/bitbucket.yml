@@ -24,9 +24,9 @@ windows:
   - zsh:
       layout: even-vertical
       panes:
-        - magicshell:
+        - shell_plus:
           - devcompose down && devcompose up -d
-          - devcompose exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py magicshell
+          - devcompose exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py shell_plus
         - zsh: g s
         - zsh:
   - vim:
