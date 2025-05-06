@@ -1,0 +1,6 @@
+name: local_agent
+root: ~/dev/repos/local_agent
+
+windows:
+  - zsh:
+  - vim: vim
