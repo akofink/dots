@@ -7,6 +7,9 @@ ZSH=$HOME/.oh-my-zsh
 # time that oh-my-zsh is loaded.
 ZSH_THEME="akofink"
 
+# Enable auto-updating of oh-my-zsh
+zstyle ':omz:update' mode auto
+
 # Example aliases
 alias l='la -la'
 alias mux=tmuxinator
