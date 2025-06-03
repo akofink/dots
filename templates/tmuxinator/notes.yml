@@ -5,13 +5,23 @@ root: ~/notes
 
 windows:
   - zsh:
-  - vim: vim atlassian.md
+      layout: main-horizontal
+      panes:
+        - zsh:
+        # - ollama: ollama serve
+        # - codex:
+        #     - nvm use --lts
+        #     - codex --provider ollama --model llama3.2
+  - vim:
+    - vim
+    - ' n'
   - http:
       root: ~/dev/http
       layout: main-horizontal
       panes:
         - http:
         - vim:
+            - nvm use --lts
             - vim
             - ' n'
   - mock-ssh-keys:

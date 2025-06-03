@@ -5,18 +5,22 @@ root: ~/dev/repos/bitbucket-billing-service
 
 pre_window:
   - source ~/dev/.venvs/bitbucket-billing-service-3.9/bin/activate
+  - alias bbbs='docker ps -f name=bitbucket-billing-service-1'; alias bbbs-celery='docker ps -f name=bitbucket-billing-service_celery-1'
 
 windows:
   - zsh:
       layout: even-vertical
       panes:
         - zsh:
-            - docker exec -it $(docker ps -qf name=bitbucket-billing-service-1) ./manage.py shell
+            - docker exec -it $(bbbs -q) ./manage.py magicshell
         - zsh:
+        - zsh:
+            - atlas acra run
   - vim:
       - vim
   - logs:
       layout: even-vertical
       panes:
-        - docker logs -f $(docker ps -qf name=bitbucket-billing-service-1)
+        - docker logs -f $(bbbs -q)
+        - docker logs -f $(bbbs-celery -q)
         - zsh:

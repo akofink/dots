@@ -1,0 +1,8 @@
+name: devai-services
+root: ~/dev/repos/atlassian/devai-services
+
+windows:
+  - zsh:
+  - vim:
+    - nvm use --lts
+    - vim

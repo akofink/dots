@@ -1,0 +1,8 @@
+name: bitbucket-mcp-server
+root: ~/dev/repos/atlassian/bitbucket-mcp-server
+
+windows:
+  - zsh:
+  - vim:
+    - nvm use --lts
+    - vim
