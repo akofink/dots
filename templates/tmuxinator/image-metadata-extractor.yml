@@ -1,0 +1,15 @@
+name: image-metadata-extractor
+root: ~/dev/repos/image-metadata-extractor
+
+windows:
+  - zsh:
+      layout: even-vertical
+      panes:
+        - server:
+          - cargo install basic-http-server
+          - basic-http-server -a 0.0.0.0:8000
+        - zsh:
+          - cargo check
+          - wasm-pack build --target web --dev
+  - vim:
+    - vim

@@ -1,0 +1,7 @@
+name: removebg
+root: ~/dev/repos/removebg
+
+windows:
+  - zsh:
+  - vim:
+    - vim
