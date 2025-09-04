@@ -8,7 +8,7 @@ ${PKG_INSTALL[@]} ${ZSH_BUILD_DEPS[@]}
 
 # oh-my-zsh
 if [ ! -d ~/.oh-my-zsh/lib ]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
 fi
 
 # oh-my-zsh plugins

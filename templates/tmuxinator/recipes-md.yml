@@ -1,0 +1,6 @@
+name: recipes-md
+root: ~/dev/repos/recipes-md
+
+windows:
+  - zsh:
+  - vim: vim

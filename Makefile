@@ -7,17 +7,17 @@ bootstrap.sh:
 	./create_bootstrap.sh
 
 docker-build-alpine: bootstrap.sh
-	docker build -t dots-alpine .
+	docker build $(BUILD_ARGS) -t dots-alpine .
 	docker tag dots-alpine dots
 
 docker-build-debian: bootstrap.sh
 	docker build $(BUILD_ARGS) --build-arg IMAGE=debian -t dots-debian .
 
 docker-build-fedora: bootstrap.sh
-	docker build --build-arg IMAGE=fedora -t dots-fedora .
+	docker build $(BUILD_ARGS) --build-arg IMAGE=fedora -t dots-fedora .
 
 docker-run-alpine:
-	docker run -itv $(PWD):/app -v /root/dev dots-alpine
+	docker run -itv $(PWD):/app -v /var/cache -v /root/dev dots-alpine
 
 docker-run-debian:
 	docker run -itv $(PWD):/app -v /var/cache -v /root/dev dots-debian

@@ -16,6 +16,7 @@ RUN command -v bash || (\
 
 RUN \
   --mount=target=. \
+  --mount=type=cache,target=/var/cache \
   ls -la \
   && bash -c "source bootstrap.sh"
 
