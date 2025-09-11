@@ -1,0 +1,7 @@
+name: textual-cli-agent
+root: ~/dev/repos/textual-cli-agent
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai:
