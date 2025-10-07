@@ -1,36 +1,56 @@
 #!/usr/bin/env bash
 
-if [ ! $REPOS_SETUP_COMPLETE ]; then
+if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
   source setup/repos.sh
 fi
 
 # Copy over config templates (.vimrc + .vim/*)
 eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc"
-[ -d ~/.vim ] || mkdir ~/.vim
-for f in $DOTS_REPO/templates/.vim/*; do
-  eval_template "$f" "$HOME/.vim/$(basename $f)"
+[[ -d "$HOME/.vim" ]] || mkdir -p "$HOME/.vim"
+for f in "$DOTS_REPO"/templates/.vim/*; do
+  [[ -e "$f" ]] || continue
+  eval_template "$f" "$HOME/.vim/$(basename -- "$f")"
 done
 
 # Clone vim upstream
-if [ ! -d ~/dev/repos/vim ]; then
-  mkdir -p ~/dev/repos
-  git clone -q https://github.com/vim/vim.git ~/dev/repos/vim
+if [[ ! -d "$HOME/dev/repos/vim" ]]; then
+  mkdir -p "$HOME/dev/repos"
+  git clone -q https://github.com/vim/vim.git "$HOME/dev/repos/vim"
 fi
 
 # Pull latest vim
-(cd ~/dev/repos/vim && git pull -q)
+(cd "$HOME/dev/repos/vim" && git pull -q)
+
+vim_needs_rebuild() {
+  local vim_path
+  vim_path=$(command -v vim || true)
+
+  # Build when vim is missing.
+  if [[ -z "$vim_path" ]]; then
+    return 0
+  fi
+
+  # Build when the executable is older than roughly one week.
+  local is_week_old
+  is_week_old=$(find "$vim_path" -mtime +6 -print -quit 2>/dev/null || true)
+  if [[ -n "$is_week_old" ]]; then
+    return 0
+  fi
+
+  return 1
+}
 
 # Build vim from source
-if ! which vim >/dev/null; then
+if vim_needs_rebuild; then
   (
-    ${PKG_INSTALL[@]} ${VIM_BUILD_DEPS[@]}
-    cd ~/dev/repos/vim;
-    make && $SUDO make install
+    "${PKG_INSTALL[@]}" "${VIM_BUILD_DEPS[@]}"
+    cd "$HOME/dev/repos/vim" || exit 1
+    make && "${SUDO[@]}" make install
   )
 fi
 
 # Install vim-plug
-if [ ! -f ~/.vim/autoload/plug.vim ]; then
-  curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+if [[ ! -f "$HOME/.vim/autoload/plug.vim" ]]; then
+  curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
