@@ -15,7 +15,7 @@ curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && sour
 ##### Regenerating the bootstrap script
 
 ```sh
-./create-bootstrap.sh
+./create_bootstrap.sh
 ```
 
 #### From the cloned repo
@@ -30,6 +30,9 @@ curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && sour
 
 ```sh
 source setup/<module>.sh
+
+The top-level `setup.sh` orchestrates a curated subset of modules—currently `vim`, `tmux`, `zsh`,
+`rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
 ```
 
 ### Contributing
