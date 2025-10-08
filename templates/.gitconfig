@@ -11,8 +11,8 @@
   b = branch
 [user]
   name = Andrew Kofink
-	email = $GIT_EMAIL
-	signingkey = $GIT_SIGNINGKEY
+  email = $GIT_EMAIL
+  signingkey = $GIT_SIGNINGKEY
 [core]
   editor = vim
   autocrlf = false
