@@ -4,6 +4,9 @@ let mapleader = ' '
 " System
 set shell=/bin/zsh
 set clipboard^=unnamed
+if has('wsl')
+  set clipboard^=unnamedplus
+endif
 set nocompatible
 
 " Command completions
