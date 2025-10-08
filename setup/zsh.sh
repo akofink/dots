@@ -10,7 +10,7 @@ fi
 
 # oh-my-zsh
 if [ ! -d "$HOME/.oh-my-zsh/lib" ]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
 # oh-my-zsh plugins
