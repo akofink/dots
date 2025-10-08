@@ -243,9 +243,6 @@ elif [[ "$PLATFORM" == "Darwin" ]]; then
 fi
 export GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"store"}
 
-eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
-eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
-
 export GIT_SETUP_COMPLETE=1
 #!/usr/bin/env bash
 
@@ -270,6 +267,8 @@ then
   fi
 fi
 
+eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 
 export REPOS_SETUP_COMPLETE=1
 (cd $DOTS_REPO && source setup.sh)
