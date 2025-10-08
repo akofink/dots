@@ -42,6 +42,8 @@ then
   # TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkg-config utf8proc)
   # shellcheck disable=SC2034
   TMUX_BUILD_DEPS=() # rely on homebrew
+  # shellcheck disable=SC2034
+  RUBY_BUILD_DEPS=()
   PKG_LIST=(make)
   if [[ -n "$ENVSUBST_PKG" ]]; then
     PKG_LIST+=("$ENVSUBST_PKG")
@@ -66,6 +68,8 @@ then
     VIM_BUILD_DEPS=(gcc make clang libtool ncurses-devel)
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison gcc g++ libevent-devel libncurses-devel locales pkg-config)
+    # shellcheck disable=SC2034
+    RUBY_BUILD_DEPS=()
     PKG_LIST=(make)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
@@ -80,6 +84,8 @@ then
     VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev libx11-dev libxt-dev libxpm-dev libxmu-dev)
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
+    # shellcheck disable=SC2034
+    RUBY_BUILD_DEPS=(git autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev)
     PKG_LIST=(gettext)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
@@ -93,6 +99,8 @@ then
     VIM_BUILD_DEPS=(gcc make clang libtool-bin ncurses-dev)
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
+    # shellcheck disable=SC2034
+    RUBY_BUILD_DEPS=()
     ENVSUBST_PKG=gettext
     PKG_LIST=(shadow bash)
     if [[ -n "$ENVSUBST_PKG" ]]; then
