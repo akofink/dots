@@ -40,13 +40,30 @@ vim_needs_rebuild() {
   return 1
 }
 
-# Build vim from source
-if vim_needs_rebuild; then
+build_vim() {
   (
     "${PKG_INSTALL[@]}" "${VIM_BUILD_DEPS[@]}"
     cd "$HOME/dev/repos/vim" || exit 1
+
+    # Start from a clean tree so configure picks up new flags.
+    make distclean >/dev/null 2>&1 || true
+
+    ./configure \
+      --with-features=huge \
+      --enable-multibyte \
+      --enable-python3interp \
+      --enable-terminal \
+      --enable-cscope \
+      --with-x \
+      --prefix=/usr/local
+
     make && "${SUDO[@]}" make install
   )
+}
+
+# Build vim from source
+if vim_needs_rebuild; then
+  build_vim
 fi
 
 # Install vim-plug

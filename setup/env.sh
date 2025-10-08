@@ -64,7 +64,7 @@ then
     PKG_INDEX_UPDATE_SUBCOMMAND=(update)
     PKG_INSTALL_SUBCOMMAND=(install -y)
     ENVSUBST_PKG=gettext-base
-    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev)
+    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev libx11-dev libxt-dev libxpm-dev libxmu-dev)
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
     PKG_LIST=(gettext $ENVSUBST_PKG)
   elif command -v apk &> /dev/null
