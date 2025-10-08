@@ -266,4 +266,4 @@ eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
 eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 
 export REPOS_SETUP_COMPLETE=1
-(cd $DOTS_REPO && source setup.sh)
+(cd "$DOTS_REPO" && ./setup.sh)
