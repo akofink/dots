@@ -21,7 +21,11 @@ bootstrap.sh: **/*.sh
 
 .PHONY: docker-run
 docker-run: bootstrap.sh
-	docker run -itv $(PWD):$(PWD) -w$(PWD) -v /var/cache -v /root/dev $(IMAGE) bash -c './bootstrap.sh; exec bash'
+	docker run -itv $(PWD):$(PWD) -w$(PWD) \
+		-v /var/cache -v /var/lib/apt/lists -v /root/dev \
+		$(IMAGE) \
+		bash -c \
+		'./bootstrap.sh; exec bash'
 
 .PHONY: docker-run-alpine
 docker-run-alpine:
