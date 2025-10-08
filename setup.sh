@@ -3,19 +3,53 @@
 echo
 echo "🍄 Dots setup.sh started..."
 
-if [ ! $REPOS_SETUP_COMPLETE ]; then
+if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
+  # shellcheck source=setup/repos.sh
   source setup/repos.sh
 fi
 
-# for script in $DOTS_REPO/setup/{vim,tmux,zsh,rbenv,tmuxinator}.sh; do
-#   if [ -f $script ]; then
-#     echo
-#     echo "🍄 Running $script"
-#     source $script || (echo "💩 Error running script $script"; exit 1)
-#   else
-#     echo "💩 Error - script does not exist: $script"
-#   fi
-# done
+run_setup_script() {
+  local name="$1"
+  case "$name" in
+    vim)
+      # shellcheck source=setup/vim.sh
+      source "$DOTS_REPO/setup/vim.sh"
+      ;;
+    tmux)
+      # shellcheck source=setup/tmux.sh
+      source "$DOTS_REPO/setup/tmux.sh"
+      ;;
+    zsh)
+      # shellcheck source=setup/zsh.sh
+      source "$DOTS_REPO/setup/zsh.sh"
+      ;;
+    rbenv)
+      # shellcheck source=setup/rbenv.sh
+      source "$DOTS_REPO/setup/rbenv.sh"
+      ;;
+    tmuxinator)
+      # shellcheck source=setup/tmuxinator.sh
+      source "$DOTS_REPO/setup/tmuxinator.sh"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+for script in vim tmux zsh rbenv tmuxinator; do
+  script_path="$DOTS_REPO/setup/$script.sh"
+  if [ -f "$script_path" ]; then
+    echo
+    echo "🍄 Running $script_path"
+    run_setup_script "$script" || {
+      echo "💩 Error running script $script_path"
+      exit 1
+    }
+  else
+    echo "💩 Error - script does not exist: $script_path"
+  fi
+done
 
 echo
 echo "🎉🎉🎉🎉 Dots setup.sh success! 🎉🎉🎉🎉"
