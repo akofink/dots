@@ -2,33 +2,35 @@
 
 TMUX_VERSION=${TMUX_VERSION:-3.5}
 
-if [ ! $REPOS_SETUP_COMPLETE ]; then
+if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
   source setup/repos.sh
 fi
 
-${PKG_INSTALL[@]} ${TMUX_BUILD_DEPS[@]}
+if [[ ${#TMUX_BUILD_DEPS[@]} -gt 0 ]]; then
+  "${PKG_INSTALL[@]}" "${TMUX_BUILD_DEPS[@]}"
+fi
 
-if [ ! -d ~/dev/repos/tmux ]; then
-  mkdir -p ~/dev/repos
-  git clone https://github.com/tmux/tmux.git ~/dev/repos/tmux
+if [ ! -d "$HOME/dev/repos/tmux" ]; then
+  mkdir -p "$HOME/dev/repos"
+  git clone https://github.com/tmux/tmux.git "$HOME/dev/repos/tmux"
 else
-  cd ~/dev/repos/tmux
+  cd "$HOME/dev/repos/tmux" || exit 1
   git fetch
 fi
 
 CONFIGURE_ARGS=()
-if ! which tmux; then
+if ! command -v tmux >/dev/null 2>&1; then
   if [[ "$PLATFORM" == "Darwin" ]]; then
-    ${PKG_INSTALL[@]} tmux
+    "${PKG_INSTALL[@]}" tmux
   else
     (
-      cd ~/dev/repos/tmux
-      git checkout $TMUX_VERSION
+      cd "$HOME/dev/repos/tmux" || exit 1
+      git checkout "$TMUX_VERSION"
       bash autogen.sh
-      echo bash ./configure ${CONFIGURE_ARGS[@]}
-      bash ./configure ${CONFIGURE_ARGS[@]}
+      printf 'bash ./configure %s\n' "${CONFIGURE_ARGS[*]}"
+      bash ./configure "${CONFIGURE_ARGS[@]}"
       make
-      $SUDO make install
+      "${SUDO[@]}" make install
     )
   fi
 fi
@@ -36,8 +38,8 @@ fi
 eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf"
 
 # Set up TPM
-if [ ! -d ~/.tmux/plugins/tpm ]; then
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
 fi
 
-(cd ~/.tmux/plugins/tpm && git pull)
+(cd "$HOME/.tmux/plugins/tpm" && git pull)

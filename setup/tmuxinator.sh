@@ -5,13 +5,14 @@ then
   gem install tmuxinator
 fi
 
-if [ ! -d ~/.config ]; then
-  mkdir -p ~/.config
+if [ ! -d "$HOME/.config" ]; then
+  mkdir -p "$HOME/.config"
 fi
 
-if [ ! -h ~/.config/tmuxinator ]; then
+if [ ! -h "$HOME/.config/tmuxinator" ]; then
   if [ -d "$HOME/.config/tmuxinator" ]; then
-    mv $HOME/.config/tmuxinator{,.old.$(date +"%Y%m%dT%H%M%S")}
+    timestamp="$(date +"%Y%m%dT%H%M%S")"
+    mv "$HOME/.config/tmuxinator" "$HOME/.config/tmuxinator.old.$timestamp"
   fi
 
   ln -s "$DOTS_REPO/templates/tmuxinator" "$HOME/.config/tmuxinator"

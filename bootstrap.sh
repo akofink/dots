@@ -3,14 +3,14 @@
 set -ae
 
 if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
-  if [ $ENV_SETUP_COMPLETE ]; then
+  if [[ -n "${ENV_SETUP_COMPLETE:-}" ]]; then
     return
   fi
 
   echo "🍄 Setting up common environment variables..."
 fi
 
-export DEV_REPOS=${DEV_REPOS:-"$HOME/dev/repos"}
+export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
 export DOTS_REPO="$DEV_REPOS/dots"
 
 # Ensure USER
@@ -29,53 +29,75 @@ else
 fi
 export SUDO
 
-export PLATFORM="$(uname)" # Linux | Darwin
+PLATFORM="$(uname)"
+export PLATFORM # Linux | Darwin
 if [[ "$PLATFORM" == "Darwin" ]]
 then
   PKG_MGR=(brew)
-  PKG_INDEX_UPDATE_SUBCOMMAND="update"
+  PKG_INDEX_UPDATE_SUBCOMMAND=(update)
   PKG_INSTALL_SUBCOMMAND=(install -q)
   ENVSUBST_PKG=gettext
+  # shellcheck disable=SC2034
   VIM_BUILD_DEPS=(gcc make libtool)
   # TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkg-config utf8proc)
+  # shellcheck disable=SC2034
   TMUX_BUILD_DEPS=() # rely on homebrew
-  PKG_LIST=(make $ENVSUBST_PKG)
+  PKG_LIST=(make)
+  if [[ -n "$ENVSUBST_PKG" ]]; then
+    PKG_LIST+=("$ENVSUBST_PKG")
+  fi
   if [ ! -f /opt/homebrew/bin/brew ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$PLATFORM" == "Linux" ]]
 then
+  # shellcheck disable=SC2034
   ZSH_BUILD_DEPS=(zsh)
 
   # LINUX_COMMON_PKG_LIST=""
   if command -v yum &> /dev/null
   then
-    PKG_MGR=($SUDO yum)
+    PKG_MGR=("${SUDO[@]}" yum)
     PKG_INDEX_UPDATE_SUBCOMMAND=(check-update)
     PKG_INSTALL_SUBCOMMAND=(install -y)
     ENVSUBST_PKG=gettext-envsubst
+    # shellcheck disable=SC2034
     VIM_BUILD_DEPS=(gcc make clang libtool ncurses-devel)
+    # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison gcc g++ libevent-devel libncurses-devel locales pkg-config)
-    PKG_LIST=(make $ENVSUBST_PKG)
+    PKG_LIST=(make)
+    if [[ -n "$ENVSUBST_PKG" ]]; then
+      PKG_LIST+=("$ENVSUBST_PKG")
+    fi
   elif command -v apt &> /dev/null
   then
-    PKG_MGR=($SUDO apt)
+    PKG_MGR=("${SUDO[@]}" apt)
     PKG_INDEX_UPDATE_SUBCOMMAND=(update)
     PKG_INSTALL_SUBCOMMAND=(install -y)
     ENVSUBST_PKG=gettext-base
-    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev)
+    # shellcheck disable=SC2034
+    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev libx11-dev libxt-dev libxpm-dev libxmu-dev)
+    # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
-    PKG_LIST=(gettext $ENVSUBST_PKG)
+    PKG_LIST=(gettext)
+    if [[ -n "$ENVSUBST_PKG" ]]; then
+      PKG_LIST+=("$ENVSUBST_PKG")
+    fi
   elif command -v apk &> /dev/null
   then
-    PKG_MGR=($SUDO apk)
+    PKG_MGR=("${SUDO[@]}" apk)
     PKG_INDEX_UPDATE_SUBCOMMAND=(update)
     PKG_INSTALL_SUBCOMMAND=(add)
+    # shellcheck disable=SC2034
     VIM_BUILD_DEPS=(gcc make clang libtool-bin ncurses-dev)
+    # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
     ENVSUBST_PKG=gettext
-    PKG_LIST=(shadow $ENVSUBST_PKG)
+    PKG_LIST=(shadow)
+    if [[ -n "$ENVSUBST_PKG" ]]; then
+      PKG_LIST+=("$ENVSUBST_PKG")
+    fi
   else
     fatal "Failed to identify a package manager (yum, apt, apk, ?)"
   fi
@@ -83,33 +105,77 @@ fi
 
 
 export PKG_MGR
-export PKG_INSTALL=(${PKG_MGR[@]} ${PKG_INSTALL_SUBCOMMAND[@]})
-export PKG_INDEX_UPDATE=(${PKG_MGR[@]} ${PKG_INDEX_UPDATE_SUBCOMMAND[@]})
+export PKG_INSTALL=("${PKG_MGR[@]}" "${PKG_INSTALL_SUBCOMMAND[@]}")
+export PKG_INDEX_UPDATE=("${PKG_MGR[@]}" "${PKG_INDEX_UPDATE_SUBCOMMAND[@]}")
 
 set +e
 
-echo ${PKG_INDEX_UPDATE[@]}
-${PKG_INDEX_UPDATE[@]}
+printf 'Running: %s\n' "${PKG_INDEX_UPDATE[*]}"
+"${PKG_INDEX_UPDATE[@]}"
 
 set -e
 
-echo ${PKG_INSTALL[@]} ${PKG_LIST[@]}
-${PKG_INSTALL[@]} ${PKG_LIST[@]}
+if [[ ${#PKG_LIST[@]} -gt 0 ]]; then
+  printf 'Installing: %s %s\n' "${PKG_INSTALL[*]}" "${PKG_LIST[*]}"
+  "${PKG_INSTALL[@]}" "${PKG_LIST[@]}"
+fi
 
 
 export ENV_SETUP_COMPLETE=1
 #!/usr/bin/env bash
 
-if [ $UTIL_SETUP_COMPLETE ]; then
-  return
-fi
-
-if [ ! $ENV_SETUP_COMPLETE ]; then
-  source setup/env.sh
-fi
+# shellcheck source-path=SCRIPTDIR
 
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
+
+if [[ -n "${UTIL_SETUP_COMPLETE:-}" ]]; then
+  return
+fi
+
+if [[ -z "${ENV_SETUP_COMPLETE:-}" ]]; then
+  script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+  if [[ -z "$script_dir" ]]; then
+    fatal "Unable to determine util.sh directory"
+  fi
+
+  if ! pushd "$script_dir" > /dev/null; then
+    fatal "Failed to enter $script_dir"
+  fi
+
+  # shellcheck source=setup/env.sh
+  source env.sh
+
+  if ! popd > /dev/null; then
+    fatal "Failed to return from $script_dir"
+  fi
+fi
+
+# Returns 0 when an archived copy of the destination already has the same contents.
+destination_has_matching_backup() {
+  local destination="$1"
+  local backup
+  for backup in "$destination".old.*; do
+    [[ -e "$backup" ]] || continue
+    if cmp -s "$destination" "$backup"; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Creates a timestamped backup when no existing archive matches current contents.
+backup_destination_if_needed() {
+  local destination="$1"
+
+  if destination_has_matching_backup "$destination"; then
+    return
+  fi
+
+  local timestamp
+  timestamp=$(date +%y%m%d%H%M%S) || fatal "Failed to generate backup timestamp"
+  mv "$destination" "$destination.old.$timestamp"
+}
 
 # eval_template templates/.vimrc.template ~/.vimrc
 # Safely applies envsubst
@@ -117,39 +183,62 @@ fatal() { err "$@" 1>&2; exit 1; }
 # 1: template file
 # 2: destination file
 eval_template() {
-  if [[ ! -z $2 ]]
-  then
-    if [[ -f "$2" ]]
-    then
-      mv "$2" "$2.old.$(date +%y%m%d%H%M%S)"
-    fi
-    if ! command -v envsubst &> /dev/null
-    then
-      fatal "No envsubst command found!"
-    fi
-    cat "$1" | envsubst > "$2"
+  local template="$1"
+  local destination="$2"
+
+  if [[ -z "$destination" ]]; then
+    return
   fi
+
+  if ! command -v envsubst &> /dev/null; then
+    fatal "No envsubst command found!"
+  fi
+
+  local rendered
+  rendered=$(mktemp) || fatal "Failed to create temp file for rendering $template"
+  # Render the template once so we can compare before overwriting.
+  if ! envsubst < "$template" > "$rendered"; then
+    rm -f "$rendered"
+    fatal "Failed to render template $template"
+  fi
+
+  if [[ -f "$destination" ]]; then
+    # Nothing to do when the destination already matches the rendered template.
+    if cmp -s "$rendered" "$destination"; then
+      rm -f "$rendered"
+      return
+    fi
+
+    # Only archive the current file when its contents are not already preserved.
+    backup_destination_if_needed "$destination"
+  fi
+
+  if ! cat "$rendered" > "$destination"; then
+    rm -f "$rendered"
+    fatal "Failed to write rendered template to $destination"
+  fi
+  rm -f "$rendered"
 }
 
 export UTIL_SETUP_COMPLETE=1
 #!/usr/bin/env bash
 
-if [ $GIT_SETUP_COMPLETE ]; then
+if [[ -n "${GIT_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
-if [ ! $UTIL_SETUP_COMPLETE ]; then
+if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source setup/util.sh
 fi
 
-command -v git &>/dev/null || ${PKG_INSTALL[@]} git
+command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
-export GIT_EMAIL=${GIT_EMAIL:-"ajkofink@gmail.com"}
-export GIT_SIGNINGKEY=${GIT_SIGNINGKEY:-"2C911B0A"}
-export GITHUB_USER=${GITHUB_USER:-"akofink"}
-if [ ! -z "$WSL_DISTRO_NAME" ]; then
+export GIT_EMAIL="${GIT_EMAIL:-"ajkofink@gmail.com"}"
+export GIT_SIGNINGKEY="${GIT_SIGNINGKEY:-"2C911B0A"}"
+export GITHUB_USER="${GITHUB_USER:-"akofink"}"
+if [[ -n "$WSL_DISTRO_NAME" ]]; then
   GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"/mnt/c/Program\\\\ Files/Git/mingw64/bin/git-credential-manager.exe"}
-elif [ "$PLATFORM" = "Darwin" ]; then
+elif [[ "$PLATFORM" == "Darwin" ]]; then
   GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"osxkeychain"}
 fi
 export GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"store"}

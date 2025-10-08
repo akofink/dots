@@ -1,6 +1,18 @@
 
+SHELLCHECK ?= shellcheck
+SHELLCHECK_ARGS ?= --severity=warning
+SHELLCHECK_SOURCES := $(shell find . -type f -name '*.sh' -not -path './.git/*' | sort)
+
 default:
 	cat Makefile
+
+.PHONY: check
+check:
+	@if [ -z "$(SHELLCHECK_SOURCES)" ]; then \
+		echo "No shell scripts found to lint."; \
+	else \
+		$(SHELLCHECK) $(SHELLCHECK_ARGS) $(SHELLCHECK_SOURCES); \
+	fi
 
 .PHONY: bootstrap.sh
 bootstrap.sh:

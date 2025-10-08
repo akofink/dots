@@ -3,26 +3,27 @@
 mkdir -p ~/dev/repos/
 
 # Clone NvChad
-if [ ! -d ~/dev/repos/NvChad ]; then
-  git clone https://github.com/NvChad/NvChad ~/dev/repos/NvChad --depth 1
+if [ ! -d "$HOME/dev/repos/NvChad" ]; then
+  git clone https://github.com/NvChad/NvChad "$HOME/dev/repos/NvChad" --depth 1
 fi
 
 # Clone personal nvim configs
-if [ ! -d ~/dev/repos/nvim ]; then
-  git clone https://github.com/akofink/nvim ~/dev/repos/nvim
+if [ ! -d "$HOME/dev/repos/nvim" ]; then
+  git clone https://github.com/akofink/nvim "$HOME/dev/repos/nvim"
 fi
 
 # Set up NvChad
-mkdir -p ~/.config
-if [ ! -h ~/.config/nvim ]; then
-  if [ -d ~/.config/nvim ]; then
-    mv ~/.config/{nvim,nvim.old.$(date +"%Y%m%dT%H%M%S")}
+mkdir -p "$HOME/.config"
+if [ ! -h "$HOME/.config/nvim" ]; then
+  if [ -d "$HOME/.config/nvim" ]; then
+    timestamp="$(date +"%Y%m%dT%H%M%S")"
+    mv "$HOME/.config/nvim" "$HOME/.config/nvim.old.$timestamp"
   fi
-  ln -s ~/dev/repos/NvChad ~/.config/nvim
+  ln -s "$HOME/dev/repos/NvChad" "$HOME/.config/nvim"
 fi
 
 
 # Link in custom NvChad settings
-if [ ! -h ~/dev/repos/NvChad/lua/custom ]; then
-  ln -s ~/dev/repos/nvim/lua/custom ~/dev/repos/NvChad/lua/custom
+if [ ! -h "$HOME/dev/repos/NvChad/lua/custom" ]; then
+  ln -s "$HOME/dev/repos/nvim/lua/custom" "$HOME/dev/repos/NvChad/lua/custom"
 fi
