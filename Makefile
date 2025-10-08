@@ -4,6 +4,7 @@ SHELLCHECK ?= shellcheck
 SHELLCHECK_ARGS ?= --severity=warning
 SHELLCHECK_SOURCES := $(shell find . -type f -name '*.sh' -not -path './.git/*' | sort)
 
+.PHONY: default
 default:
 	cat Makefile
 
@@ -18,20 +19,18 @@ check:
 bootstrap.sh: **/*.sh
 	./create_bootstrap.sh
 
+.PHONY: docker-run
 docker-run: bootstrap.sh
 	docker run -itv $(PWD):$(PWD) -w$(PWD) -v /var/cache -v /root/dev $(IMAGE) bash -c './bootstrap.sh; exec bash'
 
+.PHONY: docker-run-alpine
 docker-run-alpine:
 	IMAGE=alpine make docker-run
 
+.PHONY: docker-run-debian
 docker-run-debian:
 	IMAGE=debian make docker-run
 
+.PHONY: docker-run-fedora
 docker-run-fedora:
 	IMAGE=fedora make docker-run
-
-docker-build-all: docker-build-alpine docker-build-fedora docker-build-debian
-docker-build:
-	make -j4 docker-build-all
-
-.PHONY: default docker-build docker-build-all docker-build-alpine docker-build-fedora docker-build-debian docker-run-alpine docker-run-debian docker-run-fedora
