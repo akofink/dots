@@ -94,7 +94,7 @@ then
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
     ENVSUBST_PKG=gettext
-    PKG_LIST=(shadow)
+    PKG_LIST=(shadow bash)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
     fi

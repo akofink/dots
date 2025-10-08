@@ -1,3 +1,4 @@
+IMAGE ?= debian
 
 SHELLCHECK ?= shellcheck
 SHELLCHECK_ARGS ?= --severity=warning
@@ -14,28 +15,20 @@ check:
 		$(SHELLCHECK) $(SHELLCHECK_ARGS) $(SHELLCHECK_SOURCES); \
 	fi
 
-.PHONY: bootstrap.sh
-bootstrap.sh:
+bootstrap.sh: **/*.sh
 	./create_bootstrap.sh
 
-docker-build-alpine: bootstrap.sh
-	docker build $(BUILD_ARGS) -t dots-alpine .
-	docker tag dots-alpine dots
-
-docker-build-debian: bootstrap.sh
-	docker build $(BUILD_ARGS) --build-arg IMAGE=debian -t dots-debian .
-
-docker-build-fedora: bootstrap.sh
-	docker build $(BUILD_ARGS) --build-arg IMAGE=fedora -t dots-fedora .
+docker-run: bootstrap.sh
+	docker run -itv $(PWD):$(PWD) -w$(PWD) -v /var/cache -v /root/dev $(IMAGE) bash -c './bootstrap.sh; exec bash'
 
 docker-run-alpine:
-	docker run -itv $(PWD):/app -v /var/cache -v /root/dev dots-alpine
+	IMAGE=alpine make docker-run
 
 docker-run-debian:
-	docker run -itv $(PWD):/app -v /var/cache -v /root/dev dots-debian
+	IMAGE=debian make docker-run
 
 docker-run-fedora:
-	docker run -itv $(PWD):/app -v /var/cache -v /root/dev dots-fedora
+	IMAGE=fedora make docker-run
 
 docker-build-all: docker-build-alpine docker-build-fedora docker-build-debian
 docker-build:
