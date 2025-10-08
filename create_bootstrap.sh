@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-cat setup/env.sh > bootstrap.sh
-cat setup/util.sh >> bootstrap.sh
+set -euo pipefail
 
-cat setup/git.sh >> bootstrap.sh
-cat setup/repos.sh >> bootstrap.sh
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo '(cd "$DOTS_REPO" && ./setup.sh)' >> bootstrap.sh
-chmod +x bootstrap.sh
+cat "$ROOT_DIR/setup/env.sh" > "$ROOT_DIR/bootstrap.sh"
+cat "$ROOT_DIR/setup/util.sh" >> "$ROOT_DIR/bootstrap.sh"
+
+cat "$ROOT_DIR/setup/git.sh" >> "$ROOT_DIR/bootstrap.sh"
+cat "$ROOT_DIR/setup/repos.sh" >> "$ROOT_DIR/bootstrap.sh"
+
+echo '(cd "$DOTS_REPO" && ./setup.sh)' >> "$ROOT_DIR/bootstrap.sh"
+chmod +x "$ROOT_DIR/bootstrap.sh"
