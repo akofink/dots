@@ -81,7 +81,7 @@ then
     PKG_INSTALL_SUBCOMMAND=(install -y)
     ENVSUBST_PKG=gettext-base
     # shellcheck disable=SC2034
-    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev libx11-dev libxt-dev libxpm-dev libxmu-dev)
+    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev)
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
     # shellcheck disable=SC2034

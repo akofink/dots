@@ -40,22 +40,56 @@ vim_needs_rebuild() {
   return 1
 }
 
+has_x11_headers() {
+  # Check for X11 headers in common locations
+  local x11_include_paths=(
+    "/usr/include/X11/Xlib.h"
+    "/usr/local/include/X11/Xlib.h"
+    "/opt/X11/include/X11/Xlib.h"
+  )
+  
+  for path in "${x11_include_paths[@]}"; do
+    if [[ -f "$path" ]]; then
+      return 0
+    fi
+  done
+  
+  return 1
+}
+
 build_vim() {
   (
-    "${PKG_INSTALL[@]}" "${VIM_BUILD_DEPS[@]}"
+    # Determine X11 support
+    local vim_configure_flags=(
+      --with-features=huge
+      --enable-multibyte
+      --enable-python3interp
+      --enable-terminal
+      --enable-cscope
+      --prefix=/usr/local
+    )
+    
+    local build_deps=("${VIM_BUILD_DEPS[@]}")
+    
+    if has_x11_headers; then
+      echo "X11 headers detected, enabling X11 support..."
+      vim_configure_flags+=(--with-x)
+      # Add X11 build dependencies if not already included
+      if [[ "${PLATFORM}" == "Linux" ]] && command -v apt &> /dev/null; then
+        build_deps+=(libx11-dev libxt-dev libxpm-dev libxmu-dev)
+      fi
+    else
+      echo "X11 headers not found, building without X11 support..."
+      vim_configure_flags+=(--without-x)
+    fi
+    
+    "${PKG_INSTALL[@]}" "${build_deps[@]}"
     cd "$HOME/dev/repos/vim" || exit 1
 
     # Start from a clean tree so configure picks up new flags.
     make distclean >/dev/null 2>&1 || true
 
-    ./configure \
-      --with-features=huge \
-      --enable-multibyte \
-      --enable-python3interp \
-      --enable-terminal \
-      --enable-cscope \
-      --with-x \
-      --prefix=/usr/local
+    ./configure "${vim_configure_flags[@]}"
 
     make && "${SUDO[@]}" make install
   )

@@ -36,5 +36,6 @@ tags
 .vimbackup/
 .vimswap/
 .vimundo/
+.vim
 *.orig
 *.rej
