@@ -3,6 +3,7 @@ root: ~/dev/repos/atlassian/event-consumer
 
 pre_window:
   - pyenv shell 3.11.9
+  - source ~/dev/.venvs/event-consumer/bin/activate || python -m venv ~/dev/.venvs/event-consumer && source ~/dev/.venvs/event-consumer/bin/activate
 
 windows:
   - zsh:

@@ -1,8 +1,8 @@
-name: bitbucket2
-root: ~/dev/repos/atlassian/bitbucket2/bitbucket
+name: bitbucket4
+root: ~/dev/repos/atlassian/bitbucket4/bitbucket
 
 on_project_start:
-  - make && docker compose up -d && ./supervisorctl start all
+  # - make && docker compose up -d && ./supervisorctl start all
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
@@ -15,28 +15,28 @@ windows:
       layout: even-vertical
       panes:
         - gulp:
-            - yarn cache clean && yarn && npx gulp watch
+            # - yarn cache clean && yarn && npx gulp watch
         - shell_plus:
             # - make && docker compose down && docker compose up -d && ./supervisorctl restart all
-            - ./devbucket ./manage.py shell_plus
+            # - ./devbucket ./manage.py shell_plus
         - zsh: g s
         - zsh:
   - vim:
     - nvm use --lts
-    - export PYTHONPATH=/Users/akofink/dev/repos/atlassian/bitbucket2/
+    - export PYTHONPATH=/Users/akofink/dev/repos/atlassian/bitbucket4/
     - source .venv/bin/activate
     - vim
   - logs:
       layout: even-vertical
       panes:
         - logs:
-            - docker compose logs -f
+            # - docker compose logs -f
         - logs:
-          - ./supervisorctl tail -f website
+          # - ./supervisorctl tail -f website
         - logs:
-          - ./supervisorctl tail -f api
+          # - ./supervisorctl tail -f api
         - logs:
-          - ./supervisorctl tail -f background-tasks
+          # - ./supervisorctl tail -f background-tasks
   # - orochi:
   #     root: ~/dev/repos/atlassian/orochi
   #     layout: even-vertical

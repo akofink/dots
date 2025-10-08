@@ -1,8 +1,8 @@
-name: bitbucket2
-root: ~/dev/repos/atlassian/bitbucket2/bitbucket
+name: bitbucket3
+root: ~/dev/repos/atlassian/bitbucket3/bitbucket
 
 on_project_start:
-  - make && docker compose up -d && ./supervisorctl start all
+  # - make && docker compose up -d && ./supervisorctl start all
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
@@ -23,7 +23,7 @@ windows:
         - zsh:
   - vim:
     - nvm use --lts
-    - export PYTHONPATH=/Users/akofink/dev/repos/atlassian/bitbucket2/
+    - export PYTHONPATH=/Users/akofink/dev/repos/atlassian/bitbucket3/
     - source .venv/bin/activate
     - vim
   - logs:

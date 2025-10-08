@@ -12,10 +12,8 @@ windows:
       layout: even-vertical
       panes:
         - zsh:
-            - docker exec -it $(bbbs -q) ./manage.py magicshell
+            - docker exec -it $(bbbs -q) ./manage.py shell_plus
         - zsh:
-        - zsh:
-            - atlas acra run
   - vim:
       - vim
   - logs:
@@ -24,3 +22,5 @@ windows:
         - docker logs -f $(bbbs -q)
         - docker logs -f $(bbbs-celery -q)
         - zsh:
+  - ai:
+      - acli rovodev

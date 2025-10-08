@@ -1,0 +1,6 @@
+name: tenant-context-service
+root: ~/dev/repos/atlassian/tenant-context-service
+
+windows:
+  - zsh:
+  - vim: vim

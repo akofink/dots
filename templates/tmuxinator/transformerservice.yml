@@ -1,0 +1,14 @@
+name: transformerservice
+root: ~/dev/repos/atlassian/transformerservice
+
+pre_window:
+  - sdk use java 17.0.9-amzn
+
+windows:
+  - zsh:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
+  - vim:
+    - vim

@@ -1,5 +1,5 @@
 name: tlt-services
-root: ~/dev/repos/tlt-services
+root: ~/dev/repos/atlassian/tlt-services
 
 windows:
   - zsh:
