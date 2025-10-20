@@ -22,6 +22,11 @@ alias g='git'
 
 plugins=(gem git rails ruby zsh-autosuggestions)
 
+# rbenv completions need to be on fpath before compinit runs
+if [ -d "$HOME/.rbenv/completions" ]; then
+  fpath=("$HOME/.rbenv/completions" $fpath)
+fi
+
 # Tmux Options
 export ZSH_TMUX_AUTOCONNECT=false
 export ZSH_TMUX_AUTOQUIT=false
@@ -52,8 +57,19 @@ fi
 # nvm env setup
 if [ -d ~/.nvm ]; then
   export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  load_nvm() {
+    unset -f nvm node npm npx
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    if [ -z "${NVM_LAZY_LOADED-}" ]; then
+      typeset -g NVM_LAZY_LOADED=1
+      typeset -f nvm_auto >/dev/null 2>&1 && nvm_auto use >/dev/null 2>&1
+    fi
+  }
+  nvm() { load_nvm; nvm "$@"; }
+  node() { load_nvm; node "$@"; }
+  npm() { load_nvm; npm "$@"; }
+  npx() { load_nvm; npx "$@"; }
 fi
 
 # rbenv
@@ -61,10 +77,6 @@ if [ -d ~/.rbenv ]; then
   export PATH="$HOME/.rbenv/bin:$PATH"
 
   eval "$(~/.rbenv/bin/rbenv init - zsh)"
-  FPATH=~/.rbenv/completions:"$FPATH"
-
-  autoload -U compinit
-  compinit
 fi
 
 rbenv_update() {
