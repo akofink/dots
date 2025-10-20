@@ -5,3 +5,6 @@ windows:
   - zsh:
   - vim: vim
   - ai:
+  - ollama:
+    panes:
+      - ollama start

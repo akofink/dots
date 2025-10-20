@@ -1,0 +1,7 @@
+name: kareadoke
+root: ~/dev/repos/kareadoke
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai:
