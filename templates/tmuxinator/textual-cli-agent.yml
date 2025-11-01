@@ -3,8 +3,14 @@ root: ~/dev/repos/textual-cli-agent
 
 windows:
   - zsh:
+      panes:
+        - uv:
+            - uv run textual-cli-agent --provider ollama --model llama3.1
+        - zsh:
   - vim: vim
   - ai:
+    - codex -s danger-full-access -a never
   - ollama:
-    panes:
-      - ollama start
+      panes:
+        - ollama start
+        - ollama pull llama3.1

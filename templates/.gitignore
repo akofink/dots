@@ -33,6 +33,7 @@ venv/
 .env*
 *.iml
 tags
+.claude/
 .vimbackup/
 .vimswap/
 .vimundo/
