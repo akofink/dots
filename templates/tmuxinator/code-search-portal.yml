@@ -1,0 +1,12 @@
+name: code-search-portal
+root: ~/dev/repos/atlassian/code-search-portal
+
+on_project_start:
+  - nvm install
+
+pre_window:
+  - nvm use
+
+windows:
+  - zsh:
+  - vim: vim

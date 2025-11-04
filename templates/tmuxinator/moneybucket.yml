@@ -4,7 +4,7 @@ name: moneybucket
 root: ~/dev/repos/bitbucket-billing-service
 
 pre_window:
-  - source ~/dev/.venvs/bitbucket-billing-service-3.9/bin/activate
+  - source ~/dev/.venvs/bitbucket-billing-service-3.10/bin/activate
   - alias bbbs='docker ps -f name=bitbucket-billing-service-1'; alias bbbs-celery='docker ps -f name=bitbucket-billing-service_celery-1'
 
 windows:
