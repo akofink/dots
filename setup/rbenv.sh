@@ -4,7 +4,9 @@ if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
   source setup/repos.sh
 fi
 
-"${PKG_INSTALL[@]}" "${RUBY_BUILD_DEPS[@]}"
+if [[ ! -z "${RUBY_BUILD_DEPS[@]}" ]]; then
+  "${PKG_INSTALL[@]}" "${RUBY_BUILD_DEPS[@]}"
+fi
 
 if [ ! -d ~/.rbenv ]; then
   git clone https://github.com/rbenv/rbenv.git ~/.rbenv
