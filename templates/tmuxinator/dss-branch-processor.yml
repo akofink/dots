@@ -1,0 +1,10 @@
+name: dss-branch-processor
+root: ~/dev/repos/atlassian/dss-branch-processor
+
+pre_window:
+  - sdk install
+  - sdk use
+
+windows:
+  - zsh:
+  - vim: vim

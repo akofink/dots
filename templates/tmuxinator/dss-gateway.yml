@@ -1,0 +1,9 @@
+name: dss-gateway
+root: ~/dev/repos/atlassian/dss-gateway
+
+pre_window:
+  - sdk use java 17.0.9-amzn
+
+windows:
+  - zsh:
+  - vim: vim

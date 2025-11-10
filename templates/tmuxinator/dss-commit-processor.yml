@@ -1,0 +1,11 @@
+name: dss-commit-processor
+root: ~/dev/repos/atlassian/dss-commit-processor
+
+pre_window:
+  - cat .java-version
+  - sdk use java 17.0.9-amzn
+  - mvn clean install -DskipTests
+
+windows:
+  - zsh:
+  - vim: vim

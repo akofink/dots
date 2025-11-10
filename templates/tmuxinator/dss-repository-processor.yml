@@ -1,0 +1,6 @@
+name: dss-repository-processor
+root: ~/dev/repos/atlassian/dss-repository-processor
+
+windows:
+  - zsh:
+  - vim: vim
