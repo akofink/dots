@@ -1,6 +1,6 @@
-# /Users/akofink/.config/tmuxinator/example.yml
+# /Users/akofink/.config/tmuxinator/sample.yml
 
-name: example
+name: sample
 root: ~/
 
 # Optional tmux socket
@@ -32,7 +32,7 @@ root: ~/
 # Pass command line options to tmux. Useful for specifying a different tmux.conf.
 # tmux_options: -f ~/.tmux.mac.conf
 
-# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
+# Change the command to call tmux. This can be used by derivatives/wrappers like byobu.
 # tmux_command: byobu
 
 # Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
@@ -53,5 +53,8 @@ windows:
       panes:
         - vim
         - guard
-  - server: bundle exec rails s
+  - server:
+      root: /tmp
+      panes:
+        - bundle exec rails s
   - logs: tail -f log/development.log
