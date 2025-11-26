@@ -39,9 +39,8 @@ then
   ENVSUBST_PKG=gettext
   # shellcheck disable=SC2034
   VIM_BUILD_DEPS=(gcc make libtool)
-  # TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkg-config utf8proc)
   # shellcheck disable=SC2034
-  TMUX_BUILD_DEPS=() # rely on homebrew
+  TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkg-config utf8proc)
   # shellcheck disable=SC2034
   RUBY_BUILD_DEPS=()
   PKG_LIST=(make)
