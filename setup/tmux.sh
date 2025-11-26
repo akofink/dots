@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TMUX_VERSION=${TMUX_VERSION:-3.6}
+TMUX_VERSION=${TMUX_VERSION:-3.5a}
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
   source setup/repos.sh
@@ -19,6 +19,26 @@ else
 fi
 
 CONFIGURE_ARGS=()
+if [[ "$PLATFORM" == "Darwin" ]]; then
+  CONFIGURE_ARGS+=(--enable-utf8proc)
+  CONFIGURE_ARGS+=(--enable-sixel)
+  CONFIGURE_ARGS+=(--sysconfdir=/usr/local/etc)
+
+  # Force use of Homebrew's ncurses instead of system ncurses
+  ncurses_prefix=$(brew --prefix ncurses)
+  CONFIGURE_ARGS+=(--with-ncurses="${ncurses_prefix}")
+
+  # Set environment variables to ensure proper linking
+  export LDFLAGS="${LDFLAGS:-} -L${ncurses_prefix}/lib"
+  export CPPFLAGS="${CPPFLAGS:-} -I${ncurses_prefix}/include"
+  export PKG_CONFIG_PATH="${ncurses_prefix}/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+
+  # Use screen-256color for compatibility with older macOS ncurses
+  # https://github.com/Homebrew/homebrew-core/issues/102748
+  if [[ $(sw_vers -productVersion | cut -d. -f1) -lt 14 ]]; then
+    CONFIGURE_ARGS+=(--with-TERM=screen-256color)
+  fi
+fi
 
 # Function to check if we need to build/install tmux
 should_build_tmux() {
@@ -61,6 +81,7 @@ if should_build_tmux; then
     make
     "${SUDO[@]}" make install
   )
+
 fi
 
 eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf"
