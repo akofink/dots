@@ -2,9 +2,14 @@ name: dss-branch-processor
 root: ~/dev/repos/atlassian/dss-branch-processor
 
 pre_window:
-  - sdk install
-  - sdk use
+  - sdk env
 
 windows:
   - zsh:
+      layout: even-vertical
+      panes:
+        - mvn clean verify -DskipTests && atlas nebulae run -s resources-only
+        - (source envs.sh && mvn spring-boot:run)
+        - zsh:
   - vim: vim
+  - zsh:

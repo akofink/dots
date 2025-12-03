@@ -1,5 +1,5 @@
-name: dss-gateway
-root: ~/dev/repos/atlassian/dss-gateway
+name: dss-event-delivery
+root: ~/dev/repos/atlassian/dss-event-delivery
 
 pre_window:
   - sdk env
