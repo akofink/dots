@@ -1,0 +1,6 @@
+name: dss-monitoring
+root: ~/dev/repos/atlassian/dss-monitoring
+
+windows:
+  - zsh:
+  - vim: vim

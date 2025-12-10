@@ -1,0 +1,6 @@
+name: lifecycle-services
+root: ~/dev/repos/atlassian/lifecycle-services
+
+windows:
+  - zsh:
+  - vim: vim

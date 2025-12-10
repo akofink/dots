@@ -8,7 +8,7 @@ windows:
   - zsh:
       layout: even-vertical
       panes:
-        - atlas nebulae sandbox run -s resources-only
+        - atlas nebulae run -s resources-only
         - (source envs.sh && mvn spring-boot:run)
         - zsh:
   - vim: vim

@@ -1,0 +1,6 @@
+name: id-gatekeeper
+root: ~/dev/repos/atlassian/id-gatekeeper
+
+windows:
+  - zsh:
+  - vim: vim
