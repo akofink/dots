@@ -113,3 +113,8 @@ export GPG_TTY=$(tty)
 if [ -d /opt/homebrew/opt/libpq ]; then
   export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 fi
+
+if [ -d "$HOME/.sdkman" ]; then
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+fi
