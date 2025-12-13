@@ -10,7 +10,12 @@ fi
 
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
-export GIT_EMAIL="${GIT_EMAIL:-"ajkofink@gmail.com"}"
+_default_git_email="ajkofink@gmail.com"
+if { [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]] ; }; then
+  _default_git_email="akofink@atlassian.com"
+fi
+export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"
+
 export GIT_SIGNINGKEY="${GIT_SIGNINGKEY:-"2C911B0A"}"
 export GITHUB_USER="${GITHUB_USER:-"akofink"}"
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
