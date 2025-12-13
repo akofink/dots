@@ -1,14 +1,25 @@
-dots
-====
+# dots
 
-My dot and config files and scripts to install them. The main `./setup.sh` script will install all
-of the modules in this repo; however, each module can also be installed individually.
+Dotfiles plus installers. Run the top-level `./setup.sh` to install the curated defaults, or run any
+module script individually.
 
-### Set up on any machine
+## Modules
+
+- vim
+- tmux
+- zsh
+- rbenv
+- tmuxinator
+
+Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`, `nvim.sh`) and can be run directly.
+
+## Set up on any machine
+
+Requires `bash`, `curl`, and `git` on the target system.
 
 #### Bootstrap script
 
-```
+```sh
 curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && source bootstrap.sh
 ```
 
@@ -30,20 +41,20 @@ curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && sour
 
 ```sh
 bash setup/<module>.sh
+```
 
 The top-level `setup.sh` orchestrates a curated subset of modules—currently `vim`, `tmux`, `zsh`,
 `rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
-```
 
 ### Contributing
 
 Fork this repo, and add your own templates. Pull requests for updates to setup scripts are welcome!
 
-#### Local development and Testing
+#### Local development and testing
 
 A Makefile is provided with some commands for testing across various Linux distros:
 
-``` 
+```sh
 make docker-build # build all three Linux variants
 
 # Run the top level setup.sh in a new container, and drop the user into a shell afterwards:
