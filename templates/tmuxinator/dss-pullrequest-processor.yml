@@ -1,0 +1,14 @@
+name: dss-pullrequest-processor
+root: ~/dev/repos/atlassian/dss-pullrequest-processor
+
+pre_window:
+  - sdk env
+
+windows:
+  - zsh:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
+        - zsh:
+  - vim: vim

@@ -1,22 +1,12 @@
-# /Users/akofink/.config/tmuxinator/bitbucket.yml
-
-name: bitbucket
-root: ~/dev/repos/atlassian/bitbucket/bitbucket
+name: bitbucket3
+root: ~/dev/repos/atlassian/bitbucket3/bitbucket
 
 on_project_start:
-  - pipx upgrade atlassian-constellation
-  # - if [ ! -d .venv-local ]; then python3.7 -m venv .venv-local; fi
-  # - source .venv-local/bin/activate
+  # - make && docker compose up -d && ./supervisorctl start all
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
-  # - pip install --no-deps -r requirements/development.txt
 
 pre_window:
-  - alias bbc-website='docker ps -f ancestor=devbucket:core-latest -f name=website'
-  - alias bbc-api='docker ps -f ancestor=devbucket:core-latest -f name=api'
-  - alias bbc-background-tasks='docker ps -f ancestor=devbucket:core-latest -f name=background-tasks'
-  - alias devcompose='docker compose -f .devcontainer/docker-compose.yml'
-  # - source .venv-local/bin/activate
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
@@ -24,26 +14,32 @@ windows:
   - zsh:
       layout: even-vertical
       panes:
+        - gulp:
+            - yarn cache clean && yarn && npx gulp watch
         - shell_plus:
-          - devcompose down && devcompose up -d
-          - devcompose exec -ubitbucket -eDJANGO_SETTINGS_MODULE=settings.deploy bitbucket-core ./manage.py shell_plus
+            # - make && docker compose down && docker compose up -d && ./supervisorctl restart all
+            - ./devbucket ./manage.py shell_plus
         - zsh: g s
         - zsh:
   - vim:
-    - ls ~/dev/.venvs/bitbucket-core/bin/activate && source ~/dev/.venvs/bitbucket-core/bin/activate
+    - nvm use --lts
+    - export PYTHONPATH=/Users/akofink/dev/repos/atlassian/bitbucket3/
+    - source .venv/bin/activate
     - vim
   - logs:
       layout: even-vertical
       panes:
         - logs:
-          - docker logs -f $(bbc-website -q)
+            - docker compose logs -f
         - logs:
-          - docker logs -f $(bbc-api -q)
+          - ./supervisorctl tail -f website
         - logs:
-          - docker logs -f $(bbc-background-tasks -q)
-  - orochi:
-      root: ~/dev/repos/atlassian/orochi
-      layout: even-vertical
-      panes:
-        - vim:
-          - vim
+          - ./supervisorctl tail -f api
+        - logs:
+          - ./supervisorctl tail -f background-tasks
+  # - orochi:
+  #     root: ~/dev/repos/atlassian/orochi
+  #     layout: even-vertical
+  #     panes:
+  #       - vim:
+  #         - vim
