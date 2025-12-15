@@ -1,8 +1,8 @@
 name: bitbucket3
-root: ~/dev/repos/atlassian/bitbucket3/bitbucket
+root: ~/dev/repos/atlassian/bitbucket/main/bitbucket
 
 on_project_start:
-  # - make && docker compose up -d && ./supervisorctl start all
+  - make config virtualenv && docker compose up -d && ./supervisorctl start all
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
@@ -17,14 +17,11 @@ windows:
         - gulp:
             - yarn cache clean && yarn && npx gulp watch
         - shell_plus:
-            # - make && docker compose down && docker compose up -d && ./supervisorctl restart all
+            # - make config virtualenv && docker compose down && docker compose up -d && ./supervisorctl restart all
             - ./devbucket ./manage.py shell_plus
         - zsh: g s
         - zsh:
   - vim:
-    - nvm use --lts
-    - export PYTHONPATH=/Users/akofink/dev/repos/atlassian/bitbucket3/
-    - source .venv/bin/activate
     - vim
   - logs:
       layout: even-vertical
