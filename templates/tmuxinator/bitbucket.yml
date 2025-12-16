@@ -2,7 +2,6 @@ name: bitbucket
 root: ~/dev/repos/atlassian/bitbucket/main/bitbucket
 
 on_project_first_start:
-  - make config virtualenv && docker compose up -d && ./supervisorctl start all
   - |
     atlas micros service assume \
         -s bbc-website \
@@ -19,6 +18,7 @@ on_project_first_start:
         --disable-escaping \
         -f .devbucket/.bitbucket-group.dev-west2.env \
         && sed -i '' '/^ASAP_KEY_ID/d; /^ASAP_ISSUER/d; /^ASAP_PRIVATE_KEY/d; s/_GROUP//' .devbucket/.bitbucket-group.dev-west2.env
+  - make config virtualenv && docker compose up -d && ./supervisorctl start all
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
