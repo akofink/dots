@@ -1,5 +1,5 @@
 name: afm
-root: ~/dev/repos/atlassian/atlassian-frontend-monorepo
+root: ~/dev/repos/atlassian/atlassian-frontend-monorepo/main
 
 windows:
   - zsh:
