@@ -2,14 +2,17 @@ name: recipes-ui
 root: ~/dev/repos/recipes-ui
 
 on_project_first_start:
-  - "[ -f ~/dev/repos/recipes-ui ] || (cd ~/dev/repos && git clone https://github.com/akofink/recipes-ui.git)"
+  - "[ -d ~/dev/repos/recipes-ui ] || (cd ~/dev/repos && git clone https://github.com/akofink/recipes-ui.git)"
 
-pre_window:
-  - nvm use
+pre_window: nvm use
 
 windows:
   - zsh:
-    - yarn && yarn generate && yarn build && yarn start
-    - git status
+      layout: even-vertical
+      panes:
+        - dev:
+            - yarn && yarn generate && yarn build && yarn start
+            - git status
+        - zsh:
   - vim: vim
-  - ai: acli rovodev
+  - ai:
