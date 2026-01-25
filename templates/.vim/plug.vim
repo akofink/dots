@@ -2,7 +2,7 @@ call plug#begin()
 " Can't Live Without
 Plug 'danro/rename.vim'
 Plug 'flazz/vim-colorschemes'
-Plug 'kien/ctrlp.vim'
+Plug 'ctrlpvim/ctrlp.vim'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
 

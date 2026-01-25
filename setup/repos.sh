@@ -16,7 +16,7 @@ then
   git clone https://github.com/akofink/dots.git $DOTS_REPO
 fi
 
-eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore"
 eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 
 export REPOS_SETUP_COMPLETE=1
