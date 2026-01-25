@@ -7,7 +7,7 @@ fi
 # Copy over config templates (.vimrc + .vim/*)
 eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc"
 [[ -d "$HOME/.vim" ]] || mkdir -p "$HOME/.vim"
-for f in "$DOTS_REPO"/templates/.vim/*; do
+for f in "$DOTS_REPO"/templates/dot_vim/*; do
   [[ -e "$f" ]] || continue
   eval_template "$f" "$HOME/.vim/$(basename -- "$f")"
 done
