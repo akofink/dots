@@ -39,9 +39,8 @@ then
   ENVSUBST_PKG=gettext
   # shellcheck disable=SC2034
   VIM_BUILD_DEPS=(gcc make libtool)
-  # TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkg-config utf8proc)
   # shellcheck disable=SC2034
-  TMUX_BUILD_DEPS=() # rely on homebrew
+  TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkgconf utf8proc)
   # shellcheck disable=SC2034
   RUBY_BUILD_DEPS=()
   PKG_LIST=(make)
@@ -81,7 +80,7 @@ then
     PKG_INSTALL_SUBCOMMAND=(install -y)
     ENVSUBST_PKG=gettext-base
     # shellcheck disable=SC2034
-    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev libx11-dev libxt-dev libxpm-dev libxmu-dev)
+    VIM_BUILD_DEPS=(autoconf g++ gcc make ncurses-dev)
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
     # shellcheck disable=SC2034
@@ -241,7 +240,12 @@ fi
 
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
-export GIT_EMAIL="${GIT_EMAIL:-"ajkofink@gmail.com"}"
+_default_git_email="ajkofink@gmail.com"
+if { [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]] ; }; then
+  _default_git_email="akofink@atlassian.com"
+fi
+export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"
+
 export GIT_SIGNINGKEY="${GIT_SIGNINGKEY:-"2C911B0A"}"
 export GITHUB_USER="${GITHUB_USER:-"akofink"}"
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
@@ -270,7 +274,7 @@ then
   git clone https://github.com/akofink/dots.git $DOTS_REPO
 fi
 
-eval_template "$DOTS_REPO/templates/.gitignore" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore"
 eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 
 export REPOS_SETUP_COMPLETE=1
