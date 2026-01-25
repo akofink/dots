@@ -1,0 +1,11 @@
+name: greenfield
+root: ~/dev/repos/greenfield
+
+windows:
+  - editor:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
+  - vim: vim
+  - ai:
