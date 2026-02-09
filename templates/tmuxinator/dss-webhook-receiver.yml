@@ -1,0 +1,14 @@
+name: dss-webhook-receiver
+root: ~/dev/repos/atlassian/dss-webhook-receiver
+
+pre_window:
+  - sdk env
+
+windows:
+  - editor:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
+        - zsh:
+  - vim: vim

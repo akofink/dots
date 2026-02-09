@@ -1,0 +1,15 @@
+name: dss-panels
+root: ~/dev/repos/atlassian/dss-panels
+
+pre_window:
+  - nvm use
+
+windows:
+  - zsh:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
+        - zsh:
+  - vim: vim
+  - zsh:
