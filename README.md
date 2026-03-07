@@ -51,6 +51,15 @@ bash setup/<module>.sh
 Standalone module scripts resolve the checked-out repo automatically, so they can be run from inside the
 repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/dots`.
 
+If you are iterating on setup scripts in the same shell, clear the exported setup state first:
+
+```sh
+source setup/clean.sh
+```
+
+This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setup variables so a later
+`bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
+
 The top-level `setup.sh` orchestrates a curated subset of modules—currently `vim`, `tmux`, `zsh`,
 `llm`, `rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
 
