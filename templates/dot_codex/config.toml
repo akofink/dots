@@ -4,6 +4,9 @@ model_reasoning_effort = "medium"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
+[features]
+multi_agent = true
+
 [projects."$DEV_REPOS/kareadoke"]
 trust_level = "trusted"
 
