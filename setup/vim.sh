@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
-  source setup/repos.sh
+  # shellcheck source=setup/repos.sh
+  source "$script_dir/repos.sh"
 fi
 
 # Copy over config templates (.vimrc + .vim/*)

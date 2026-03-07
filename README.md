@@ -48,6 +48,9 @@ curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && sour
 bash setup/<module>.sh
 ```
 
+Standalone module scripts resolve the checked-out repo automatically, so they can be run from inside the
+repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/dots`.
+
 The top-level `setup.sh` orchestrates a curated subset of modules—currently `vim`, `tmux`, `zsh`,
 `llm`, `rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
 

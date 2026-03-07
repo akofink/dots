@@ -2,8 +2,11 @@
 
 TMUX_VERSION=${TMUX_VERSION:-3.6a}
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
-  source setup/repos.sh
+  # shellcheck source=setup/repos.sh
+  source "$script_dir/repos.sh"
 fi
 
 if [[ ${#TMUX_BUILD_DEPS[@]} -gt 0 ]]; then

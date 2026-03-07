@@ -4,8 +4,11 @@ if [[ -n "${LLM_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
-  source setup/util.sh
+  # shellcheck source=setup/util.sh
+  source "$script_dir/util.sh"
 fi
 
 mkdir -p "$HOME/.codex" "$HOME/.rovodev"

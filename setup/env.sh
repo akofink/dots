@@ -14,7 +14,14 @@ if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
 fi
 
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
-export DOTS_REPO="$DEV_REPOS/dots"
+
+if [ "$(basename -- "$0")" = "bootstrap.sh" ]; then
+  dots_repo_default="$DEV_REPOS/dots"
+else
+  env_script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+  dots_repo_default=$(cd -- "$env_script_dir/.." && pwd)
+fi
+export DOTS_REPO="${DOTS_REPO:-"$dots_repo_default"}"
 
 has_jamf_default=0
 if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then

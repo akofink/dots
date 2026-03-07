@@ -2,6 +2,20 @@
 
 # shellcheck source-path=SCRIPTDIR
 
+if ! declare -F err >/dev/null 2>&1; then
+  err() { echo "$@" 1>&2; }
+fi
+
+if ! declare -F fatal >/dev/null 2>&1; then
+  fatal() { err "$@" 1>&2; exit 1; }
+fi
+
+if [[ -z "${DOTS_REPO:-}" ]]; then
+  util_script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+  DOTS_REPO=$(cd -- "$util_script_dir/.." && pwd)
+  export DOTS_REPO
+fi
+
 if [[ -n "${UTIL_SETUP_COMPLETE:-}" ]]; then
   return
 fi

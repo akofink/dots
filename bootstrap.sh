@@ -14,7 +14,14 @@ if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
 fi
 
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
-export DOTS_REPO="$DEV_REPOS/dots"
+
+if [ "$(basename -- "$0")" = "bootstrap.sh" ]; then
+  dots_repo_default="$DEV_REPOS/dots"
+else
+  env_script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+  dots_repo_default=$(cd -- "$env_script_dir/.." && pwd)
+fi
+export DOTS_REPO="${DOTS_REPO:-"$dots_repo_default"}"
 
 has_jamf_default=0
 if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then
@@ -143,6 +150,20 @@ export ENV_SETUP_COMPLETE=1
 
 # shellcheck source-path=SCRIPTDIR
 
+if ! declare -F err >/dev/null 2>&1; then
+  err() { echo "$@" 1>&2; }
+fi
+
+if ! declare -F fatal >/dev/null 2>&1; then
+  fatal() { err "$@" 1>&2; exit 1; }
+fi
+
+if [[ -z "${DOTS_REPO:-}" ]]; then
+  util_script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+  DOTS_REPO=$(cd -- "$util_script_dir/.." && pwd)
+  export DOTS_REPO
+fi
+
 if [[ -n "${UTIL_SETUP_COMPLETE:-}" ]]; then
   return
 fi
@@ -252,8 +273,11 @@ if [[ -n "${GIT_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
-  source setup/util.sh
+  # shellcheck source=setup/util.sh
+  source "$script_dir/util.sh"
 fi
 
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
@@ -276,20 +300,22 @@ export GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"store"}
 export GIT_SETUP_COMPLETE=1
 #!/usr/bin/env bash
 
-
-if [ $REPOS_SETUP_COMPLETE ]; then
+if [[ -n "${REPOS_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
-if [ ! $GIT_SETUP_COMPLETE ]; then
-  source setup/git.sh
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+if [[ -z "${GIT_SETUP_COMPLETE:-}" ]]; then
+  # shellcheck source=setup/git.sh
+  source "$script_dir/git.sh"
 fi
 
 mkdir -p "$DEV_REPOS"
 
 if [[ ! -d "$DOTS_REPO" ]]
 then
-  git clone https://github.com/akofink/dots.git $DOTS_REPO
+  git clone https://github.com/akofink/dots.git "$DOTS_REPO"
 fi
 
 eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore"

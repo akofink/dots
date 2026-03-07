@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
-  source setup/repos.sh
+  # shellcheck source=setup/repos.sh
+  source "$script_dir/repos.sh"
 fi
 
 if [[ ${#ZSH_BUILD_DEPS[@]} -gt 0 ]]; then

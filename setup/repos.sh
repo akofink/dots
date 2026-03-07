@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-
-if [ $REPOS_SETUP_COMPLETE ]; then
+if [[ -n "${REPOS_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
-if [ ! $GIT_SETUP_COMPLETE ]; then
-  source setup/git.sh
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+if [[ -z "${GIT_SETUP_COMPLETE:-}" ]]; then
+  # shellcheck source=setup/git.sh
+  source "$script_dir/git.sh"
 fi
 
 mkdir -p "$DEV_REPOS"
 
 if [[ ! -d "$DOTS_REPO" ]]
 then
-  git clone https://github.com/akofink/dots.git $DOTS_REPO
+  git clone https://github.com/akofink/dots.git "$DOTS_REPO"
 fi
 
 eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore"
