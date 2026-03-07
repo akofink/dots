@@ -1,0 +1,9 @@
+personality = "pragmatic"
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+
+[projects."$DOTS_REPO"]
+trust_level = "trusted"
+
+[notice]
+hide_full_access_warning = true

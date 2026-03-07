@@ -8,6 +8,7 @@ module script individually.
 - vim
 - tmux
 - zsh
+- llm
 - rbenv
 - tmuxinator
 
@@ -48,7 +49,24 @@ bash setup/<module>.sh
 ```
 
 The top-level `setup.sh` orchestrates a curated subset of modules—currently `vim`, `tmux`, `zsh`,
-`rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
+`llm`, `rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
+
+#### LLM config module
+
+`bash setup/llm.sh` renders a small managed set of agent configs:
+
+- `~/.codex/config.toml`
+- `~/.codex/instructions.md`
+- `~/.rovodev/config.yml`
+- `~/.rovodev/AGENTS.md`
+
+RovoDev agent instructions intentionally diverge by machine role:
+
+- personal machines get a lightweight template that avoids Jira, Splunk, and other corporate-only assumptions
+- work machines (`IS_WORK_MACHINE=1`) get the Atlassian-specific agent guidance
+
+The shared RovoDev config is intentionally conservative so it works across home machines, work laptops,
+and containerized setups without assuming proprietary integrations are always reachable.
 
 ### Contributing
 

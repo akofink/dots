@@ -23,6 +23,10 @@ run_setup_script() {
       # shellcheck source=setup/zsh.sh
       source "$DOTS_REPO/setup/zsh.sh"
       ;;
+    llm)
+      # shellcheck source=setup/llm.sh
+      source "$DOTS_REPO/setup/llm.sh"
+      ;;
     rbenv)
       # shellcheck source=setup/rbenv.sh
       source "$DOTS_REPO/setup/rbenv.sh"
@@ -37,7 +41,7 @@ run_setup_script() {
   esac
 }
 
-for script in vim tmux zsh rbenv tmuxinator; do
+for script in vim tmux zsh llm rbenv tmuxinator; do
   script_path="$DOTS_REPO/setup/$script.sh"
   if [ -f "$script_path" ]; then
     echo

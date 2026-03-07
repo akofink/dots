@@ -1,0 +1,86 @@
+version: 1
+
+agent:
+  additionalSystemPrompt: null
+  streaming: true
+  temperature: 0.3
+  modelId: auto
+  enableDeepPlanTool: false
+  experimental:
+    enableShadowMode: false
+
+sessions:
+  persistenceDir: $HOME/.rovodev/sessions
+
+atlassianConnections:
+  jiraProjects: []
+  localOverridePath: .rovodev/atlassian_connections.json
+  enabled: true
+
+console:
+  outputFormat: markdown
+  showToolResults: true
+  editingMode: EMACS
+  customCommandPrompt: null
+  maxOutputWidth: 120
+  enableStartupAnimations: true
+
+logging:
+  path: $HOME/.rovodev/rovodev.log
+
+mcp:
+  mcpConfigPath: $HOME/.rovodev/mcp.json
+  allowedMcpServers: []
+  disabledMcpServers: []
+
+toolPermissions:
+  default: ask
+  tools:
+    create_file: allow
+    delete_file: allow
+    move_file: ask
+    find_and_replace_code: allow
+    open_files: allow
+    expand_code_chunks: allow
+    expand_folder: allow
+    grep: allow
+    grep_file_content: allow
+    grep_file_paths: allow
+  bash:
+    default: ask
+    commands:
+      - command: ls.*
+        permission: allow
+      - command: cat.*
+        permission: allow
+      - command: echo.*
+        permission: allow
+      - command: git status
+        permission: allow
+      - command: git diff.*
+        permission: allow
+      - command: git log.*
+        permission: allow
+      - command: pwd
+        permission: allow
+      - command: true.*
+        permission: allow
+      - command: shellcheck.*
+        permission: allow
+    runInSandbox: false
+    env: {}
+  allowedExternalPaths: []
+
+announcementTracking:
+  announcementViewCounts: {}
+
+sessionFeedback:
+  permanentlyDisabled: false
+  lastFeedbackAsked: null
+
+atlassianBillingSite: null
+
+smartTasks:
+  enabled: true
+  sources:
+    - filesystem
