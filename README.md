@@ -54,7 +54,7 @@ repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/d
 If you are iterating on setup scripts in the same shell, clear the exported setup state first:
 
 ```sh
-source setup/clean.sh
+eval "$(make clean)"
 ```
 
 This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setup variables so a later

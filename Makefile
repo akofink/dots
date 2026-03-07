@@ -16,6 +16,10 @@ check:
 		$(SHELLCHECK) $(SHELLCHECK_ARGS) $(SHELLCHECK_SOURCES); \
 	fi
 
+.PHONY: clean
+clean:
+	@bash setup/clean.sh --print
+
 bootstrap.sh: **/*.sh
 	./create_bootstrap.sh
 
