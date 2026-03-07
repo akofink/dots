@@ -2,6 +2,9 @@
 
 set -ae
 
+err() { echo "$@" 1>&2; }
+fatal() { err "$@" 1>&2; exit 1; }
+
 if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
   if [[ -n "${ENV_SETUP_COMPLETE:-}" ]]; then
     return
@@ -12,6 +15,13 @@ fi
 
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
 export DOTS_REPO="$DEV_REPOS/dots"
+
+has_jamf_default=0
+if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then
+  has_jamf_default=1
+fi
+export HAS_JAMF="${HAS_JAMF:-"$has_jamf_default"}"
+export IS_WORK_MACHINE="${IS_WORK_MACHINE:-"$HAS_JAMF"}"
 
 # Ensure USER
 if [[ -z "${USER-}" ]]

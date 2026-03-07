@@ -2,6 +2,9 @@
 
 set -ae
 
+err() { echo "$@" 1>&2; }
+fatal() { err "$@" 1>&2; exit 1; }
+
 if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
   if [[ -n "${ENV_SETUP_COMPLETE:-}" ]]; then
     return
@@ -12,6 +15,13 @@ fi
 
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
 export DOTS_REPO="$DEV_REPOS/dots"
+
+has_jamf_default=0
+if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then
+  has_jamf_default=1
+fi
+export HAS_JAMF="${HAS_JAMF:-"$has_jamf_default"}"
+export IS_WORK_MACHINE="${IS_WORK_MACHINE:-"$HAS_JAMF"}"
 
 # Ensure USER
 if [[ -z "${USER-}" ]]
@@ -133,12 +143,20 @@ export ENV_SETUP_COMPLETE=1
 
 # shellcheck source-path=SCRIPTDIR
 
-err() { echo "$@" 1>&2; }
-fatal() { err "$@" 1>&2; exit 1; }
-
 if [[ -n "${UTIL_SETUP_COMPLETE:-}" ]]; then
   return
 fi
+
+is_truthy() {
+  case "${1:-}" in
+    1|true|TRUE|yes|YES|on|ON)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
 
 if [[ -z "${ENV_SETUP_COMPLETE:-}" ]]; then
   script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -241,7 +259,7 @@ fi
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
-if { [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]] ; }; then
+if is_truthy "${IS_WORK_MACHINE:-0}"; then
   _default_git_email="akofink@atlassian.com"
 fi
 export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"

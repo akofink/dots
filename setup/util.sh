@@ -2,12 +2,20 @@
 
 # shellcheck source-path=SCRIPTDIR
 
-err() { echo "$@" 1>&2; }
-fatal() { err "$@" 1>&2; exit 1; }
-
 if [[ -n "${UTIL_SETUP_COMPLETE:-}" ]]; then
   return
 fi
+
+is_truthy() {
+  case "${1:-}" in
+    1|true|TRUE|yes|YES|on|ON)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
 
 if [[ -z "${ENV_SETUP_COMPLETE:-}" ]]; then
   script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)

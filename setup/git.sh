@@ -11,7 +11,7 @@ fi
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
-if { [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]] ; }; then
+if is_truthy "${IS_WORK_MACHINE:-0}"; then
   _default_git_email="akofink@atlassian.com"
 fi
 export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"

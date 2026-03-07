@@ -13,6 +13,10 @@ module script individually.
 
 Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`, `nvim.sh`) and can be run directly.
 
+Machine-role behavior is driven by shared environment detection in `setup/env.sh`. Jamf-managed hosts
+default `HAS_JAMF=1` and therefore `IS_WORK_MACHINE=1`; override those env vars before running setup if
+you need to force personal or work defaults on a given machine or in a container.
+
 ## Set up on any machine
 
 Requires `bash`, `curl`, and `git` on the target system.
