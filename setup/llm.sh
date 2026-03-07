@@ -11,10 +11,11 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
-mkdir -p "$HOME/.codex" "$HOME/.rovodev"
+mkdir -p "$HOME/.codex" "$HOME/.codex/rules" "$HOME/.rovodev"
 
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 eval_template "$DOTS_REPO/templates/dot_codex/instructions.md" "$HOME/.codex/instructions.md"
+eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules"
 eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml"
 
 rovodev_agents_template="$DOTS_REPO/templates/dot_rovodev/AGENTS-home.md"

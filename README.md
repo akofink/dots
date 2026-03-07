@@ -69,8 +69,13 @@ The top-level `setup.sh` orchestrates a curated subset of modules—currently `v
 
 - `~/.codex/config.toml`
 - `~/.codex/instructions.md`
+- `~/.codex/rules/dots.rules`
 - `~/.rovodev/config.yml`
 - `~/.rovodev/AGENTS.md`
+
+The Codex rules file is a repo-managed baseline for portable allow-prefix rules. Keep machine-specific or
+task-specific approvals in separate files such as `~/.codex/rules/default.rules`; `setup/llm.sh` will not
+overwrite those.
 
 RovoDev agent instructions intentionally diverge by machine role:
 
