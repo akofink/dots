@@ -65,6 +65,7 @@ build_vim() {
     # Determine X11 support
     local vim_configure_flags=(
       --with-features=huge
+      --with-compiledby="Andrew Kofink"
       --enable-multibyte
       --enable-python3interp
       --enable-terminal
