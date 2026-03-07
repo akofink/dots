@@ -1,25 +1,25 @@
 name: bitbucket
-root: ~/dev/repos/atlassian/bitbucket/main/bitbucket
+root: ~/dev/repos/atlassian/bitbucket
 
 on_project_first_start:
-  - >
-    atlas micros service assume \
-        -s bbc-website \
-        -e stg-east \
-        --output env \
-        --disable-export \
-        --disable-escaping \
-        -f .devbucket/.bbc-website.stg-east.env \
-  - >
-    atlas micros service assume \
-        -s bbc-website \
-        -e dev-west2 \
-        --output env \
-        --disable-export \
-        --disable-escaping \
-        -f .devbucket/.bitbucket-group.dev-west2.env \
-        && sed -i '' '/^ASAP_KEY_ID/d; /^ASAP_ISSUER/d; /^ASAP_PRIVATE_KEY/d; s/_GROUP//' .devbucket/.bitbucket-group.dev-west2.env \
-  - make config virtualenv && docker compose up -d && ./supervisorctl start all
+  # - >
+  #   atlas micros service assume \
+  #       -s bbc-website \
+  #       -e stg-east \
+  #       --output env \
+  #       --disable-export \
+  #       --disable-escaping \
+  #       -f .devbucket/.bbc-website.stg-east.env \
+  # - >
+  #   atlas micros service assume \
+  #       -s bbc-website \
+  #       -e dev-west2 \
+  #       --output env \
+  #       --disable-export \
+  #       --disable-escaping \
+  #       -f .devbucket/.bitbucket-group.dev-west2.env \
+  #       && sed -i '' '/^ASAP_KEY_ID/d; /^ASAP_ISSUER/d; /^ASAP_PRIVATE_KEY/d; s/_GROUP//' .devbucket/.bitbucket-group.dev-west2.env \
+  # - make config virtualenv && docker compose up -d && ./supervisorctl start all
   # - export LDFLAGS="-L/usr/local/opt/libgit2@1.5/lib"
   # - export CPPFLAGS="-I/usr/local/opt/libgit2@1.5/include"
 
@@ -32,25 +32,41 @@ windows:
       layout: even-vertical
       panes:
         - gulp:
+            - cd main/bitbucket
             - yarn cache clean && yarn && npx gulp watch
         - shell_plus:
+            - cd main/bitbucket
             # - make config virtualenv && docker compose down && docker compose up -d && ./supervisorctl restart all
             - ./devbucket ./manage.py shell_plus
-        - zsh: g s
+        - zsh:
+            - cd main/bitbucket
+            - g s
         - zsh:
   - vim:
+    - cd main/bitbucket
     - vim
   - logs:
       layout: even-vertical
       panes:
         - logs:
-            - docker compose logs -f
+          - cd main/bitbucket
+          - docker compose logs -f
         - logs:
+          - cd main/bitbucket
           - ./supervisorctl tail -f website
         - logs:
+          - cd main/bitbucket
           - ./supervisorctl tail -f api
         - logs:
+          - cd main/bitbucket
           - ./supervisorctl tail -f background-tasks
+  - core-notes:
+      layout: even-vertical
+      panes:
+        - vim:
+          - cd core-notes
+          - vim
+        - zsh:
   # - orochi:
   #     root: ~/dev/repos/atlassian/orochi
   #     layout: even-vertical
