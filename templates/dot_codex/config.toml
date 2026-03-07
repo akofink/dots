@@ -1,6 +1,8 @@
 personality = "pragmatic"
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
 
 [projects."$DEV_REPOS/kareadoke"]
 trust_level = "trusted"
