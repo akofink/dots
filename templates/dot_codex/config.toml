@@ -2,7 +2,25 @@ personality = "pragmatic"
 model = "gpt-5.4"
 model_reasoning_effort = "medium"
 
+[projects."$DEV_REPOS/kareadoke"]
+trust_level = "trusted"
+
+[projects."$DEV_REPOS/image-metadata-extractor"]
+trust_level = "trusted"
+
+[projects."$DEV_REPOS/textual-cli-agent"]
+trust_level = "trusted"
+
 [projects."$DOTS_REPO"]
+trust_level = "trusted"
+
+[projects."$DEV_REPOS/greenfield"]
+trust_level = "trusted"
+
+[projects."$HOME/dev/sandbox"]
+trust_level = "trusted"
+
+[projects."$DEV_REPOS/deeper-trail"]
 trust_level = "trusted"
 
 [notice]
