@@ -1,0 +1,10 @@
+name: deeper-trail
+root: ~/dev/repos/deeper-trail
+
+pre_window:
+  - nvm use --lts
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai:
