@@ -10,3 +10,5 @@ comments are encouraged on public interfaces.
 When writing tests for code that is feature flagged, include tests for both the enabled and disabled states of the feature flag. Use descriptive test names that clearly indicate what is being tested and the expected outcome but does not mention the flag state itself. The flag overrides speak for themselves, and this reduces the changes necessary to later clean up the flag.
 
 When creating splunk queries, use macros with backticks to get logs for a given service, like "`micros_bitbucket-billing-service` env=prod-east ..."
+
+When linking Jira work items (e.g., "blocks"/"blocked by" relationships), the user can use `acli jira workitem link create --out <OUTWARD-KEY> --in <INWARD-KEY> --type <TYPE> --yes`. If you have no tools available to do the linking, provide these commands back to the user for manual execution. Available link types can be listed with `acli jira workitem link type`. For "blocks" relationships, the inward issue blocks the outward issue (e.g., --out BBCEEP-5692 --in BBCEEP-5707 --type Blocks means BBCEEP-5707 blocks BBCEEP-5692).
