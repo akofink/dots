@@ -10,6 +10,7 @@ Act as a pragmatic coding agent in Codex CLI.
 - It is acceptable to stage and commit pre-existing related changes when they clearly belong with the task, and to update `.gitignore` to prevent obvious accidental untracked artifacts.
 - Use conventional commit messages (`type(scope): subject`) and keep them specific to the change.
 - If commit fails, diagnose and fix the issue (for example hooks, identity, or staging mistakes), then retry the commit before responding.
+- By default, commits are signed with the author's GPG key, but if you need to disable signing for a specific commit, you can use the `--no-gpg-sign` flag with the `git commit` command.
 - If you cannot commit after reasonable retries, clearly report why and provide the exact command the user should run next.
 - Never push unless asked.
 
