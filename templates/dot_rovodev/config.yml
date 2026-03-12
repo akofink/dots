@@ -1,86 +1,394 @@
 version: 1
 
+# Agent behavior and model settings
 agent:
+  # Additional system prompt to append to the agent's default system prompt
   additionalSystemPrompt: null
+  # Enable streaming responses from the AI model
   streaming: true
+  # Temperature setting for AI model responses (0.0-1.0)
   temperature: 0.3
-  modelId: auto
+  # Model ID to use for the agent. See /models command to list available models.
+  modelId: claude-opus-4-6
+  # Optional model variant key selected from dynamic configuration.
+  modelVariant: null
+  # Enable the deep planning tool for complex task planning
   enableDeepPlanTool: false
+  # Enable/disable experimental features
   experimental:
+    # Enable/disable the agent to run in shadow mode. This will run the agent on
+    # a temporary clone of your workspace, prompting you before any changes are
+    # applied to your working directory.
     enableShadowMode: false
+    # Disable the built-in Atlassian MCP server so user can configure a custom
+    # one
+    disableBuiltinAtlassianMcp: false
 
+# Session management settings
 sessions:
-  persistenceDir: $HOME/.rovodev/sessions
+  # Directory where session data is stored
+  persistenceDir: /Users/akofink/.rovodev/sessions
+  # (Experimental) When enabled, Rovo Dev may warn and offer to switch your
+  # workspace git state (branch/commit) to match the session checkpoint when
+  # restoring or switching sessions.
+  enableWorkspaceStateSync: false
 
+# Atlassian product integration settings
 atlassianConnections:
-  jiraProjects: []
+  # Global jira projects user is part of
+  jiraProjects:
+  - url: https://softwareteams.atlassian.net/browse/BBCEEP
+    key: BBCEEP
+    id: ari:cloud:jira:12e73ff5-8b07-4b31-be8e-67ee0666fc43:project/12000
+  # Directory where any local overrides are stored
   localOverridePath: .rovodev/atlassian_connections.json
+  # Whether atlassian integration is enabled
   enabled: true
 
+# Console and UI behavior settings
 console:
+  # Output format for console display (markdown, simple, or raw)
   outputFormat: markdown
+  # Show tool execution results in the console
   showToolResults: true
+  # Per-tool configuration for whether to show tool execution results in the
+  # console
+  toolResultVisibility:
+    bash: true
+    powershell: true
+    open_files: true
+    create_file: true
+    delete_file: true
+    move_file: true
+    expand_code_chunks: true
+    find_and_replace_code: true
+    grep: true
+    expand_folder: true
+    update_allowed_external_paths: true
+  # Editing mode for the prompt session
   editingMode: EMACS
+  # Shell command to generate a command prompt that replaces the default '> '.
+  # For example, set 'STARSHIP_SHELL=rovodev starship prompt' to use Starship.
   customCommandPrompt: null
+  # Color theme for syntax highlighting. Options: 'dark' (Dracula), 'light',
+  # 'auto' (detect system theme), or any [Pygments theme
+  # name](https://pygments.org/styles/)(e.g., 'monokai', 'solarized-light')
+  theme: solarized-light
+  # Maximum width of the console output in characters, or 'fill' to fill the
+  # terminal width
   maxOutputWidth: 120
+  # Enable or disable animated startup loading screen
   enableStartupAnimations: true
+  # Automatically copy selected text to clipboard when text is selected in the
+  # chat
+  copyOnSelect: true
 
+# Logging and prompt collection settings
 logging:
-  path: $HOME/.rovodev/rovodev.log
+  # Path to the log file
+  path: /Users/akofink/.rovodev/rovodev.log
+  # Enable collection of prompts for debugging and analysis
+  enablePromptCollection: true
 
+# Model Context Protocol server configuration
 mcp:
-  mcpConfigPath: $HOME/.rovodev/mcp.json
-  allowedMcpServers: []
+  # Path to the MCP (Model Context Protocol) configuration file
+  mcpConfigPath: /Users/akofink/.rovodev/mcp.json
+  # List of allowed MCP server signatures
+  allowedMcpServers:
+  - stdio:sh:-c $(git rev-parse --show-toplevel)/scripts/load-mcp.sh @atlaskit/ads-mcp
+  - stdio:npx:@atlassian/ops-sherpa
+  - stdio:npx:-y @atlassian/ops-sherpa
+  - url:https://mcp.atlassian.design/public/mcp
+  # List of globally disabled MCP server signatures
   disabledMcpServers: []
 
+# Tool and command permission settings
 toolPermissions:
+  # Default permission for tools not explicitly listed
   default: ask
+  # Permission settings for specific tools
   tools:
     create_file: allow
     delete_file: allow
-    move_file: ask
+    move_file: allow
     find_and_replace_code: allow
     open_files: allow
     expand_code_chunks: allow
     expand_folder: allow
     grep: allow
+    create_confluence_page: allow
+    update_confluence_page: allow
+    add_confluence_page_comment: allow
+    create_jira_issue: allow
+    update_jira_issue: allow
     grep_file_content: allow
     grep_file_paths: allow
+    read_file: allow
+    list_directory: allow
+    read_multiple_files: allow
+    search_files: allow
+    write_file: allow
+    list_allowed_directories: allow
+    bb_ls_workspaces: allow
+    bb_search: allow
+    bb_ls_repos: allow
+    edit_file: allow
+    create_directory: allow
+    search_orchestrated: allow
+    search: allow
+    get_pr_links_from_issue_link: allow
+    get_similar_issues: allow
+    get_linked_content_from_similar_issues: allow
+    splunk_search_service: allow
+    generate_slauth_token: allow
+    splunk_search: allow
+    get_pollinator_check: allow
+    get_pollinator_run: allow
+    get_pollinator_check_availability: allow
+    search_issues: allow
+    get_issue: allow
+    get_fields: allow
+    sourcegraph_search_code: allow
+    atlassian_docs_search: allow
+    atlassian_search: allow
+    search_code: allow
+    explore_file: allow
   bash:
+    # Default permission for bash commands not explicitly listed
     default: ask
+    # List of specific bash commands with their permission settings
     commands:
-      - command: ls.*
-        permission: allow
-      - command: cat.*
-        permission: allow
-      - command: echo.*
-        permission: allow
-      - command: git status
-        permission: allow
-      - command: git diff.*
-        permission: allow
-      - command: git log.*
-        permission: allow
-      - command: pwd
-        permission: allow
-      - command: true.*
-        permission: allow
-      - command: shellcheck.*
-        permission: allow
-    runInSandbox: false
+    - command: ls
+      permission: allow
+    - command: cat
+      permission: allow
+    - command: echo
+      permission: allow
+    - command: git status
+      permission: allow
+    - command: git diff
+      permission: allow
+    - command: git log
+      permission: allow
+    - command: git.*
+      permission: allow
+    - command: docker.*
+      permission: allow
+    - command: java -version
+      permission: allow
+    - command: ./gradlew --version
+      permission: allow
+    - command: ./gradlew compileJava --info 2>&1 | head -50
+      permission: allow
+    - command: find . -name "*.iml" -o -name ".project" -o -name ".classpath" -o -name
+        "coc-settings.json" 2>/dev/null
+      permission: allow
+    - command: ls -la ~/.config/coc/ 2>/dev/null || echo "No coc config directory
+        found"
+      permission: allow
+    - command: find ~/.config/coc -name "*java*" -o -name "*jdt*" -o -name "*eclipse*"
+        2>/dev/null
+      permission: allow
+    - command: find ~/.config/coc/extensions/coc-java-data -name "*.log" -mtime -1
+        2>/dev/null | head -5
+      permission: allow
+    - command: ls -la ~/.config/coc/extensions/coc-java-data/1.26.1/config_mac/*.log
+        | tail -3
+      permission: allow
+    - command: tail.*
+      permission: allow
+    - command: cat ~/.config/coc/extensions/node_modules/coc-java/package.json | grep
+        '"version"' | head -1
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/atlassian/transformerservice && ./gradlew
+        compileJava --quiet
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/atlassian/transformerservice && ./gradlew
+        test --tests BitbucketPlanTransformerTest --quiet
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/atlassian/transformerservice && ./gradlew
+        compileTestJava --quiet
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/atlassian/transformerservice && ./gradlew
+        test --tests "*BitbucketPlanTransformerTest.shouldConstructInputRecordProgrammatically"
+        --quiet
+      permission: allow
+    - command: rm.*
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/atlassian/transformerservice && ./gradlew
+        test --tests "*BitbucketPlanTransformerTest.shouldIgnoreExtraFieldsInJson"
+        --quiet
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/atlassian/transformerservice && ./gradlew
+        test --tests "*BitbucketPlanTransformerTest" --quiet
+      permission: allow
+    - command: ./gradlew test --tests BitbucketPlanTransformerTest.shouldTransformAllExpectedFieldsFromValidRecord
+        --info
+      permission: allow
+    - command: ./gradlew.*
+      permission: allow
+    - command: cd /workspace && ./gradlew test --tests BitbucketPlanTransformerTest
+      permission: allow
+    - command: cd src/test/java/io/atlassian/transformerservice/transformers/impl/cataloguerecord/bitbucket
+        && grep -c "assertThat" BitbucketPlanTransformerTest.java
+      permission: allow
+    - command: find . -name "*test*" -type f | grep -i rovo
+      permission: allow
+    - command: find . -name "*bitbucket*" -type f | head -20
+      permission: allow
+    - command: ./gradlew test --tests "*TCSTransformerDeterminismTest*" --info 2>&1
+        | grep -A 20 -B 5 "BitbucketPlanTransformer"
+      permission: allow
+    - command: find . -name "*.java" -exec grep -l "class Json" {} \;
+      permission: allow
+    - command: ./gradlew test --tests "*TCSTransformerDeterminismTest*" --tests "*BitbucketPlanTransformer*"
+        2>&1 | grep -A 10 -B 5 "BitbucketPlanTransformer"
+      permission: allow
+    - command: ./gradlew test -x jacocoTestReport -x jacocoTestCoverageVerification
+        --tests "*TCSTransformerDeterminismTest*" 2>&1 | grep -E "(FAILED|BUILD|SUCCESS|completed)"
+      permission: allow
+    - command: ./gradlew test -x jacocoTestReport -x jacocoTestCoverageVerification
+        --tests "*bitbucket*" 2>&1 | grep -E "(FAILED|BUILD|SUCCESS|completed)"
+      permission: allow
+    - command: ./gradlew test -x jacocoTestReport -x jacocoTestCoverageVerification
+        --tests "*BitbucketPlanTransformerTest*" 2>&1 | grep -E "(FAILED|BUILD|SUCCESS|completed|test)"
+      permission: allow
+    - command: ./gradlew test -x jacocoTestReport -x jacocoTestCoverageVerification
+        --tests "*bitbucket.*" --tests "*Determinism*" 2>&1 | tail -10
+      permission: allow
+    - command: ./gradlew test -x jacocoTestReport -x jacocoTestCoverageVerification
+        --tests "*BitbucketPlanTransformer*" 2>&1 | grep -E "(FAILED|BUILD|SUCCESS|completed)"
+      permission: allow
+    - command: grep.*
+      permission: allow
+    - command: cd /tmp && python -m pytest billing/tests/test_api.py::test_account_deactivate_ccp_with_feature_flag
+        -xvs
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/notes && grep -A 20 "<feedback>" 2025/06/30_peer_feedback_mert.md
+        | grep -B 20 "</feedback>" | sed '1d;$$d' | wc -w
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/notes && grep -A 10 "Opportunities" 2025/06/30_peer_feedback_mert.md
+        | grep -A 5 "<feedback>" | grep -B 5 "</feedback>" | sed '1d;$$d' | wc -w
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/notes && tail -n 10 2025/06/30_peer_feedback_mert.md
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/notes && sed -n '/^<feedback>$/,/^<\/feedback>$/p'
+        2025/06/30_peer_feedback_mert.md | head -n -1 | tail -n +2 | wc -w
+      permission: allow
+    - command: cd /Users/akofink/dev/repos/notes && grep -A 20 "Strengths" 2025/06/30_peer_feedback_mert.md
+      permission: allow
+    - command: cd /workspace && ./gradlew test --tests "*BitbucketPlanTransformerTest*"
+        --info
+      permission: allow
+    - command: ./gradlew test --tests "*BitbucketPlanTransformerTest.shouldTransformValidRecord*premium-monthly*"
+        --info | grep -A 20 -B 5 "premium-monthly"
+      permission: allow
+    - command: ./gradlew test --tests "*BitbucketPlanTransformerTest.shouldTransformValidRecord*premium-monthly*"
+        2>&1 | grep -A 30 "premium-monthly"
+      permission: allow
+    - command: python tmp_rovodev_clean_html.py
+      permission: allow
+    - command: head -5 "2025/07/02_prs_authored_in_the_last_6_months.html"
+      permission: allow
+    - command: sed -i 's/ style="[^"]*"//g' "2025/07/02_prs_authored_in_the_last_6_months.html"
+      permission: allow
+    - command: sed -i 's| style="[^"]*"||g' "2025/07/02_prs_authored_in_the_last_6_months.html"
+      permission: allow
+    - command: cd "2025/07" && sed -i 's/ style="[^"]*"//g' "02_prs_authored_in_the_last_6_months.html"
+      permission: allow
+    - command: cd "2025/07" && sed -i 's# style="[^"]*"##g' "02_prs_authored_in_the_last_6_months.html"
+      permission: allow
+    - command: cd /workspace && python tmp_rovodev_test_tcs_plan_info.py
+      permission: allow
+    - command: python tmp_rovodev_test_tcs_plan_info.py
+      permission: allow
+    - command: uv run mypy apps/billing &
+      permission: allow
+    - command: git rm -r --cached reports && rm -rf reports
+      permission: allow
+    - command: git add apps/billing/utils.py && git commit --amend --no-edit
+      permission: allow
+    - command: uv.*
+      permission: allow
+    - command: uv run mypy apps/billing/templatetags &
+      permission: allow
+    - command: uv run mypy apps/billing/urls.py &
+      permission: allow
+    - command: ./devbucket isort apps/billing/tests/test_internal_atlassian_api.py
+      permission: allow
+    - command: ./devbucket.*
+      permission: allow
+    - command: find adminhub/packages/pages/shadow-it -name "*.test.*" -o -name "*.spec.*"
+        | head -20
+      permission: allow
+    - command: find adminhub/packages/pages/shadow-it -name "*.test.*" -o -name "*.spec.*"
+        | xargs grep -l "ShadowItSettingsPage\|shadow-it-settings" 2>/dev/null
+      permission: allow
+    - command: find adminhub/packages/pages/shadow-it -name "*.test.*" -o -name "*.spec.*"
+        | xargs grep -l "BITBUCKET\|hasPremiumBitbucketWorkspaces\|isVortexed" 2>/dev/null
+      permission: allow
+    - command: find adminhub/packages/pages/shadow-it -name "*.test.*" -o -name "*.spec.*"
+        | xargs ls -la
+      permission: allow
+    - command: find adminhub/packages/pages/shadow-it -name "*.json" | grep -i fixture
+      permission: allow
+    - command: find adminhub/packages/pages/shadow-it -type f -name "*.json" | head
+        -20
+      permission: allow
+    - command: find.*
+      permission: allow
+    - command: grep -r "fixtures\|fixture" adminhub/packages/pages/shadow-it/integration-tests/product-request-settings.test.ts
+        | head -5
+      permission: allow
+    - command: git show 3fab9839a920ed -- "**/product-request-settings.test.ts" |
+        head -200
+      permission: allow
+    - command: chmod +x tmp_rovodev_test_x11_detection.sh
+      permission: allow
+    - command: sed.*
+      permission: allow
+    # Run bash commands in a sandboxed environment - currently available for
+    # MacOS and Linux only. Enabling this option for Windows will prevent the
+    # agent from running powershell commands.
+    runInSandbox: true
+    # Environment variables to set when running bash commands. Env vars are
+    # automatically inherited from the user's environment, except for sensitive
+    # variables such as API tokens and passwords. Use this config to set
+    # additional env vars, or to pass secrets. Env vars can be set to strings or
+    # can reference other env vars using the ${VAR_NAME} syntax.
     env: {}
-  allowedExternalPaths: []
+  # List of file or directory paths that are allowed to be accessed outside the
+  # workspace
+  allowedExternalPaths:
+  - /Users/akofink/dev
+  - /Users/akofink/dev/repos/atlassian/bitbucket/main/bitbucket
+  - /usr/share/zoneinfo.default
+  - /private/var/db
+  - /Users/akofink/Desktop
+  - /Users/akofink/.gnupg
 
 announcementTracking:
-  announcementViewCounts: {}
+  announcementViewCounts:
+    915dee9bec676adabc1d0dcd1f637ce0: 5
+    ca393c3ddd928e7f11e5924fa5f785db: 1
 
 sessionFeedback:
   permanentlyDisabled: false
+  # ISO timestamp of the last provided feedback
   lastFeedbackAsked: null
 
-atlassianBillingSite: null
+atlassianBillingSite:
+  siteUrl: https://hello.atlassian.net
 
 smartTasks:
+  # Enable Smart Tasks discovery
   enabled: true
+  # List of task discovery sources
   sources:
-    - filesystem
+  - filesystem
+
+# Event Hooks configuration. See /hooks command to list available events.
+eventHooks:
+  logFile: /Users/akofink/.rovodev/event_hooks.log
+  events: []
