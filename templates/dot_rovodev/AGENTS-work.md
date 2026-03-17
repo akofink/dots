@@ -2,12 +2,14 @@ When creating Jira tickets, follow the format "#### Metadata\n ... #### Problem\
 
 Feature flag cleanup tasks should be reported in a straightforward task, similar to "Metadata\n\nhttps://switcheroo.atlassian.com/ui/gates/15a6353f-42ed-47b1-99f8-95383b1e787f/key/bbceep-5456-bbbs-allow-null-recharge-date\n\nProblem\n\nStale flag, on at 100% for all users as of 2026-01-16\n\nSolution\n\nRemove the flag references in our code\n\nAfter deploy, archive the flag"
 
+Create a branch for each Jira ticket, with the format `akofink/BBCEEP-1234-<description>`.
+
 When creating commits, title them using conventional commit format, including the Jira ticket number likely within the branch name, or NONE, e.g., "feat: BBC-123 add new feature", "fix: BBCEEP-123 resolve bug", "docs: NONE update documentation", "chore: ABC-123 bump package version", "chore: BBCEEP-123 remove dead code" etc. and use the following commit body format "Metadata\n\n ... Problem\n\n ... Solution\n\n ..." since git ignores lines starting with "#". Markdown syntax is otherwise encouraged, especially backticks for code keywords or blocks. Use git commit best practices, including using the imperative mood and not past tense in the solution. By default, commits are signed with the author's GPG key, but if you need to disable signing for a specific commit, you can use the `--no-gpg-sign` flag with the `git commit` command. The commit message is used as the default PR description in markdown on Bitbucket Cloud; unordered lists require an additional newline proceeding them to render properly, for example. Do not ever push commits to any remote unless asked to do so.
 
 This is a professional codebase; do not include excessive obvious comments. Function or class level
 comments are encouraged on public interfaces.
 
-When writing tests for code that is feature flagged, include tests for both the enabled and disabled states of the feature flag. Use descriptive test names that clearly indicate what is being tested and the expected outcome but does not mention the flag state itself. The flag overrides speak for themselves, and this reduces the changes necessary to later clean up the flag.
+When writing tests for code that is feature flagged, include tests for both the enabled and disabled states of the feature flag. Use descriptive test names that clearly indicate what is being tested and the expected outcome but does not mention the flag state itself. The flag overrides speak for themselves, and this reduces the changes necessary to later clean up the flag. Flag names must not exceed 50 characters. Choose flag names with service and jira ticket prefix, like `bbc-bbceep-1234-<description>`.
 
 When creating splunk queries, use macros with backticks to get logs for a given service, like "`micros_bitbucket-billing-service` env=prod-east ..."
 
