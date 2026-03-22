@@ -27,6 +27,12 @@ if [ -d "$HOME/.rbenv/completions" ]; then
   fpath=("$HOME/.rbenv/completions" $fpath)
 fi
 
+# Docker Desktop on WSL can leave a broken _docker symlink in the system
+# vendor completions directory, which makes compinit error during startup.
+if [ -n "$WSL_DISTRO_NAME" ] && [ -L /usr/share/zsh/vendor-completions/_docker ] && [ ! -e /usr/share/zsh/vendor-completions/_docker ]; then
+  fpath=(${fpath:#/usr/share/zsh/vendor-completions})
+fi
+
 # Tmux Options
 export ZSH_TMUX_AUTOCONNECT=false
 export ZSH_TMUX_AUTOQUIT=false
