@@ -64,7 +64,7 @@ fi
 if [ -d ~/.nvm ]; then
   export NVM_DIR="$HOME/.nvm"
   load_nvm() {
-    unset -f nvm node npm npx
+    unset -f nvm node npm npx codex 2>/dev/null
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
     if [ -z "${NVM_LAZY_LOADED-}" ]; then
@@ -77,7 +77,7 @@ if [ -d ~/.nvm ]; then
   npm() { load_nvm; npm "$@"; }
   npx() { load_nvm; npx "$@"; }
   if [ -n "$WSL_DISTRO_NAME" ]; then
-    codex() { load_nvm; codex "$@"; }
+    codex() { load_nvm; command codex "$@"; }
   fi
 fi
 
