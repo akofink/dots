@@ -76,6 +76,9 @@ if [ -d ~/.nvm ]; then
   node() { load_nvm; node "$@"; }
   npm() { load_nvm; npm "$@"; }
   npx() { load_nvm; npx "$@"; }
+  if [ -n "$WSL_DISTRO_NAME" ]; then
+    codex() { load_nvm; codex "$@"; }
+  fi
 fi
 
 # rbenv
