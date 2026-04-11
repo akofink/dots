@@ -1,0 +1,11 @@
+name: quantgent
+root: ~/dev/repos/quantgent
+
+windows:
+  - zsh:
+      layout: even-vertical
+      panes:
+        - zsh:
+        - zsh:
+  - vim: vim
+  - ai:
