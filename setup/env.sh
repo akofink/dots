@@ -5,7 +5,9 @@ set -ae
 err() { echo "$@" 1>&2; }
 fatal() { err "$@" 1>&2; exit 1; }
 
-if [ "$(basename -- "$0")" != "bootstrap.sh" ]; then
+current_script_name="$(basename -- "${BASH_SOURCE[0]}")"
+
+if [ "$current_script_name" != "bootstrap.sh" ]; then
   if [[ -n "${ENV_SETUP_COMPLETE:-}" ]]; then
     return
   fi
@@ -15,7 +17,7 @@ fi
 
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
 
-if [ "$(basename -- "$0")" = "bootstrap.sh" ]; then
+if [ "$current_script_name" = "bootstrap.sh" ]; then
   dots_repo_default="$DEV_REPOS/dots"
 else
   env_script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
