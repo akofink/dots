@@ -127,3 +127,16 @@ if [ -d "$HOME/.sdkman" ]; then
   export SDKMAN_DIR="$HOME/.sdkman"
   [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 fi
+
+# Local source build of rovodev (patched to keep claude-opus selections).
+# Only activated on machines with the acra-python repo checked out (work).
+if [ -d "$HOME/dev/repos/atlassian/acra-python" ]; then
+  rovodev() {
+    local repo="$HOME/dev/repos/atlassian/acra-python"
+    local stamp="$repo/.git/.rovodev-last-pull"
+    if [[ ! -f "$stamp" || $(( $(date +%s) - $(stat -f %m "$stamp") )) -ge 43200 ]]; then
+      (cd "$repo" && git pull --rebase --autostash && uv sync) && touch "$stamp"
+    fi
+    AUTH_METHOD=oauth uv run --project "$repo" rovodev "$@"
+  }
+fi
