@@ -40,5 +40,5 @@ windows:
   - atlas:
   - docker:
   - psql:
-  - ads: which ads_setup && ads_setup
+  # - ads: which ads_setup && ads_setup
 

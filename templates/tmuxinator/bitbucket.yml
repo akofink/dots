@@ -44,6 +44,8 @@ windows:
         - zsh:
   - vim:
     - cd main/bitbucket
+    - ./devbucket
+    - nvm use --lts
     - vim
   - logs:
       layout: even-vertical

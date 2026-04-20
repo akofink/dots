@@ -1,0 +1,7 @@
+name: dss
+root: ~/dev/repos/atlassian/dss
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai:
