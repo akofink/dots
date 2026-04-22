@@ -9,20 +9,20 @@ agent:
   # Temperature setting for AI model responses (0.0-1.0)
   temperature: 0.3
   # Model ID to use for the agent. See /models command to list available models.
-  modelId: claude-opus-4-6
+  modelId: anthropic:claude-opus-4-7
   # Optional model variant key selected from dynamic configuration.
   modelVariant: null
+  # Per-model inference parameter overrides keyed by model ID.
+  inferenceConfig: null
   # Enable the deep planning tool for complex task planning
   enableDeepPlanTool: false
+  # Efficiency level controlling iteration limits. Options: low, medium
+  # (default), high, max.
+  efficiencyLevel: medium
+  # Enable/disable subagents for task delegation
+  enableSubagents: true
   # Enable/disable experimental features
-  experimental:
-    # Enable/disable the agent to run in shadow mode. This will run the agent on
-    # a temporary clone of your workspace, prompting you before any changes are
-    # applied to your working directory.
-    enableShadowMode: false
-    # Disable the built-in Atlassian MCP server so user can configure a custom
-    # one
-    disableBuiltinAtlassianMcp: false
+  experimental: {}
 
 # Session management settings
 sessions:
@@ -73,7 +73,7 @@ console:
   # Color theme for syntax highlighting. Options: 'dark' (Dracula), 'light',
   # 'auto' (detect system theme), or any [Pygments theme
   # name](https://pygments.org/styles/)(e.g., 'monokai', 'solarized-light')
-  theme: solarized-light
+  theme: solarized-light (bg)
   # Maximum width of the console output in characters, or 'fill' to fill the
   # terminal width
   maxOutputWidth: 120
@@ -82,13 +82,26 @@ console:
   # Automatically copy selected text to clipboard when text is selected in the
   # chat
   copyOnSelect: true
+  # When enabled, Enter inserts a newline and double-Enter submits the message.
+  # When disabled (default), Enter submits and Shift+Enter inserts a newline.
+  multilineInput: false
+  # Compact older agent turns to reduce memory usage in long sessions. Only the
+  # last 5 turns stay fully expanded.
+  compactMode: true
+  # Terminal tab title settings
+  terminalTitle:
+    # Enable or disable automatic terminal tab title updates
+    isEnabled: false
+    # Terminal tab title format string. Supported template variables:   • {cwd}
+    # — workspace directory name   • {project} — full workspace path   •
+    # {branch}  — current git branch   • {session} — session title   • {model}
+    # — current model name
+    displayValue: Rovo Dev
 
-# Logging and prompt collection settings
+# Logging settings
 logging:
   # Path to the log file
   path: /Users/akofink/.rovodev/rovodev.log
-  # Enable collection of prompts for debugging and analysis
-  enablePromptCollection: true
 
 # Model Context Protocol server configuration
 mcp:
@@ -100,6 +113,7 @@ mcp:
   - stdio:npx:@atlassian/ops-sherpa
   - stdio:npx:-y @atlassian/ops-sherpa
   - url:https://mcp.atlassian.design/public/mcp
+  - url:https://mcp.atlassian.com/v1/ads/public/mcp
   # List of globally disabled MCP server signatures
   disabledMcpServers: []
 
@@ -154,6 +168,47 @@ toolPermissions:
     atlassian_search: allow
     search_code: allow
     explore_file: allow
+    get_repository_overview: allow
+    search_pr: allow
+    scan_repo: allow
+    explore_directory: allow
+    search_bitbucket_recent_commits: allow
+    get_bitbucket_commit_diff: allow
+    search_switcheroo_changes: allow
+    message_get_reply: allow
+    search_metric: allow
+    channel_get_message: allow
+    get_switcheroo_change_details: allow
+    get_full_context_for_user: allow
+    get_sentry_issue_details: allow
+    search_sentry_issues: allow
+    get_sentry_issue_events: allow
+    search_load_balancer_logs: allow
+    search_jsm_alerts: allow
+    get_pr_diff: allow
+    get_bitbucket_pr_diff: allow
+    get_jsm_alert: allow
+    query_tcs_key: allow
+    code_search: allow
+    get_switcheroo_changelog: allow
+    commit-tracker-simplified-track: allow
+    commit-tracker-simplified-config: allow
+    get_bitbucket_pr_comments: allow
+    get_context: allow
+    get_nl2cypher_query: allow
+    get_execute_cypher_query: allow
+    bitbucketPullRequest: allow
+    bitbucketRepository: allow
+    bitbucketWorkspace: allow
+    get_recent_prs: allow
+    jira_ci_cd_commit_deployments: allow
+    twg_twg_atlassian_graph_get_context_for_work_item: allow
+    twg_twg_atlassian_graph_get_related_repos_for_work_item: allow
+    check_slauth_token_status: allow
+    get_timeseries_window: allow
+    slack_slack_atlassian_message_get_reply: allow
+    slack_slack_atlassian_channel_get_message: allow
+    slack_slack_atlassian_slack_search_realtime: allow
   bash:
     # Default permission for bash commands not explicitly listed
     default: ask
