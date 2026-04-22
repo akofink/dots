@@ -60,8 +60,18 @@ eval "$(make clean)"
 This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setup variables so a later
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
-The top-level `setup.sh` orchestrates a curated subset of modules—currently `vim`, `tmux`, `zsh`,
-`llm`, `rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
+The top-level `setup.sh` orchestrates a curated subset of modules: `vim`, `tmux`, `zsh`, `llm`,
+`rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
+
+#### Ubuntu / WSL2 notes
+
+WSL2 system-level config is included as examples only:
+
+- `templates/wsl/wsl.conf`
+- `templates/windows-home/.wslconfig`
+
+Those files usually need to be applied manually to `/etc/wsl.conf` and `%USERPROFILE%/.wslconfig`,
+then WSL restarted.
 
 #### LLM config module
 

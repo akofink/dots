@@ -128,6 +128,11 @@ if [ -d "$HOME/.sdkman" ]; then
   [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 fi
 
+# opencode
+if [ -d "$HOME/.opencode/bin" ]; then
+  export PATH="$HOME/.opencode/bin:$PATH"
+fi
+
 # Local source build of rovodev (patched to keep claude-opus selections).
 # Only activated on machines with the acra-python repo checked out (work).
 if [ -d "$HOME/dev/repos/atlassian/acra-python" ]; then
