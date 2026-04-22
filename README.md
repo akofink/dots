@@ -77,7 +77,9 @@ then WSL restarted.
 
 `bash setup/llm.sh` renders a small managed set of agent configs:
 
+- `~/.config/opencode/AGENTS.md`
 - `~/.codex/config.toml`
+- `~/.codex/AGENTS.md`
 - `~/.codex/instructions.md`
 - `~/.codex/rules/dots.rules`
 - `~/.rovodev/config.yml`
@@ -87,7 +89,7 @@ The Codex rules file is a repo-managed baseline for portable allow-prefix rules.
 task-specific approvals in separate files such as `~/.codex/rules/default.rules`; `setup/llm.sh` will not
 overwrite those.
 
-RovoDev agent instructions intentionally diverge by machine role:
+Shared agent instructions intentionally diverge by machine role:
 
 - personal machines get a lightweight template that avoids Jira, Splunk, and other corporate-only assumptions
 - work machines (`IS_WORK_MACHINE=1`) get the Atlassian-specific agent guidance
