@@ -1,0 +1,84 @@
+#!/usr/bin/env sh
+set -eu
+
+repo="${OPENCODE_REPO:-$HOME/dev/repos/opencode}"
+fetch_head="$repo/.git/FETCH_HEAD"
+max_age_seconds=43200
+
+if [ ! -d "$repo/.git" ]; then
+  printf '%s\n' "opencode repo not found at $repo" >&2
+  exit 1
+fi
+
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  # shellcheck disable=SC1091
+  . "$NVM_DIR/nvm.sh"
+  nvm use --lts >/dev/null
+fi
+
+if ! command -v bun >/dev/null 2>&1; then
+  printf '%s\n' "bun not found; run: nvm use --lts && npm i -g bun" >&2
+  exit 1
+fi
+
+case "$(uname -s)" in
+  Darwin) platform="darwin" ;;
+  Linux) platform="linux" ;;
+  *)
+    printf '%s\n' "unsupported platform: $(uname -s)" >&2
+    exit 1
+    ;;
+esac
+
+case "$(uname -m)" in
+  arm64|aarch64) arch="arm64" ;;
+  x86_64|amd64) arch="x64" ;;
+  *)
+    printf '%s\n' "unsupported architecture: $(uname -m)" >&2
+    exit 1
+    ;;
+esac
+
+dist_dir="$repo/packages/opencode/dist/opencode-$platform-$arch"
+binary="$dist_dir/bin/opencode"
+head_stamp="$dist_dir/.opencode-local-head"
+current_head="$(git -C "$repo" rev-parse HEAD)"
+should_build=0
+
+if [ ! -e "$fetch_head" ]; then
+  should_pull=1
+else
+  now="$(date +%s)"
+  fetched_at="$(stat -f %m "$fetch_head" 2>/dev/null || stat -c %Y "$fetch_head")"
+  if [ $((now - fetched_at)) -ge "$max_age_seconds" ]; then
+    should_pull=1
+  else
+    should_pull=0
+  fi
+fi
+
+if [ "$should_pull" -eq 1 ]; then
+  before_pull_head="$current_head"
+  git -C "$repo" pull --ff-only
+  current_head="$(git -C "$repo" rev-parse HEAD)"
+  if [ "$current_head" != "$before_pull_head" ]; then
+    should_build=1
+  fi
+fi
+
+if [ ! -x "$binary" ]; then
+  should_build=1
+fi
+
+if [ ! -e "$head_stamp" ] || [ "$(cat "$head_stamp")" != "$current_head" ]; then
+  should_build=1
+fi
+
+if [ "$should_build" -eq 1 ]; then
+  "$repo/packages/opencode/script/build.ts" --single
+  mkdir -p "$dist_dir"
+  printf '%s\n' "$(git -C "$repo" rev-parse HEAD)" >"$head_stamp"
+fi
+
+exec "$binary" "$@"

@@ -9,6 +9,7 @@ module script individually.
 - tmux
 - zsh
 - llm
+- opencode
 - rbenv
 - tmuxinator
 - glow
@@ -62,7 +63,15 @@ This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setu
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
 The top-level `setup.sh` orchestrates a curated subset of modules: `vim`, `tmux`, `zsh`, `llm`,
-`rbenv`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module script directly.
+`opencode`, `rbenv`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module
+script directly.
+
+#### opencode module
+
+`bash setup/opencode.sh` installs opencode from the local source checkout at `~/dev/repos/opencode`.
+It clones `https://github.com/akofink/opencode.git` on the `customizations` branch when missing, keeps
+that branch fast-forwarded, ensures `bun` is available, and installs the managed launcher at
+`/usr/local/bin/opencode`.
 
 #### Ubuntu / WSL2 notes
 
