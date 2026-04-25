@@ -35,6 +35,10 @@ run_setup_script() {
       # shellcheck source=setup/rbenv.sh
       source "$DOTS_REPO/setup/rbenv.sh"
       ;;
+    go)
+      # shellcheck source=setup/go.sh
+      source "$DOTS_REPO/setup/go.sh"
+      ;;
     tmuxinator)
       # shellcheck source=setup/tmuxinator.sh
       source "$DOTS_REPO/setup/tmuxinator.sh"
@@ -49,7 +53,7 @@ run_setup_script() {
   esac
 }
 
-for script in vim tmux zsh llm opencode rbenv tmuxinator glow; do
+for script in vim tmux zsh llm opencode rbenv go tmuxinator glow; do
   script_path="$DOTS_REPO/setup/$script.sh"
   if [ -f "$script_path" ]; then
     echo

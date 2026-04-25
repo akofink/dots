@@ -11,6 +11,7 @@ module script individually.
 - llm
 - opencode
 - rbenv
+- go
 - tmuxinator
 - glow
 
@@ -63,7 +64,7 @@ This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setu
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
 The top-level `setup.sh` orchestrates a curated subset of modules: `vim`, `tmux`, `zsh`, `llm`,
-`opencode`, `rbenv`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module
+`opencode`, `rbenv`, `go`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module
 script directly.
 
 #### opencode module
@@ -75,6 +76,11 @@ that branch fast-forwarded, ensures `bun` is available, and installs the managed
 When rebuilding the local binary, the launcher sets `OPENCODE_VERSION=9999.0.0` by default so the
 custom build is treated as current by opencode update checks. Override with `OPENCODE_BUILD_VERSION`
 when a different local build version is needed.
+
+#### go module
+
+`bash setup/go.sh` installs Go through `goenv` at `~/.goenv`, installs the latest stable Go version,
+sets it globally, and ensures `~/go/bin` is available on `PATH` for binaries installed with `go install`.
 
 #### Ubuntu / WSL2 notes
 

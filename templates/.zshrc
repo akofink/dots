@@ -108,6 +108,7 @@ if [ -d ~/.goenv ]; then
 fi
 
 export GOPATH=$HOME/go
+export PATH="$GOPATH/bin:$PATH"
 
 # Tmuxinator
 [[ -s $HOME/.tmuxinator/scripts/tmuxinator ]] && source $HOME/.tmuxinator/scripts/tmuxinator
