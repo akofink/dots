@@ -44,6 +44,7 @@ if ! command -v bun >/dev/null 2>&1; then
 fi
 
 if [[ ! -f "$opencode_bin" ]] || ! cmp -s "$opencode_template" "$opencode_bin"; then
+  "${SUDO[@]}" rm -f "$opencode_bin"
   "${SUDO[@]}" install -m 0755 "$opencode_template" "$opencode_bin"
 fi
 
