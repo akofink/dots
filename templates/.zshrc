@@ -47,7 +47,7 @@ if which ruby >/dev/null && which gem >/dev/null; then
 fi
 
 # Customize to your needs...
-export PATH=/Users/akofink/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
+export PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 
 # Atlas CLI env setup
