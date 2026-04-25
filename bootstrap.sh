@@ -226,13 +226,23 @@ backup_destination_if_needed() {
 }
 
 # eval_template templates/.vimrc.template ~/.vimrc
-# Safely applies envsubst
-# Archives existing destination files in place by appending a timestamp
+# eval_template templates/.zshrc ~/.zshrc '$GIT_EMAIL $GIT_SIGNINGKEY'
+#
+# Safely applies envsubst to a template file and installs it at the destination.
+# Archives existing destination files in place by appending a timestamp.
+#
 # 1: template file
 # 2: destination file
+# 3: (optional) shell-format string of variables to substitute, e.g. '$FOO $BAR'.
+#    When provided, only the listed variables are expanded; all other $VAR
+#    references are passed through verbatim, which is essential for templates
+#    (such as .zshrc) that contain runtime shell variables alongside the
+#    setup-time variables being substituted.
+#    When omitted, envsubst expands every $VAR in the template.
 eval_template() {
   local template="$1"
   local destination="$2"
+  local subst_vars="${3:-}"
 
   if [[ -z "$destination" ]]; then
     return
@@ -245,9 +255,18 @@ eval_template() {
   local rendered
   rendered=$(mktemp) || fatal "Failed to create temp file for rendering $template"
   # Render the template once so we can compare before overwriting.
-  if ! envsubst < "$template" > "$rendered"; then
-    rm -f "$rendered"
-    fatal "Failed to render template $template"
+  # Pass $subst_vars as a positional argument only when set; an empty string
+  # would tell envsubst to substitute nothing at all.
+  if [[ -n "$subst_vars" ]]; then
+    if ! envsubst "$subst_vars" < "$template" > "$rendered"; then
+      rm -f "$rendered"
+      fatal "Failed to render template $template"
+    fi
+  else
+    if ! envsubst < "$template" > "$rendered"; then
+      rm -f "$rendered"
+      fatal "Failed to render template $template"
+    fi
   fi
 
   if [[ -f "$destination" ]]; then

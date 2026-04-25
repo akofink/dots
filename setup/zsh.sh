@@ -25,7 +25,10 @@ fi
 
 mkdir -p "$HOME/.oh-my-zsh/custom/themes/"
 cp "$DOTS_REPO/templates/akofink.zsh-theme" "$HOME/.oh-my-zsh/custom/themes/akofink.zsh-theme"
-cp "$DOTS_REPO/templates/.zshenv" "$HOME/.zshenv"
-cp "$DOTS_REPO/templates/.zshrc" "$HOME/.zshrc"
+eval_template "$DOTS_REPO/templates/.zshenv" "$HOME/.zshenv"
+# Only $GIT_EMAIL is a setup-time variable; all other $VAR references in
+# .zshrc (e.g. $HOME, $PATH, $NVM_DIR) are runtime shell variables and must
+# be passed through verbatim.
+eval_template "$DOTS_REPO/templates/.zshrc" "$HOME/.zshrc" '$GIT_EMAIL'
 
 "${SUDO[@]}" chsh -s "$(command -v zsh)" "$USER"
