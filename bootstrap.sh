@@ -285,13 +285,15 @@ fi
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
+_default_github_user="akofink"
 if is_truthy "${IS_WORK_MACHINE:-0}"; then
   _default_git_email="akofink@atlassian.com"
+  _default_github_user="akofink-atlassian"
 fi
 export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"
 
 export GIT_SIGNINGKEY="${GIT_SIGNINGKEY:-"2C911B0A"}"
-export GITHUB_USER="${GITHUB_USER:-"akofink"}"
+export GITHUB_USER="${GITHUB_USER:-"${_default_github_user}"}"
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
   GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"/mnt/c/Program\\\\ Files/Git/mingw64/bin/git-credential-manager.exe"}
 elif [[ "$PLATFORM" == "Darwin" ]]; then
