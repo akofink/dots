@@ -1,0 +1,7 @@
+name: opencode
+root: ~/dev/repos/opencode
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai: opencode
