@@ -72,6 +72,9 @@ script directly.
 It clones `https://github.com/akofink/opencode.git` on the `customizations` branch when missing, keeps
 that branch fast-forwarded, ensures `bun` is available, and installs the managed launcher at
 `/usr/local/bin/opencode`.
+When rebuilding the local binary, the launcher sets `OPENCODE_VERSION=9999.0.0` by default so the
+custom build is treated as current by opencode update checks. Override with `OPENCODE_BUILD_VERSION`
+when a different local build version is needed.
 
 #### Ubuntu / WSL2 notes
 

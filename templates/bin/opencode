@@ -2,6 +2,7 @@
 set -eu
 
 repo="${OPENCODE_REPO:-$HOME/dev/repos/opencode}"
+build_version="${OPENCODE_BUILD_VERSION:-9999.0.0}"
 fetch_head="$repo/.git/FETCH_HEAD"
 max_age_seconds=43200
 
@@ -94,9 +95,9 @@ if [ "$should_build" -eq 1 ]; then
   (cd "$repo" && bun install)
 
   if [ -n "$baseline" ]; then
-    "$repo/packages/opencode/script/build.ts" --single --baseline
+    OPENCODE_VERSION="$build_version" "$repo/packages/opencode/script/build.ts" --single --baseline
   else
-    "$repo/packages/opencode/script/build.ts" --single
+    OPENCODE_VERSION="$build_version" "$repo/packages/opencode/script/build.ts" --single
   fi
   mkdir -p "$dist_dir"
   printf '%s\n' "$(git -C "$repo" rev-parse HEAD)" >"$head_stamp"
