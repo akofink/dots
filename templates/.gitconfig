@@ -38,3 +38,5 @@
   defaultBranch = main
 [commit]
   gpgsign = true
+[credential "https://github.com"]
+  username = $GITHUB_USER
