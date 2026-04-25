@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ -n "${VIM_SETUP_COMPLETE:-}" ]]; then
+  return
+fi
+
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
@@ -109,3 +113,5 @@ if [[ ! -f "$HOME/.vim/autoload/plug.vim" ]]; then
   curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
+
+export VIM_SETUP_COMPLETE=1

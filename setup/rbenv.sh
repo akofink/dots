@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ -n "${RBENV_SETUP_COMPLETE:-}" ]]; then
+  return
+fi
+
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
@@ -28,3 +32,5 @@ LATEST_RUBY_VERSION=$(rbenv install -l | grep -v - | tail -1)
 
 rbenv install -s $LATEST_RUBY_VERSION \
   && rbenv global $LATEST_RUBY_VERSION
+
+export RBENV_SETUP_COMPLETE=1

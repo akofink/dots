@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ -n "${ZSH_SETUP_COMPLETE:-}" ]]; then
+  return
+fi
+
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
@@ -32,3 +36,5 @@ eval_template "$DOTS_REPO/templates/.zshenv" "$HOME/.zshenv"
 eval_template "$DOTS_REPO/templates/.zshrc" "$HOME/.zshrc" '$GIT_EMAIL'
 
 "${SUDO[@]}" chsh -s "$(command -v zsh)" "$USER"
+
+export ZSH_SETUP_COMPLETE=1

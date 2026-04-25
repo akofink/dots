@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ -n "${TMUXINATOR_SETUP_COMPLETE:-}" ]]; then
+  return
+fi
+
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
@@ -24,3 +28,5 @@ if [ ! -h "$HOME/.config/tmuxinator" ]; then
 
   ln -s "$DOTS_REPO/templates/tmuxinator" "$HOME/.config/tmuxinator"
 fi
+
+export TMUXINATOR_SETUP_COMPLETE=1

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ -n "${TMUX_SETUP_COMPLETE:-}" ]]; then
+  return
+fi
+
 TMUX_VERSION=${TMUX_VERSION:-3.6a}
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -95,3 +99,5 @@ if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
 fi
 
 (cd "$HOME/.tmux/plugins/tpm" && git pull)
+
+export TMUX_SETUP_COMPLETE=1
