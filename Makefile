@@ -20,7 +20,9 @@ check:
 clean:
 	@bash setup/clean.sh --print
 
-bootstrap.sh: **/*.sh
+SETUP_SOURCES := $(shell find . -type f -name '*.sh' -not -path './.git/*' | sort)
+
+bootstrap.sh: $(SETUP_SOURCES)
 	./create_bootstrap.sh
 
 .PHONY: docker-run
