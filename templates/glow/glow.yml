@@ -1,5 +1,5 @@
 # style name or JSON path (default "auto")
-style: "${HOME}/Library/Preferences/glow/solarized-light.json"
+style: "${GLOW_CONFIG_DIR}/solarized-light.json"
 # mouse support (TUI-mode only)
 mouse: false
 # use pager to display markdown

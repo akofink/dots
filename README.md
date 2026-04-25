@@ -82,6 +82,14 @@ when a different local build version is needed.
 `bash setup/go.sh` installs Go through `goenv` at `~/.goenv`, installs the latest stable Go version,
 sets it globally, and ensures `~/go/bin` is available on `PATH` for binaries installed with `go install`.
 
+#### glow module
+
+`bash setup/glow.sh` installs glow from the local source checkout at `~/dev/repos/glow`.
+It clones `https://github.com/charmbracelet/glow.git` when missing, fast-forwards the checkout,
+builds with `go install`, and installs the resulting binary at `/usr/local/bin/glow`.
+The managed solarized config is rendered to `~/Library/Preferences/glow` on macOS and
+`${XDG_CONFIG_HOME:-~/.config}/glow` elsewhere.
+
 #### Ubuntu / WSL2 notes
 
 WSL2 system-level config is included as examples only:
