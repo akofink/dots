@@ -23,6 +23,8 @@ Create a branch for each Jira ticket, with the format `akofink/BBCEEP-1234-<desc
 
 When creating commits, title them using conventional commit format, including the Jira ticket number likely within the branch name, or NONE, e.g., "feat: BBC-123 add new feature", "fix: BBCEEP-123 resolve bug", "docs: NONE update documentation", "chore: ABC-123 bump package version", "chore: BBCEEP-123 remove dead code" etc. and use the following commit body format "Metadata\n\n ... Problem\n\n ... Solution\n\n ..." since git ignores lines starting with "#". Markdown syntax is otherwise encouraged, especially backticks for code keywords or blocks. Use git commit best practices, including using the imperative mood and not past tense in the solution. By default, commits are signed with the author's GPG key, but if you need to disable signing for a specific commit, you can use the `--no-gpg-sign` flag with the `git commit` command. The commit message is used as the default PR description in markdown on Bitbucket Cloud; unordered lists require an additional newline proceeding them to render properly, for example. Do not ever push commits to any remote unless asked to do so.
 
+Default workflow after changing tracked files is: edit, verify, stage, commit, then final response. Do not return control to the user with uncommitted changes unless the user explicitly asked not to commit, the task is intentionally incomplete, or committing is blocked; if blocked, explain why and include the exact next command to run.
+
 This is a professional codebase; do not include excessive obvious comments. Function or class level
 comments are encouraged on public interfaces.
 

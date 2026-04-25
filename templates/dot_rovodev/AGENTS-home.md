@@ -4,6 +4,8 @@ When creating commits, use conventional commit titles, for example `feat: add ll
 
 When passing commit messages through a shell command, protect inline backticks from command substitution by using single-quoted `git commit -m` arguments or `git commit -F` instead of double-quoted `-m` strings.
 
+Default workflow after changing tracked files is: edit, verify, stage, commit, then final response. Do not return control to the user with uncommitted changes unless the user explicitly asked not to commit, the task is intentionally incomplete, or committing is blocked; if blocked, explain why and include the exact next command to run.
+
 If you ever have issues getting the `.git/index.lock`, simply wait briefly and retry; it is more likely you are racing another subagent than the lockfile was left behind from a crashed past session.
 
 Avoid excessive obvious comments in code, and prefer concise documentation that explains machine-specific behavior only when it matters.
