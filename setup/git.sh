@@ -15,7 +15,7 @@ command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
 _default_github_user="akofink"
-if is_truthy "${IS_WORK_MACHINE:-0}"; then
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   _default_git_email="akofink@atlassian.com"
   _default_github_user="akofink-atlassian"
 fi

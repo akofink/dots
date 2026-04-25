@@ -99,17 +99,20 @@ hook regenerate it.
 
 ### Machine-role system
 
-Machine role is currently a binary flag: `IS_WORK_MACHINE` (defaults to
-`HAS_JAMF`, which is auto-detected by checking for a Jamf binary). This drives
-git identity, GitHub user, and which LLM agent instruction template is deployed.
+Machine role is expressed as a string variable `MACHINE_CLASS` (values: `work` | `personal`).
+It is set in `setup/env.sh` and defaults to `work` on Jamf-managed hosts (`HAS_JAMF=1`) and
+`personal` everywhere else. It drives git identity, GitHub user, and which LLM agent
+instruction template is deployed.
 
-The binary flag is a known limitation. The intended direction is a set of
-capability or class flags (e.g. a `MACHINE_CLASS` enum, or a collection of
-boolean capability flags) that can be composed for edge cases like cloud VMs,
-containers, or homelab hosts that are neither personal laptops nor Jamf-managed
-work machines. Avoid deepening the `IS_WORK_MACHINE` boolean; new
-role-dependent behavior should be designed against a richer class system when
-it is introduced.
+`MACHINE_CLASS` is the single authoritative branch point for role-dependent behaviour. Do
+not add new logic that branches on `HAS_JAMF` directly; keep the detection logic in
+`env.sh` and consume `MACHINE_CLASS` downstream.
+
+The design is intentionally open-ended: `MACHINE_CLASS` is a string, not a boolean, so
+additional classes (e.g. `server`, `container`) can be introduced without changing the
+branching shape. When a third class is needed, add it to `env.sh`'s auto-detection logic,
+add the corresponding template or behaviour in the relevant module, and document the new
+value here.
 
 ### No remote CI
 

@@ -19,7 +19,7 @@ eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/ru
 eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml"
 
 agents_template="$DOTS_REPO/templates/dot_rovodev/AGENTS-home.md"
-if is_truthy "${IS_WORK_MACHINE:-0}"; then
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   agents_template="$DOTS_REPO/templates/dot_rovodev/AGENTS-work.md"
 fi
 eval_template "$agents_template" "$HOME/.config/opencode/AGENTS.md"

@@ -30,7 +30,18 @@ if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then
   has_jamf_default=1
 fi
 export HAS_JAMF="${HAS_JAMF:-"$has_jamf_default"}"
-export IS_WORK_MACHINE="${IS_WORK_MACHINE:-"$HAS_JAMF"}"
+
+# MACHINE_CLASS identifies the role of this machine.
+# Current values: "work" | "personal"
+# Defaults to "work" on Jamf-managed hosts; override before running setup
+# to force a specific class (e.g. MACHINE_CLASS=personal ./setup.sh).
+# Avoid adding new behaviour gated directly on HAS_JAMF; use MACHINE_CLASS
+# instead so the detection logic stays in one place.
+_default_machine_class=personal
+if is_truthy "${HAS_JAMF}"; then
+  _default_machine_class=work
+fi
+export MACHINE_CLASS="${MACHINE_CLASS:-"$_default_machine_class"}"
 
 # Ensure USER
 if [[ -z "${USER-}" ]]
@@ -305,7 +316,7 @@ command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
 _default_github_user="akofink"
-if is_truthy "${IS_WORK_MACHINE:-0}"; then
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   _default_git_email="akofink@atlassian.com"
   _default_github_user="akofink-atlassian"
 fi

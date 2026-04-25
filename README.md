@@ -17,9 +17,17 @@ module script individually.
 
 Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`, `nvim.sh`) and can be run directly.
 
-Machine-role behavior is driven by shared environment detection in `setup/env.sh`. Jamf-managed hosts
-default `HAS_JAMF=1` and therefore `IS_WORK_MACHINE=1`; override those env vars before running setup if
-you need to force personal or work defaults on a given machine or in a container.
+Machine-role behavior is driven by shared environment detection in `setup/env.sh`. The
+`MACHINE_CLASS` variable identifies the role of the current machine and defaults to `work`
+on Jamf-managed hosts (`HAS_JAMF=1`) and `personal` everywhere else. Override it before
+running setup to force a specific profile on a machine where auto-detection would be wrong:
+
+```sh
+MACHINE_CLASS=personal ./setup.sh
+```
+
+Current valid values are `work` and `personal`. The variable is the single place to gate
+role-dependent behaviour; do not add new logic that branches on `HAS_JAMF` directly.
 
 ## Set up on any machine
 
@@ -119,7 +127,7 @@ overwrite those.
 Shared agent instructions intentionally diverge by machine role:
 
 - personal machines get a lightweight template that avoids Jira, Splunk, and other corporate-only assumptions
-- work machines (`IS_WORK_MACHINE=1`) get the Atlassian-specific agent guidance
+- work machines (`MACHINE_CLASS=work`) get the Atlassian-specific agent guidance
 
 The shared RovoDev config is intentionally conservative so it works across home machines, work laptops,
 and containerized setups without assuming proprietary integrations are always reachable.
