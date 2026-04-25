@@ -7,3 +7,11 @@ repos:
         files: \.sh$
         args:
           - --severity=warning
+  - repo: local
+    hooks:
+      - id: regen-bootstrap
+        name: regenerate bootstrap.sh
+        language: script
+        entry: ./create_bootstrap.sh
+        files: ^setup/.*\.sh$
+        pass_filenames: false
