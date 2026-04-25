@@ -16,6 +16,7 @@ opencode_remote_name="akofink"
 opencode_remote="https://github.com/akofink/opencode.git"
 opencode_branch="customizations"
 opencode_bin="/usr/local/bin/opencode"
+opencode_template="$DOTS_REPO/templates/bin/opencode"
 
 mkdir -p "$DEV_REPOS"
 
@@ -42,15 +43,8 @@ if ! command -v bun >/dev/null 2>&1; then
   npm install -g bun
 fi
 
-rendered_opencode=$(mktemp) || fatal "Failed to create temp file for opencode wrapper"
-if ! envsubst < "$DOTS_REPO/templates/bin/opencode" > "$rendered_opencode"; then
-  rm -f "$rendered_opencode"
-  fatal "Failed to render opencode wrapper"
+if [[ ! -f "$opencode_bin" ]] || ! cmp -s "$opencode_template" "$opencode_bin"; then
+  "${SUDO[@]}" install -m 0755 "$opencode_template" "$opencode_bin"
 fi
-
-if [[ ! -f "$opencode_bin" ]] || ! cmp -s "$rendered_opencode" "$opencode_bin"; then
-  "${SUDO[@]}" install -m 0755 "$rendered_opencode" "$opencode_bin"
-fi
-rm -f "$rendered_opencode"
 
 export OPENCODE_SETUP_COMPLETE=1
