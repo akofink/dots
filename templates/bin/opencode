@@ -91,6 +91,8 @@ if [ ! -e "$head_stamp" ] || [ "$(cat "$head_stamp")" != "$current_head" ]; then
 fi
 
 if [ "$should_build" -eq 1 ]; then
+  (cd "$repo" && bun install)
+
   if [ -n "$baseline" ]; then
     "$repo/packages/opencode/script/build.ts" --single --baseline
   else
