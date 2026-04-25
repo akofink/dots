@@ -35,13 +35,17 @@ run_setup_script() {
       # shellcheck source=setup/tmuxinator.sh
       source "$DOTS_REPO/setup/tmuxinator.sh"
       ;;
+    glow)
+      # shellcheck source=setup/glow.sh
+      source "$DOTS_REPO/setup/glow.sh"
+      ;;
     *)
       return 1
       ;;
   esac
 }
 
-for script in vim tmux zsh llm rbenv tmuxinator; do
+for script in vim tmux zsh llm rbenv tmuxinator glow; do
   script_path="$DOTS_REPO/setup/$script.sh"
   if [ -f "$script_path" ]; then
     echo

@@ -11,6 +11,7 @@ module script individually.
 - llm
 - rbenv
 - tmuxinator
+- glow
 
 Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`, `nvim.sh`) and can be run directly.
 
@@ -61,7 +62,7 @@ This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setu
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
 The top-level `setup.sh` orchestrates a curated subset of modules: `vim`, `tmux`, `zsh`, `llm`,
-`rbenv`, and `tmuxinator`. Feel free to tailor that list or run any other module script directly.
+`rbenv`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module script directly.
 
 #### Ubuntu / WSL2 notes
 
