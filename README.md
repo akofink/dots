@@ -124,6 +124,39 @@ Shared agent instructions intentionally diverge by machine role:
 The shared RovoDev config is intentionally conservative so it works across home machines, work laptops,
 and containerized setups without assuming proprietary integrations are always reachable.
 
+### Template system
+
+Templates live in `templates/` and are rendered to the home directory by the
+`eval_template` helper in `setup/util.sh`. It wraps `envsubst` and writes
+atomically: a temp file is rendered, compared with `cmp -s` against the
+destination, and the destination is only replaced when the content has changed.
+Any previous destination is archived with a timestamped `.old.<timestamp>`
+suffix.
+
+`eval_template` accepts an optional third argument: a shell-format variable
+list (e.g. `'$FOO $BAR'`). This controls which variables `envsubst` expands:
+
+- **No third argument** — expands every `$VAR`. Use only for templates whose
+  variables are all setup-time values resolved when setup runs (e.g.
+  `templates/.gitconfig` with `$GIT_EMAIL`, `$GIT_SIGNINGKEY`, etc.).
+
+- **Explicit variable list** — only the listed variables are substituted; all
+  other `$VAR` references are passed through verbatim. Required for templates
+  that mix setup-time and runtime shell variables. For example,
+  `templates/.zshrc` is rendered with:
+
+  ```bash
+  eval_template "$DOTS_REPO/templates/.zshrc" "$HOME/.zshrc" '$GIT_EMAIL'
+  ```
+
+  `$GIT_EMAIL` is stamped in at install time; `$HOME`, `$PATH`, `$NVM_DIR`,
+  and every other variable are left as literal `$VAR` strings for the shell to
+  expand at runtime. This is the same mechanism `envsubst` itself exposes — the
+  variable list argument is passed straight through.
+
+When adding a variable to any template, decide whether it is setup-time or
+runtime. If the template mixes both kinds, supply the explicit variable list.
+
 ### Contributing
 
 Fork this repo, and add your own templates. Pull requests for updates to setup scripts are welcome!
