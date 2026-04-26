@@ -1,4 +1,4 @@
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # Ubuntu runs compinit from /etc/zsh/zshrc before ~/.zshrc unless this is set.
 # Only disable the global invocation under WSL, where Docker Desktop can
