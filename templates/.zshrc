@@ -48,8 +48,6 @@ fi
 
 # Customize to your needs...
 export PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
-[ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
-
 # Atlas CLI env setup
 if [ -d /opt/atlassian/bin ]; then
   export PATH=$PATH:/opt/atlassian/bin
@@ -100,8 +98,6 @@ rbenv_update() {
 }
 
 # pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 if [ -d ~/.pyenv ]; then
   eval "$(pyenv init -)"
 fi
@@ -111,23 +107,6 @@ if [ -d ~/.goenv ]; then
   export GOENV_ROOT="$HOME/.goenv"
   export PATH="$GOENV_ROOT/bin:$PATH"
   eval "$(goenv init -)"
-fi
-
-export GOPATH=$HOME/go
-export PATH="$GOPATH/bin:$PATH"
-
-# Tmuxinator
-[[ -s $HOME/.tmuxinator/scripts/tmuxinator ]] && source $HOME/.tmuxinator/scripts/tmuxinator
-
-export EDITOR=vim
-git config --global user.email $GIT_EMAIL >/dev/null
-
-export DISPLAY=:0
-export GPG_TTY=$(tty)
-
-# libpq from homebrew
-if [ -d /opt/homebrew/opt/libpq ]; then
-  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 fi
 
 if [ -d "$HOME/.sdkman" ]; then
