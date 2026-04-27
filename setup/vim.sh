@@ -108,6 +108,40 @@ if vim_needs_rebuild; then
   build_vim
 fi
 
+# On WSL2, ensure win32yank.exe is on PATH so Vim's clipboard provider works.
+# win32yank.exe bridges the WSL clipboard to the Windows clipboard.
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  if ! command -v win32yank.exe &>/dev/null; then
+    # Search common Windows locations for an existing win32yank.exe.
+    win32yank_src=""
+    for candidate in \
+      "/mnt/c/ProgramData/chocolatey/bin/win32yank.exe" \
+      "/mnt/c/tools/win32yank.exe" \
+      "/mnt/c/Windows/win32yank.exe"; do
+      if [[ -f "$candidate" ]]; then
+        win32yank_src="$candidate"
+        break
+      fi
+    done
+
+    # Fall back to a glob search under the user's AppData / Downloads.
+    if [[ -z "$win32yank_src" ]]; then
+      win32yank_src=$(find /mnt/c/Users -maxdepth 6 -name "win32yank.exe" 2>/dev/null | head -1 || true)
+    fi
+
+    if [[ -n "$win32yank_src" ]]; then
+      mkdir -p "$HOME/bin"
+      cp "$win32yank_src" "$HOME/bin/win32yank.exe"
+      chmod +x "$HOME/bin/win32yank.exe"
+      echo "Installed win32yank.exe from $win32yank_src"
+    else
+      echo "WARNING: win32yank.exe not found on the Windows filesystem." \
+           "Install it from https://github.com/equalsraf/win32yank and" \
+           "place it somewhere on the Windows PATH (e.g. C:\\tools\\win32yank.exe)."
+    fi
+  fi
+fi
+
 # Install vim-plug
 if [[ ! -f "$HOME/.vim/autoload/plug.vim" ]]; then
   curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \

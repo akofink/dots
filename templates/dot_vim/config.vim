@@ -4,8 +4,34 @@ let mapleader = ' '
 " System
 set shell=/bin/zsh
 set clipboard^=unnamed
-if has('wsl')
+let s:is_wsl = has('wsl') || (filereadable('/proc/version') && readfile('/proc/version')[0] =~? 'microsoft')
+if s:is_wsl
   set clipboard^=unnamedplus
+  " Route yank/paste through win32yank.exe so the Windows clipboard is used.
+  function! s:Win32YankAvailable() abort
+    return executable('win32yank.exe')
+  endfunction
+
+  function! s:Win32YankCopy(reg, type, lines) abort
+    call system('win32yank.exe -i --crlf', join(a:lines, "\n"))
+  endfunction
+
+  function! s:Win32YankPaste(reg) abort
+    return ['', split(system('win32yank.exe -o --lf'), "\n", 1)]
+  endfunction
+
+  let v:clipproviders['win32yank'] = {
+    \ 'available': function('s:Win32YankAvailable'),
+    \ 'copy': {
+    \   '+': function('s:Win32YankCopy'),
+    \   '*': function('s:Win32YankCopy'),
+    \ },
+    \ 'paste': {
+    \   '+': function('s:Win32YankPaste'),
+    \   '*': function('s:Win32YankPaste'),
+    \ },
+    \ }
+  set clipmethod^=win32yank
 endif
 set nocompatible
 
