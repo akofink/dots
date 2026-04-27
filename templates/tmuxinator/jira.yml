@@ -1,0 +1,7 @@
+name: jira
+root: ~/dev/repos/atlassian/jira
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai: acli rovodev --yolo
