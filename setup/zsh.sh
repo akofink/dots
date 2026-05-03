@@ -16,9 +16,8 @@ if [[ ${#ZSH_BUILD_DEPS[@]} -gt 0 ]]; then
 fi
 
 # oh-my-zsh
-if [ ! -d "$HOME/.oh-my-zsh/lib" ]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-fi
+rm -rf "$HOME/.oh-my-zsh"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # oh-my-zsh plugins
 ZSH_CUSTOM_PLUGIN_ROOT=${ZSH_CUSTOM:-"$HOME/.oh-my-zsh/custom"}
