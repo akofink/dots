@@ -11,7 +11,7 @@ ZSH_THEME="akofink"
 zstyle ':omz:update' mode auto
 
 # Example aliases
-alias l='la -la'
+alias l='ls -la'
 alias mux=tmuxinator
 alias s='source ~/.zshrc'
 alias gpullr='git pull --rebase'
