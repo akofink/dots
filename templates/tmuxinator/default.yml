@@ -1,0 +1,10 @@
+name: default
+root: ~/dev/
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai:
+      panes:
+        - ai:
+        - zsh:
