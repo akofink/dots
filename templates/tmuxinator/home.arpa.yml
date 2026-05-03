@@ -1,0 +1,7 @@
+name: home.arpa
+root: ~/dev/repos/home.arpa
+
+windows:
+  - zsh:
+  - vim: vim
+  - ai:

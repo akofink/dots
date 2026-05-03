@@ -1,7 +1,0 @@
-name: fk
-root: ~/dev/repos/fk
-
-windows:
-  - zsh:
-  - vim: vim
-  - ai:
