@@ -16,8 +16,15 @@ if [[ ${#ZSH_BUILD_DEPS[@]} -gt 0 ]]; then
 fi
 
 # oh-my-zsh
-rm -rf "$HOME/.oh-my-zsh"
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+OH_MY_ZSH_DIR="$HOME/.oh-my-zsh"
+OH_MY_ZSH_FETCH_HEAD="$OH_MY_ZSH_DIR/.git/FETCH_HEAD"
+if [ -f "$OH_MY_ZSH_FETCH_HEAD" ] && [ -n "$(find "$OH_MY_ZSH_FETCH_HEAD" -mtime +30 -print -quit)" ]; then
+  rm -rf "$OH_MY_ZSH_DIR"
+fi
+
+if [ ! -d "$OH_MY_ZSH_DIR/lib" ]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
 # oh-my-zsh plugins
 ZSH_CUSTOM_PLUGIN_ROOT=${ZSH_CUSTOM:-"$HOME/.oh-my-zsh/custom"}
