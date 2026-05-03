@@ -26,9 +26,11 @@ Use the imperative mood. Protect inline backticks from shell substitution by
 using single-quoted `-m` strings or `git commit -F`. Commits are signed with
 GPG by default; if signing fails, stop and report it. Do not push to any remote.
 
-Default workflow: edit → verify (`make check`) → stage → commit → respond.
-Do not leave tracked files uncommitted unless the task is intentionally
-incomplete or blocked.
+Default workflow: edit → stage → commit → respond. Rely on the pre-commit
+hooks to run checks during commit rather than running `make check` manually
+first, unless diagnosing a hook failure or the user explicitly asks for a
+separate verification command. Do not leave tracked files uncommitted unless
+the task is intentionally incomplete or blocked.
 
 ## Architecture overview
 
