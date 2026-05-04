@@ -11,3 +11,4 @@ windows:
   - yarn:
     - nvm use
     - yarn && yarn start --https
+  - ai:

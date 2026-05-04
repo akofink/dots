@@ -23,4 +23,3 @@ windows:
         - docker logs -f $(bbbs-celery -q)
         - zsh:
   - ai:
-      - acli rovodev --yolo
