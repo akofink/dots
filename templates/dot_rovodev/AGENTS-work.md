@@ -25,6 +25,8 @@ When creating commits, title them using conventional commit format, including th
 
 Default workflow after changing tracked files is: edit, verify, stage, commit, then final response. Do not return control to the user with uncommitted changes unless the user explicitly asked not to commit, the task is intentionally incomplete, or committing is blocked; if blocked, explain why and include the exact next command to run.
 
+Never post comments or replies on Bitbucket pull requests. Reading PR comments is fine and often necessary for context. When the operator wants a response delivered to a thread, draft the reply text in chat (or in an unstaged scratch file in the worktree) so they can paste it into Bitbucket themselves; never use any MCP `bitbucketPullRequest` action with `action=comment` (or any other write action that surfaces in the PR UI such as `approve`, `merge`, `edit`) without an explicit instruction to do exactly that.
+
 This is a professional codebase; do not include excessive obvious comments. Function or class level
 comments are encouraged on public interfaces.
 
@@ -41,6 +43,10 @@ When rebasing chained branches, the `git rebase --onto <previous-branch> HEAD~1`
 ---
 
 When creating Jira issues via the Atlassian MCP tools (`create_jira_issue`), do **not** pass the `assignee` parameter — user lookup by email or display name fails silently and causes the entire creation to fail without an error. Create the issue unassigned and let the user self-assign. Also note that `create_jira_issue` returns a generic "Could not find user" message but the issue may or may not have actually been created — always verify with a JQL search after a failed attempt before retrying.
+
+When creating or updating Confluence pages via the Atlassian MCP tools (`create_confluence_page` / `update_confluence_page`), the body must use the LLM-optimised HTML format documented in the `confluence` skill — **not** the legacy storage format with `<ac:structured-macro>` tags. Storage-format tags are not parsed; they round-trip as escaped text (`&lt;ac:structured-macro …&gt;`) and render as visible junk on the page. Specifically: use `<div data-type="panel-info|warning|note|success|error"><p>…</p></div>` for panels, `<pre><code class="language-LANG">…</code></pre>` for code blocks (escape `<` `>` `&` inside), `<details><summary>…</summary>…</details>` for expanders, and the `data-type=…` attributes from the skill for tasks/decisions/layouts. Always read the `confluence` skill before authoring or editing any Confluence page so this is fresh.
+
+The working `parent_url` form for placing a page under a Confluence **folder** via `create_confluence_page` is the page-style URL with the folder id substituted as the page id, e.g. `https://hello.atlassian.net/wiki/spaces/<slug>/pages/<folder-id>`. The `…/folder/<folder-id>` and cloud-space-id (`/spaces/<uuid>/…`) forms succeed silently but place the new page at space root instead of inside the folder — always verify placement with `view_confluence_ancestors` or by re-fetching the parent's children after creation. Folder creation/deletion and page deletion are not exposed by the Atlassian MCP — for cleanup, rename the stale page (titles must be unique per space) with a `(deprecated, …)` suffix and ask the operator to delete in the UI.
 
 If asked to work within a worktree and there is no clear worktree setup for the given working space, use the directory structure at ~/dev/worktrees/<repo-name>/BBCEEP-1234<-optional-description>/, i.e. `git worktree add ~/dev/worktrees/$(basename $PWD)/SAI-20888 akrishnamoorthy/pmr-routing-for-remaining-dd-apis`.
 
