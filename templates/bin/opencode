@@ -3,8 +3,14 @@ set -eu
 
 repo="${OPENCODE_REPO:-$HOME/dev/repos/opencode}"
 build_version="${OPENCODE_BUILD_VERSION:-9999.0.0}"
-fetch_head="$repo/.git/FETCH_HEAD"
-max_age_seconds=43200
+custom_branch="${OPENCODE_CUSTOM_BRANCH:-customizations}"
+fork_remote_name="${OPENCODE_FORK_REMOTE_NAME:-akofink}"
+fork_remote_url="${OPENCODE_FORK_REMOTE_URL:-https://github.com/akofink/opencode.git}"
+upstream_remote_name="${OPENCODE_UPSTREAM_REMOTE_NAME:-upstream}"
+upstream_remote_url="${OPENCODE_UPSTREAM_REMOTE_URL:-https://github.com/anomalyco/opencode.git}"
+base_ref="${OPENCODE_BASE_REF:-latest}"
+update_stamp="$repo/.git/opencode-local-update-stamp"
+max_age_seconds="${OPENCODE_UPDATE_INTERVAL_SECONDS:-21600}"
 
 if [ ! -d "$repo/.git" ]; then
   printf '%s\n' "opencode repo not found at $repo" >&2
@@ -62,24 +68,86 @@ mtime_seconds() {
   fi
 }
 
-if [ ! -e "$fetch_head" ]; then
-  should_pull=1
+ensure_remote() {
+  name="$1"
+  url="$2"
+
+  if git -C "$repo" remote get-url "$name" >/dev/null 2>&1; then
+    git -C "$repo" remote set-url "$name" "$url"
+  else
+    git -C "$repo" remote add "$name" "$url"
+  fi
+}
+
+should_update=0
+if [ ! -e "$update_stamp" ]; then
+  should_update=1
 else
   now="$(date +%s)"
-  fetched_at="$(mtime_seconds "$fetch_head")"
-  if [ $((now - fetched_at)) -ge "$max_age_seconds" ]; then
-    should_pull=1
-  else
-    should_pull=0
+  updated_at="$(mtime_seconds "$update_stamp")"
+  if [ $((now - updated_at)) -ge "$max_age_seconds" ]; then
+    should_update=1
   fi
 fi
 
-if [ "$should_pull" -eq 1 ]; then
-  before_pull_head="$current_head"
-  git -C "$repo" pull --ff-only
-  current_head="$(git -C "$repo" rev-parse HEAD)"
-  if [ "$current_head" != "$before_pull_head" ]; then
-    should_build=1
+if [ "$should_update" -eq 1 ]; then
+  if ! git -C "$repo" diff --quiet || ! git -C "$repo" diff --cached --quiet; then
+    printf '%s\n' "opencode repo has local changes; skipping auto-update" >&2
+    : >"$update_stamp"
+  else
+    ensure_remote "$fork_remote_name" "$fork_remote_url"
+    ensure_remote "$upstream_remote_name" "$upstream_remote_url"
+
+    if [ "$base_ref" = "latest" ]; then
+      if ! command -v npm >/dev/null 2>&1; then
+        printf '%s\n' "npm not found; skipping opencode latest release lookup" >&2
+        resolved_base=""
+      elif latest_version="$(npm view opencode-ai version)"; then
+        resolved_base="v$latest_version"
+      else
+        printf '%s\n' "failed to resolve latest opencode release; skipping auto-update" >&2
+        resolved_base=""
+      fi
+    else
+      resolved_base="$base_ref"
+    fi
+
+    if [ -n "$resolved_base" ]; then
+      if [ "$resolved_base" = "dev" ]; then
+        if ! git -C "$repo" fetch --quiet "$upstream_remote_name" dev; then
+          printf '%s\n' "failed to fetch opencode upstream dev; skipping auto-update" >&2
+          resolved_base=""
+        fi
+        rebase_base="$upstream_remote_name/dev"
+      else
+        tag_name="${resolved_base#refs/tags/}"
+        if ! git -C "$repo" fetch --quiet "$upstream_remote_name" "+refs/tags/$tag_name:refs/tags/$tag_name"; then
+          printf '%s\n' "failed to fetch opencode upstream $tag_name; skipping auto-update" >&2
+          resolved_base=""
+        fi
+        rebase_base="$tag_name"
+      fi
+
+      if [ -n "$resolved_base" ]; then
+        before_update_head="$current_head"
+        git -C "$repo" checkout --quiet "$custom_branch"
+        if ! git -C "$repo" rebase "$rebase_base"; then
+          printf '%s\n' "opencode auto-update rebase failed; resolve conflicts in $repo" >&2
+          exit 1
+        fi
+
+        current_head="$(git -C "$repo" rev-parse HEAD)"
+        if [ "$current_head" != "$before_update_head" ]; then
+          should_build=1
+        fi
+
+        if ! git -C "$repo" push --force-with-lease "$fork_remote_name" "$custom_branch"; then
+          printf '%s\n' "opencode auto-update push failed; continuing with local branch" >&2
+        fi
+      fi
+    fi
+
+    : >"$update_stamp"
   fi
 fi
 
