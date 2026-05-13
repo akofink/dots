@@ -1,1 +1,6 @@
-  - extra: echo 'foobar'
+name: default
+root: ~/dev/
+
+windows:
+  - zsh:
+      - echo <%= options[:name] %>
