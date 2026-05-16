@@ -105,6 +105,7 @@ fi
 # goenv
 if [ -d ~/.goenv ]; then
   export GOENV_ROOT="$HOME/.goenv"
+  export GOENV_PATH_ORDER=front
   export PATH="$GOENV_ROOT/bin:$PATH"
   eval "$(goenv init -)"
 fi

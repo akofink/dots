@@ -12,6 +12,31 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
 fi
 
 export GOENV_ROOT="${GOENV_ROOT:-$HOME/.goenv}"
+goenvrc="$HOME/.goenvrc"
+
+export GOENV_PATH_ORDER=front
+if [[ -f "$goenvrc" ]] && grep -q '^export GOENV_PATH_ORDER=' "$goenvrc"; then
+  if ! grep -q '^export GOENV_PATH_ORDER=front$' "$goenvrc"; then
+    goenvrc_tmp=$(mktemp) || fatal "Failed to create temp file for $goenvrc"
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      case "$line" in
+        export\ GOENV_PATH_ORDER=*)
+          printf '%s\n' 'export GOENV_PATH_ORDER=front'
+          ;;
+        *)
+          printf '%s\n' "$line"
+          ;;
+      esac
+    done < "$goenvrc" > "$goenvrc_tmp"
+    mv "$goenvrc_tmp" "$goenvrc"
+  fi
+else
+  if [[ -s "$goenvrc" ]]; then
+    printf '\nexport GOENV_PATH_ORDER=front\n' >> "$goenvrc"
+  else
+    printf 'export GOENV_PATH_ORDER=front\n' >> "$goenvrc"
+  fi
+fi
 
 if [[ ! -d "$GOENV_ROOT/.git" ]]; then
   git clone -q https://github.com/go-nv/goenv.git "$GOENV_ROOT"
