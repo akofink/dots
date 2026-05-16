@@ -1,0 +1,6 @@
+name: test2
+root: ~/dev/
+
+windows:
+  - zsh: zsh
+  - vim: vim

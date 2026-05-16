@@ -1,6 +1,6 @@
-name: default
+name: test
 root: ~/dev/
 
 windows:
-  - zsh:
-      - echo <%= options[:name] %>
+  - server:
+      - bundle exec rails s
