@@ -22,7 +22,7 @@ if [ ! -d "$HOME/dev/repos/tmux" ]; then
   git clone https://github.com/tmux/tmux.git "$HOME/dev/repos/tmux"
 else
   cd "$HOME/dev/repos/tmux" || exit 1
-  git fetch
+  git fetch --tags
 fi
 
 CONFIGURE_ARGS=()
