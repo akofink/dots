@@ -3,4 +3,6 @@ root: ~/dev/
 
 windows:
   - server:
-      - bundle exec rails s
+      panes:
+        - echo hello
+        - echo world
