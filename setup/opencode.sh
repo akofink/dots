@@ -58,9 +58,14 @@ if ! command -v bun >/dev/null 2>&1; then
   npm install -g bun
 fi
 
-if [[ ! -f "$opencode_bin" ]] || ! cmp -s "$opencode_template" "$opencode_bin"; then
+opencode_render_dir=$(mktemp -d) || fatal "Failed to create temp dir for rendering opencode wrapper"
+opencode_rendered="$opencode_render_dir/opencode"
+eval_template "$opencode_template" "$opencode_rendered" ''
+
+if [[ ! -f "$opencode_bin" ]] || ! cmp -s "$opencode_rendered" "$opencode_bin"; then
   "${SUDO[@]}" rm -f "$opencode_bin"
-  "${SUDO[@]}" install -m 0755 "$opencode_template" "$opencode_bin"
+  "${SUDO[@]}" install -m 0755 "$opencode_rendered" "$opencode_bin"
 fi
+rm -rf "$opencode_render_dir"
 
 export OPENCODE_SETUP_COMPLETE=1

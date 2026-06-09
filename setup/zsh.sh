@@ -34,7 +34,7 @@ if [ ! -d "$ZSH_CUSTOM_PLUGIN_DIR/zsh-autosuggestions" ]; then
 fi
 
 mkdir -p "$HOME/.oh-my-zsh/custom/themes/"
-cp "$DOTS_REPO/templates/akofink.zsh-theme" "$HOME/.oh-my-zsh/custom/themes/akofink.zsh-theme"
+eval_template "$DOTS_REPO/templates/akofink.zsh-theme" "$HOME/.oh-my-zsh/custom/themes/akofink.zsh-theme" ''
 # .zshenv contains only runtime shell variables; do not stamp setup-time values
 # into it or PATH/FPATH can retain stale Homebrew Cellar paths after upgrades.
 eval_template "$DOTS_REPO/templates/.zshenv" "$HOME/.zshenv" ''

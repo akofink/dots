@@ -12,11 +12,11 @@ if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
 fi
 
 # Copy over config templates (.vimrc + .vim/*)
-eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc"
+eval_template "$DOTS_REPO/templates/.vimrc" "$HOME/.vimrc" ''
 [[ -d "$HOME/.vim" ]] || mkdir -p "$HOME/.vim"
 for f in "$DOTS_REPO"/templates/dot_vim/*; do
   [[ -e "$f" ]] || continue
-  eval_template "$f" "$HOME/.vim/$(basename -- "$f")"
+  eval_template "$f" "$HOME/.vim/$(basename -- "$f")" ''
 done
 
 # Clone vim upstream

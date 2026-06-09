@@ -91,7 +91,7 @@ if should_build_tmux; then
 
 fi
 
-eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf"
+eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf" ''
 
 # Set up TPM
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
