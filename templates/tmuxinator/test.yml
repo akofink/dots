@@ -1,8 +1,14 @@
 name: test
 root: ~/dev/
-
 windows:
-  - server:
+  - window1:
+      root: .
       panes:
         - echo hello
         - echo world
+  - window2:
+      root: .
+      panes:
+        - commands:
+            - echo hello
+            - echo world
