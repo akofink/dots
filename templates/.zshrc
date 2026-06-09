@@ -41,6 +41,14 @@ if [ -f $ZSH/oh-my-zsh.sh ]; then source $ZSH/oh-my-zsh.sh; fi
 if [ -f ~/.secrets ]; then source ~/.secrets; fi # Secret key environment variables
 if [ -f ~/.env ]; then source ~/.env; fi # Other environment variables
 
+# Keep curses pinentry attached to the current terminal, especially inside tmux.
+if GPG_TTY=$(tty 2>/dev/null); then
+  export GPG_TTY
+  if command -v gpg-connect-agent >/dev/null; then
+    gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
+  fi
+fi
+
 # Rubygems user binary path setup
 if which ruby >/dev/null && which gem >/dev/null; then
     PATH="$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH"
