@@ -93,6 +93,10 @@ eval_template() {
   local template="$1"
   local destination="$2"
   local subst_vars="${3:-}"
+  local has_subst_vars=0
+  if [[ $# -ge 3 ]]; then
+    has_subst_vars=1
+  fi
 
   if [[ -z "$destination" ]]; then
     return
@@ -105,9 +109,9 @@ eval_template() {
   local rendered
   rendered=$(mktemp) || fatal "Failed to create temp file for rendering $template"
   # Render the template once so we can compare before overwriting.
-  # Pass $subst_vars as a positional argument only when set; an empty string
-  # would tell envsubst to substitute nothing at all.
-  if [[ -n "$subst_vars" ]]; then
+  # Pass $subst_vars whenever the caller provides the third argument. An empty
+  # string intentionally tells envsubst to substitute nothing at all.
+  if [[ $has_subst_vars -eq 1 ]]; then
     if ! envsubst "$subst_vars" < "$template" > "$rendered"; then
       rm -f "$rendered"
       fatal "Failed to render template $template"
