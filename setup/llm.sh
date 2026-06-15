@@ -11,7 +11,7 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
-mkdir -p "$HOME/.config/opencode" "$HOME/.codex" "$HOME/.codex/rules" "$HOME/.rovodev"
+mkdir -p "$HOME/.config/opencode" "$HOME/.codex" "$HOME/.codex/rules" "$HOME/.rovodev" "$HOME/.rovo"
 
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml" ''
 eval_template "$DOTS_REPO/templates/dot_codex/instructions.md" "$HOME/.codex/instructions.md" ''
@@ -25,5 +25,7 @@ fi
 eval_template "$agents_template" "$HOME/.config/opencode/AGENTS.md" ''
 eval_template "$agents_template" "$HOME/.codex/AGENTS.md" ''
 eval_template "$agents_template" "$HOME/.rovodev/AGENTS.md" ''
+# Rovo CLI reads global memory from ~/.rovo/; config and MCP are tool-managed.
+eval_template "$agents_template" "$HOME/.rovo/AGENTS.md" ''
 
 export LLM_SETUP_COMPLETE=1
