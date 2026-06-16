@@ -1,3 +1,7 @@
+This global memory file (`~/.rovodev/AGENTS.md`) is generated from the dots repo at `~/dev/repos/dots/templates/dot_rovodev/AGENTS-work.md` — edit it there (not the generated copy) and commit in the dots repo so changes survive a re-render. Keeping the live file in sync directly is fine for immediate effect, but the canonical edit must land in the template.
+
+---
+
 When creating Jira tickets, follow the format "#### Metadata\n ... #### Problem\n ... #### Solution\n ...". If possible, include a prefix in the title that indicates which service the change is related to, e.g. "[BBBS] remove unused ...". Some relevant services include core (Bitbucket core repo), frontbucket, BBBS (bitbucket-billing-service), dss-* services (like dss-repository-processor). Use the related repo's directory name or service descriptor, if available, to figure out the relevant service. If no service is relevant, omit the tag prefix. Story points are in a custom field called `customfield_10117` on softwareteams Jira/BBCEEP tickets; 2 points is a typical ticket estimate, with trivial tickets being 1 point and more complex tasks being 3. Rarely should we have > 3 points on a ticket; this indicates the work should be further split up. Stories can be used to group sets of tasks, with a blocks/blocked by relationship. Never use sub-task type work items due to how they behave across sprints.
 
 ---
