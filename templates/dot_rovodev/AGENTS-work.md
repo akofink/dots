@@ -2,26 +2,7 @@ This global memory file (`~/.rovodev/AGENTS.md`) is generated from the dots repo
 
 ---
 
-When creating Jira tickets, follow the format "#### Metadata\n ... #### Problem\n ... #### Solution\n ...". If possible, include a prefix in the title that indicates which service the change is related to, e.g. "[BBBS] remove unused ...". Some relevant services include core (Bitbucket core repo), frontbucket, BBBS (bitbucket-billing-service), dss-* services (like dss-repository-processor). Use the related repo's directory name or service descriptor, if available, to figure out the relevant service. If no service is relevant, omit the tag prefix. Story points are in a custom field called `customfield_10117` on softwareteams Jira/BBCEEP tickets; 2 points is a typical ticket estimate, with trivial tickets being 1 point and more complex tasks being 3. Rarely should we have > 3 points on a ticket; this indicates the work should be further split up. Stories can be used to group sets of tasks, with a blocks/blocked by relationship. Never use sub-task type work items due to how they behave across sprints.
-
----
-
-When classifying Jira tickets with Engineering Work Taxonomy (EWT) labels, apply exactly one
-of these labels based on the work's primary outcome:
-
-- `ewt-ctb-feature` — new features, roadmap initiatives, new platform capabilities
-- `ewt-ctb-improve-existing` — perf/reliability/security improvements, compliance uplifts, PIR improvement actions, architecture redesign
-- `ewt-ctb-awesome-tools` — tooling benefiting orgs/pillars outside your own
-- `ewt-dp-empowered-teams` — tech debt, test gaps, local dev pain, reducing RtB costs (self-selected, own team)
-- `ewt-dp-amazing-engineering-culture` — adopting standards, golden images, improving team processes (own team)
-- `ewt-rtb-service-operations-and-tech-entropy` — incidents, PIR priority actions, CSS escalations, vuln fixes, dependency upgrades, alert tuning
-- `ewt-rtb-organic-growth` — scaling work driven by organic company growth (not architectural redesign)
-
-When ambiguous, classify by the work's primary driver/outcome.
-
----
-
-Feature flag cleanup tasks should be reported in a straightforward task, similar to "Metadata\n\nhttps://switcheroo.atlassian.com/ui/gates/15a6353f-42ed-47b1-99f8-95383b1e787f/key/bbceep-5456-bbbs-allow-null-recharge-date\n\nProblem\n\nStale flag, on at 100% for all users as of 2026-01-16\n\nSolution\n\nRemove the flag references in our code\n\nAfter deploy, archive the flag"
+When reading, creating, editing, formatting, labeling (EWT), pointing, or linking Jira work items, load the `jira-ticket-authoring` skill — it holds the ticket/title/EWT/story-point/feature-flag-cleanup conventions and the exact tooling (twg + acli; the Atlassian remote MCP cannot reach softwareteams). Always-on rule independent of that skill: never use sub-task type work items due to how they behave across sprints.
 
 Create a branch for each Jira ticket, with the format `akofink/BBCEEP-1234-<description>`. Never transition a Jira ticket (or set resolution / fix version / sprint completion) without an explicit standalone instruction naming the ticket and target status; PR merge, test pass, work completion, and `ask_user_questions` selections are not implicit triggers. Reading status/transitions is fine.
 
@@ -46,13 +27,9 @@ When writing tests for code that is feature flagged, include tests for both the 
 
 When creating splunk queries, use macros with backticks to get logs for a given service, like "`micros_bitbucket-billing-service` env=prod-east ..."
 
-When linking Jira work items (e.g., "blocks"/"blocked by" relationships), the user can use `acli jira workitem link create --out <OUTWARD-KEY> --in <INWARD-KEY> --type <TYPE> --yes`. If you have no tools available to do the linking, provide these commands back to the user for manual execution. Available link types can be listed with `acli jira workitem link type`. For "blocks" relationships, the inward issue blocks the outward issue (e.g., --out BBCEEP-5692 --in BBCEEP-5707 --type Blocks means BBCEEP-5707 blocks BBCEEP-5692).
-
 When rebasing chained branches, the `git rebase --onto <previous-branch> HEAD~1` command is useful.
 
 ---
-
-When creating Jira issues via the Atlassian MCP tools (`create_jira_issue`), do **not** pass the `assignee` parameter — user lookup by email or display name fails silently and causes the entire creation to fail without an error. Create the issue unassigned and let the user self-assign. Also note that `create_jira_issue` returns a generic "Could not find user" message but the issue may or may not have actually been created — always verify with a JQL search after a failed attempt before retrying.
 
 When creating or updating Confluence pages via the Atlassian MCP tools (`create_confluence_page` / `update_confluence_page`), the body must use the LLM-optimised HTML format documented in the `confluence` skill — **not** the legacy storage format with `<ac:structured-macro>` tags. Storage-format tags are not parsed; they round-trip as escaped text (`&lt;ac:structured-macro …&gt;`) and render as visible junk on the page. Specifically: use `<div data-type="panel-info|warning|note|success|error"><p>…</p></div>` for panels, `<pre><code class="language-LANG">…</code></pre>` for code blocks (escape `<` `>` `&` inside), `<details><summary>…</summary>…</details>` for expanders, and the `data-type=…` attributes from the skill for tasks/decisions/layouts. Always read the `confluence` skill before authoring or editing any Confluence page so this is fresh.
 
