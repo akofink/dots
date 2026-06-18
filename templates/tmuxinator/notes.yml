@@ -38,9 +38,7 @@ windows:
       panes:
         - zsh:
   - atlas:
-  - ai:
-  - ai:
-  - ai:
+  # - ai:
   # - docker:
   # - psql:
   # - ads: which ads_setup && ads_setup
