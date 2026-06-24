@@ -19,5 +19,5 @@ root: <%= root %>
 windows:
   - zsh:
   - vim: vim
-  - rovodev: acli rovodev --yolo
+  # - rovodev: acli rovodev --yolo
   - rovo: rovo --yolo
