@@ -43,3 +43,11 @@ windows:
   # - psql:
   # - ads: which ads_setup && ads_setup
 
+  - dots:
+      root: ~/dev/repos/dots
+      layout: even-horizontal
+      panes:
+        - vim:
+            - vim
+            - ' n'
+        - zsh:
