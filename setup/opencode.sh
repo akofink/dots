@@ -31,13 +31,13 @@ if ! bash "$opencode_install_script" --no-modify-path; then
   fatal "Failed to run opencode installer"
 fi
 
-if [[ ! -x "$opencode_install_dir/opencode" ]]; then
-  fatal "opencode installer did not create $opencode_install_dir/opencode"
-fi
+export PATH="$opencode_install_dir:$PATH"
 
-if [[ -f "$legacy_opencode_bin" ]] && grep -q 'OPENCODE_CUSTOM_BRANCH' "$legacy_opencode_bin"; then
+if [[ -x "$opencode_install_dir/opencode" && -f "$legacy_opencode_bin" ]] && grep -q 'OPENCODE_CUSTOM_BRANCH' "$legacy_opencode_bin"; then
   "${SUDO[@]}" rm -f "$legacy_opencode_bin"
 fi
 
-export PATH="$opencode_install_dir:$PATH"
+if ! command -v opencode >/dev/null 2>&1; then
+  fatal "opencode installer completed but no opencode executable is available on PATH"
+fi
 export OPENCODE_SETUP_COMPLETE=1

@@ -44,6 +44,29 @@ unlink_skill_set() {
   done
 }
 
+unlink_notes_symlinks() {
+  remove_symlink_if_points_to "$HOME/.agents/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.claude/CLAUDE.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.claude/agents/test-writer.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.codex/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.config/opencode/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.pi/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.rovodev/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.rovo/AGENTS.md" "$notes_repo"
+
+  unlink_skill_set "$HOME/.agents/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.claude/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.codex/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.pi/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+}
+
 common_skills=(coding-workflow no-mistakes pr-review)
 work_skills=(atlas-updates jira-ticket-authoring working-state-cleanup)
 
@@ -55,7 +78,7 @@ mkdir -p \
   "$HOME/.config/opencode" \
   "$HOME/.pi"
 
-eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml" ''
+eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 eval_template "$DOTS_REPO/templates/dot_codex/instructions.md" "$HOME/.codex/instructions.md" ''
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
 
@@ -87,42 +110,49 @@ if [[ $has_notes_agents -eq 1 ]]; then
 fi
 
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
-  if [[ -f "$notes_repo/bitbucket-core-AGENTS.md" ]]; then
-    install_symlink "$notes_repo/bitbucket-core-AGENTS.md" "$HOME/dev/AGENTS.bbc-core.md"
-  fi
-  if [[ -f "$notes_repo/dss-AGENTS.md" ]]; then
-    install_symlink "$notes_repo/dss-AGENTS.md" "$HOME/dev/AGENTS.dss.md"
+  if [[ $has_notes_agents -eq 1 ]]; then
+    if [[ -f "$notes_repo/bitbucket-core-AGENTS.md" ]]; then
+      install_symlink "$notes_repo/bitbucket-core-AGENTS.md" "$HOME/dev/AGENTS.bbc-core.md"
+    fi
+    if [[ -f "$notes_repo/dss-AGENTS.md" ]]; then
+      install_symlink "$notes_repo/dss-AGENTS.md" "$HOME/dev/AGENTS.dss.md"
+    fi
   fi
 
   mkdir -p "$HOME/.rovodev" "$HOME/.rovo"
   eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml" ''
 
-  install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
-  # Rovo CLI reads global memory from ~/.rovo/; config and MCP are tool-managed.
-  install_symlink "$agents_template" "$HOME/.rovo/AGENTS.md"
-
-  link_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
-  link_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
-  link_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
-  link_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
-  link_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
-  link_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
-  link_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}"
-  link_skill_set "$HOME/dev/.rovodev/skills" "${work_skills[@]}"
-else
   if [[ $has_notes_agents -eq 1 ]]; then
-    unlink_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
-    unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
-    unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
-    unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
-    unlink_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
-    unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
-    unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+    install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
+    # Rovo CLI reads global memory from ~/.rovo/; config and MCP are tool-managed.
+    install_symlink "$agents_template" "$HOME/.rovo/AGENTS.md"
 
-    remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo/bitbucket-core-AGENTS.md"
-    remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo/dss-AGENTS.md"
-    remove_symlink_if_points_to "$HOME/.rovodev/AGENTS.md" "$notes_repo/agents/global-work.md"
-    remove_symlink_if_points_to "$HOME/.rovo/AGENTS.md" "$notes_repo/agents/global-work.md"
+    link_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
+    link_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
+    link_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
+    link_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
+    link_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
+    link_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+    link_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}"
+    link_skill_set "$HOME/dev/.rovodev/skills" "${work_skills[@]}"
+  else
+    unlink_notes_symlinks
+  fi
+else
+  unlink_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.rovodev/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.rovo/AGENTS.md" "$notes_repo"
+  if [[ $has_notes_agents -eq 0 ]]; then
+    unlink_notes_symlinks
   fi
   if [[ -f "$HOME/.rovodev/config.yml" ]] && cmp -s "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml"; then
     rm -f "$HOME/.rovodev/config.yml"
