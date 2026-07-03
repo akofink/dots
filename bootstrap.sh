@@ -236,6 +236,39 @@ backup_destination_if_needed() {
   mv "$destination" "$destination.old.$timestamp"
 }
 
+install_symlink() {
+  local source="$1"
+  local destination="$2"
+
+  if [[ -z "$source" || -z "$destination" ]]; then
+    return
+  fi
+
+  if [[ ! -e "$source" ]]; then
+    fatal "Cannot symlink missing source: $source"
+  fi
+
+  local destination_dir
+  destination_dir=$(dirname -- "$destination") || fatal "Failed to determine directory for $destination"
+  mkdir -p "$destination_dir"
+
+  if [[ -L "$destination" ]]; then
+    local current_target
+    current_target=$(readlink "$destination") || fatal "Failed to read symlink $destination"
+    if [[ "$current_target" == "$source" ]]; then
+      return
+    fi
+  fi
+
+  if [[ -e "$destination" || -L "$destination" ]]; then
+    local timestamp
+    timestamp=$(date +%y%m%d%H%M%S) || fatal "Failed to generate backup timestamp"
+    mv "$destination" "$destination.old.$timestamp"
+  fi
+
+  ln -s "$source" "$destination"
+}
+
 # eval_template templates/.vimrc.template ~/.vimrc
 # eval_template templates/.zshrc ~/.zshrc '$GIT_EMAIL $GIT_SIGNINGKEY'
 #
@@ -254,6 +287,10 @@ eval_template() {
   local template="$1"
   local destination="$2"
   local subst_vars="${3:-}"
+  local has_subst_vars=0
+  if [[ $# -ge 3 ]]; then
+    has_subst_vars=1
+  fi
 
   if [[ -z "$destination" ]]; then
     return
@@ -266,9 +303,9 @@ eval_template() {
   local rendered
   rendered=$(mktemp) || fatal "Failed to create temp file for rendering $template"
   # Render the template once so we can compare before overwriting.
-  # Pass $subst_vars as a positional argument only when set; an empty string
-  # would tell envsubst to substitute nothing at all.
-  if [[ -n "$subst_vars" ]]; then
+  # Pass $subst_vars whenever the caller provides the third argument. An empty
+  # string intentionally tells envsubst to substitute nothing at all.
+  if [[ $has_subst_vars -eq 1 ]]; then
     if ! envsubst "$subst_vars" < "$template" > "$rendered"; then
       rm -f "$rendered"
       fatal "Failed to render template $template"
@@ -352,7 +389,7 @@ then
   git clone https://github.com/akofink/dots.git "$DOTS_REPO"
 fi
 
-eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore"
+eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore" ''
 eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 
 export REPOS_SETUP_COMPLETE=1
