@@ -43,7 +43,7 @@ unlink_skill_set() {
   done
 }
 
-common_skills=(coding-workflow pr-review)
+common_skills=(coding-workflow no-mistakes pr-review)
 work_skills=(atlas-updates jira-ticket-authoring working-state-cleanup)
 
 mkdir -p \
@@ -64,6 +64,10 @@ install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
 install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
 install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
 install_symlink "$agents_template" "$HOME/.pi/AGENTS.md"
+
+if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
+  install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
+fi
 
 link_skill_set "$HOME/.agents/skills" "${common_skills[@]}"
 link_skill_set "$HOME/.claude/skills" "${common_skills[@]}"

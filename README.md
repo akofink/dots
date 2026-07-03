@@ -112,6 +112,7 @@ from the private notes repo (`~/dev/repos/notes` by default):
 - `~/.agents/AGENTS.md`
 - `~/.claude/AGENTS.md`
 - `~/.claude/CLAUDE.md`
+- `~/.claude/agents/test-writer.md` when the notes repo has the target file
 - `~/.config/opencode/AGENTS.md`
 - `~/.codex/config.toml`
 - `~/.codex/AGENTS.md`
