@@ -77,13 +77,9 @@ script directly.
 
 #### opencode module
 
-`bash setup/opencode.sh` installs opencode from the local source checkout at `~/dev/repos/opencode`.
-It clones `https://github.com/akofink/opencode.git` on the `customizations` branch when missing, keeps
-that branch fast-forwarded, ensures `bun` is available, and installs the managed launcher at
-`/usr/local/bin/opencode`.
-When rebuilding the local binary, the launcher sets `OPENCODE_VERSION=9999.0.0` by default so the
-custom build is treated as current by opencode update checks. Override with `OPENCODE_BUILD_VERSION`
-when a different local build version is needed.
+`bash setup/opencode.sh` installs opencode using the official installer from `https://opencode.ai/install`.
+The installer places the binary in `~/.opencode/bin`; the managed shell templates already add that
+directory to `PATH`, so the setup script runs the installer with `--no-modify-path`.
 
 #### go module
 

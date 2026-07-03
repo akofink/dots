@@ -11,61 +11,25 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
-opencode_repo="$DEV_REPOS/opencode"
-opencode_remote_name="akofink"
-opencode_remote="https://github.com/akofink/opencode.git"
-opencode_upstream_remote_name="upstream"
-opencode_upstream_remote="https://github.com/anomalyco/opencode.git"
-opencode_branch="customizations"
-opencode_bin="/usr/local/bin/opencode"
-opencode_template="$DOTS_REPO/templates/bin/opencode"
-
-mkdir -p "$DEV_REPOS"
-
-if [[ ! -d "$opencode_repo/.git" ]]; then
-  git clone -q --origin "$opencode_remote_name" --branch "$opencode_branch" "$opencode_remote" "$opencode_repo"
-  git -C "$opencode_repo" remote add "$opencode_upstream_remote_name" "$opencode_upstream_remote"
-else
-  git -C "$opencode_repo" remote set-url "$opencode_remote_name" "$opencode_remote"
-  if ! git -C "$opencode_repo" remote get-url "$opencode_upstream_remote_name" >/dev/null 2>&1; then
-    git -C "$opencode_repo" remote add "$opencode_upstream_remote_name" "$opencode_upstream_remote"
-  else
-    git -C "$opencode_repo" remote set-url "$opencode_upstream_remote_name" "$opencode_upstream_remote"
-  fi
-
-  git -C "$opencode_repo" checkout -q "$opencode_branch"
+if ! command -v curl >/dev/null 2>&1; then
+  fatal "curl not found; install curl before setting up opencode"
 fi
 
-if ! command -v bun >/dev/null 2>&1; then
-  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
-    # shellcheck disable=SC1091
-    had_nounset=0
-    case $- in
-      *u*) had_nounset=1; set +u ;;
-    esac
-    source "$NVM_DIR/nvm.sh"
-    nvm use --lts >/dev/null
-    if [[ "$had_nounset" -eq 1 ]]; then
-      set -u
-    fi
-  fi
+opencode_install_dir="$HOME/.opencode/bin"
+legacy_opencode_bin="/usr/local/bin/opencode"
 
-  if ! command -v npm >/dev/null 2>&1; then
-    fatal "npm not found; install nvm/node before setting up opencode"
-  fi
+opencode_install_script=$(mktemp) || fatal "Failed to create temp file for opencode installer"
+cleanup_opencode_install_script() {
+  rm -f "$opencode_install_script"
+}
+trap cleanup_opencode_install_script RETURN
 
-  npm install -g bun
+curl -fsSL https://opencode.ai/install -o "$opencode_install_script"
+bash "$opencode_install_script" --no-modify-path
+
+if [[ -f "$legacy_opencode_bin" ]] && grep -q 'OPENCODE_CUSTOM_BRANCH' "$legacy_opencode_bin"; then
+  "${SUDO[@]}" rm -f "$legacy_opencode_bin"
 fi
 
-opencode_render_dir=$(mktemp -d) || fatal "Failed to create temp dir for rendering opencode wrapper"
-opencode_rendered="$opencode_render_dir/opencode"
-eval_template "$opencode_template" "$opencode_rendered" ''
-
-if [[ ! -f "$opencode_bin" ]] || ! cmp -s "$opencode_rendered" "$opencode_bin"; then
-  "${SUDO[@]}" rm -f "$opencode_bin"
-  "${SUDO[@]}" install -m 0755 "$opencode_rendered" "$opencode_bin"
-fi
-rm -rf "$opencode_render_dir"
-
+export PATH="$opencode_install_dir:$PATH"
 export OPENCODE_SETUP_COMPLETE=1
