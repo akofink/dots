@@ -16,9 +16,10 @@ agents_template="$notes_repo/agents/global-personal.md"
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   agents_template="$notes_repo/agents/global-work.md"
 fi
-
+has_notes_agents=1
 if [[ ! -f "$agents_template" ]]; then
-  fatal "Agent instructions not found at $agents_template. Clone or restore the notes repo before running llm setup."
+  has_notes_agents=0
+  echo "Skipping notes-backed agent setup; missing $agents_template"
 fi
 
 link_skill_set() {
@@ -58,29 +59,31 @@ eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.
 eval_template "$DOTS_REPO/templates/dot_codex/instructions.md" "$HOME/.codex/instructions.md" ''
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
 
-install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
-install_symlink "$agents_template" "$HOME/.claude/AGENTS.md"
-install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
-install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
-install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
-install_symlink "$agents_template" "$HOME/.pi/AGENTS.md"
+if [[ $has_notes_agents -eq 1 ]]; then
+  install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
+  install_symlink "$agents_template" "$HOME/.claude/AGENTS.md"
+  install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
+  install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
+  install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
+  install_symlink "$agents_template" "$HOME/.pi/AGENTS.md"
 
-if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
-  install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
-fi
+  if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
+    install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
+  fi
 
-link_skill_set "$HOME/.agents/skills" "${common_skills[@]}"
-link_skill_set "$HOME/.claude/skills" "${common_skills[@]}"
-link_skill_set "$HOME/.codex/skills" "${common_skills[@]}"
-link_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}"
-link_skill_set "$HOME/.pi/skills" "${common_skills[@]}"
+  link_skill_set "$HOME/.agents/skills" "${common_skills[@]}"
+  link_skill_set "$HOME/.claude/skills" "${common_skills[@]}"
+  link_skill_set "$HOME/.codex/skills" "${common_skills[@]}"
+  link_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}"
+  link_skill_set "$HOME/.pi/skills" "${common_skills[@]}"
 
-dev_agents_template="$notes_repo/dev-root-personal-AGENTS.md"
-if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
-  dev_agents_template="$notes_repo/dev-root-AGENTS.md"
-fi
-if [[ -f "$dev_agents_template" ]]; then
-  install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
+  dev_agents_template="$notes_repo/dev-root-personal-AGENTS.md"
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    dev_agents_template="$notes_repo/dev-root-AGENTS.md"
+  fi
+  if [[ -f "$dev_agents_template" ]]; then
+    install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
+  fi
 fi
 
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
@@ -107,18 +110,23 @@ if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   link_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}"
   link_skill_set "$HOME/dev/.rovodev/skills" "${work_skills[@]}"
 else
-  unlink_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
-  unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+  if [[ $has_notes_agents -eq 1 ]]; then
+    unlink_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
+    unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
+    unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
+    unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
+    unlink_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
+    unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+    unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
 
-  remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo/bitbucket-core-AGENTS.md"
-  remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo/dss-AGENTS.md"
-  remove_symlink_if_points_to "$HOME/.rovodev/AGENTS.md" "$notes_repo/agents/global-work.md"
-  remove_symlink_if_points_to "$HOME/.rovo/AGENTS.md" "$notes_repo/agents/global-work.md"
+    remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo/bitbucket-core-AGENTS.md"
+    remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo/dss-AGENTS.md"
+    remove_symlink_if_points_to "$HOME/.rovodev/AGENTS.md" "$notes_repo/agents/global-work.md"
+    remove_symlink_if_points_to "$HOME/.rovo/AGENTS.md" "$notes_repo/agents/global-work.md"
+  fi
+  if [[ -f "$HOME/.rovodev/config.yml" ]] && cmp -s "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml"; then
+    rm -f "$HOME/.rovodev/config.yml"
+  fi
 fi
 
 export LLM_SETUP_COMPLETE=1

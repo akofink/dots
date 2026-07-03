@@ -1,5 +1,5 @@
 name: opencode
-root: ~/dev/repos/opencode
+root: ~/dev
 
 windows:
   - zsh:

@@ -121,6 +121,9 @@ from the private notes repo (`~/dev/repos/notes` by default):
 - `~/.pi/AGENTS.md`
 - `~/dev/AGENTS.md`
 
+If the notes repo is not present, the module still renders the repo-managed Codex config and rules, then skips the
+notes-backed agent and skill symlinks with a warning.
+
 On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
 
 - `~/dev/AGENTS.bbc-core.md` when the notes repo has the target file

@@ -24,8 +24,16 @@ cleanup_opencode_install_script() {
 }
 trap cleanup_opencode_install_script RETURN
 
-curl -fsSL https://opencode.ai/install -o "$opencode_install_script"
-bash "$opencode_install_script" --no-modify-path
+if ! curl -fsSL https://opencode.ai/install -o "$opencode_install_script"; then
+  fatal "Failed to download opencode installer"
+fi
+if ! bash "$opencode_install_script" --no-modify-path; then
+  fatal "Failed to run opencode installer"
+fi
+
+if [[ ! -x "$opencode_install_dir/opencode" ]]; then
+  fatal "opencode installer did not create $opencode_install_dir/opencode"
+fi
 
 if [[ -f "$legacy_opencode_bin" ]] && grep -q 'OPENCODE_CUSTOM_BRANCH' "$legacy_opencode_bin"; then
   "${SUDO[@]}" rm -f "$legacy_opencode_bin"
