@@ -75,6 +75,39 @@ backup_destination_if_needed() {
   mv "$destination" "$destination.old.$timestamp"
 }
 
+install_symlink() {
+  local source="$1"
+  local destination="$2"
+
+  if [[ -z "$source" || -z "$destination" ]]; then
+    return
+  fi
+
+  if [[ ! -e "$source" ]]; then
+    fatal "Cannot symlink missing source: $source"
+  fi
+
+  local destination_dir
+  destination_dir=$(dirname -- "$destination") || fatal "Failed to determine directory for $destination"
+  mkdir -p "$destination_dir"
+
+  if [[ -L "$destination" ]]; then
+    local current_target
+    current_target=$(readlink "$destination") || fatal "Failed to read symlink $destination"
+    if [[ "$current_target" == "$source" ]]; then
+      return
+    fi
+  fi
+
+  if [[ -e "$destination" || -L "$destination" ]]; then
+    local timestamp
+    timestamp=$(date +%y%m%d%H%M%S) || fatal "Failed to generate backup timestamp"
+    mv "$destination" "$destination.old.$timestamp"
+  fi
+
+  ln -s "$source" "$destination"
+}
+
 # eval_template templates/.vimrc.template ~/.vimrc
 # eval_template templates/.zshrc ~/.zshrc '$GIT_EMAIL $GIT_SIGNINGKEY'
 #

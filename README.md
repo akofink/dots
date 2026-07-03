@@ -106,27 +106,44 @@ then WSL restarted.
 
 #### LLM config module
 
-`bash setup/llm.sh` renders a small managed set of agent configs:
+`bash setup/llm.sh` renders tool configs and symlinks shared agent/skill files
+from the private notes repo (`~/dev/repos/notes` by default):
 
+- `~/.agents/AGENTS.md`
+- `~/.claude/AGENTS.md`
+- `~/.claude/CLAUDE.md`
 - `~/.config/opencode/AGENTS.md`
 - `~/.codex/config.toml`
 - `~/.codex/AGENTS.md`
 - `~/.codex/instructions.md`
 - `~/.codex/rules/dots.rules`
+- `~/.pi/AGENTS.md`
+- `~/dev/AGENTS.md`
+- `~/dev/AGENTS.bbc-core.md` when the notes repo has the target file
+- `~/dev/AGENTS.dss.md` when the notes repo has the target file
+
+On work machines (`MACHINE_CLASS=work`) it additionally manages Rovo/RovoDev:
+
 - `~/.rovodev/config.yml`
 - `~/.rovodev/AGENTS.md`
+- `~/.rovo/AGENTS.md`
 
 The Codex rules file is a repo-managed baseline for portable allow-prefix rules. Keep machine-specific or
 task-specific approvals in separate files such as `~/.codex/rules/default.rules`; `setup/llm.sh` will not
 overwrite those.
 
-Shared agent instructions intentionally diverge by machine role:
+Shared agent instructions intentionally diverge by machine role and are canonical in the notes repo:
 
-- personal machines get a lightweight template that avoids Jira, Splunk, and other corporate-only assumptions
-- work machines (`MACHINE_CLASS=work`) get the Atlassian-specific agent guidance
+- personal machines link to `~/dev/repos/notes/agents/global-personal.md`, which avoids Jira, Splunk,
+  Confluence, Rovo/RovoDev, and other corporate-only assumptions
+- work machines (`MACHINE_CLASS=work`) link to `~/dev/repos/notes/agents/global-work.md`, which includes
+  Atlassian-specific agent guidance
 
-The shared RovoDev config is intentionally conservative so it works across home machines, work laptops,
-and containerized setups without assuming proprietary integrations are always reachable.
+Skills are also symlinked from `~/dev/repos/notes/.rovodev/skills/` into the tool-specific skill directories.
+Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
+linked only when `MACHINE_CLASS=work`.
+
+Rovo/RovoDev setup is work-only because those tools and instructions assume Atlassian-specific workflows.
 
 ### Template system
 
