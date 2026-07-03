@@ -34,6 +34,15 @@ link_skill_set() {
   done
 }
 
+unlink_skill_set() {
+  local destination_root="$1"
+  shift
+
+  for skill_name in "$@"; do
+    remove_symlink_if_points_to "$destination_root/$skill_name" "$notes_repo/.rovodev/skills/$skill_name"
+  done
+}
+
 common_skills=(coding-workflow pr-review)
 work_skills=(atlas-updates jira-ticket-authoring working-state-cleanup)
 
@@ -62,16 +71,22 @@ link_skill_set "$HOME/.codex/skills" "${common_skills[@]}"
 link_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}"
 link_skill_set "$HOME/.pi/skills" "${common_skills[@]}"
 
-install_symlink "$notes_repo/dev-root-AGENTS.md" "$HOME/dev/AGENTS.md"
-
-if [[ -f "$notes_repo/bitbucket-core-AGENTS.md" ]]; then
-  install_symlink "$notes_repo/bitbucket-core-AGENTS.md" "$HOME/dev/AGENTS.bbc-core.md"
+dev_agents_template="$notes_repo/dev-root-personal-AGENTS.md"
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+  dev_agents_template="$notes_repo/dev-root-AGENTS.md"
 fi
-if [[ -f "$notes_repo/dss-AGENTS.md" ]]; then
-  install_symlink "$notes_repo/dss-AGENTS.md" "$HOME/dev/AGENTS.dss.md"
+if [[ -f "$dev_agents_template" ]]; then
+  install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
 fi
 
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+  if [[ -f "$notes_repo/bitbucket-core-AGENTS.md" ]]; then
+    install_symlink "$notes_repo/bitbucket-core-AGENTS.md" "$HOME/dev/AGENTS.bbc-core.md"
+  fi
+  if [[ -f "$notes_repo/dss-AGENTS.md" ]]; then
+    install_symlink "$notes_repo/dss-AGENTS.md" "$HOME/dev/AGENTS.dss.md"
+  fi
+
   mkdir -p "$HOME/.rovodev" "$HOME/.rovo"
   eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml" ''
 
@@ -87,6 +102,19 @@ if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   link_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   link_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}"
   link_skill_set "$HOME/dev/.rovodev/skills" "${work_skills[@]}"
+else
+  unlink_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo/bitbucket-core-AGENTS.md"
+  remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo/dss-AGENTS.md"
+  remove_symlink_if_points_to "$HOME/.rovodev/AGENTS.md" "$notes_repo/agents/global-work.md"
+  remove_symlink_if_points_to "$HOME/.rovo/AGENTS.md" "$notes_repo/agents/global-work.md"
 fi
 
 export LLM_SETUP_COMPLETE=1

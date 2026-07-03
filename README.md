@@ -119,11 +119,11 @@ from the private notes repo (`~/dev/repos/notes` by default):
 - `~/.codex/rules/dots.rules`
 - `~/.pi/AGENTS.md`
 - `~/dev/AGENTS.md`
+
+On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
+
 - `~/dev/AGENTS.bbc-core.md` when the notes repo has the target file
 - `~/dev/AGENTS.dss.md` when the notes repo has the target file
-
-On work machines (`MACHINE_CLASS=work`) it additionally manages Rovo/RovoDev:
-
 - `~/.rovodev/config.yml`
 - `~/.rovodev/AGENTS.md`
 - `~/.rovo/AGENTS.md`
@@ -138,6 +138,10 @@ Shared agent instructions intentionally diverge by machine role and are canonica
   Confluence, Rovo/RovoDev, and other corporate-only assumptions
 - work machines (`MACHINE_CLASS=work`) link to `~/dev/repos/notes/agents/global-work.md`, which includes
   Atlassian-specific agent guidance
+
+The `~/dev/AGENTS.md` link follows the same split: personal machines link to
+`~/dev/repos/notes/dev-root-personal-AGENTS.md`, while work machines link to
+`~/dev/repos/notes/dev-root-AGENTS.md`.
 
 Skills are also symlinked from `~/dev/repos/notes/.rovodev/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are

@@ -108,6 +108,21 @@ install_symlink() {
   ln -s "$source" "$destination"
 }
 
+remove_symlink_if_points_to() {
+  local destination="$1"
+  local source_prefix="$2"
+
+  if [[ ! -L "$destination" ]]; then
+    return
+  fi
+
+  local current_target
+  current_target=$(readlink "$destination") || fatal "Failed to read symlink $destination"
+  if [[ "$current_target" == "$source_prefix" || "$current_target" == "$source_prefix"/* ]]; then
+    rm -f "$destination"
+  fi
+}
+
 # eval_template templates/.vimrc.template ~/.vimrc
 # eval_template templates/.zshrc ~/.zshrc '$GIT_EMAIL $GIT_SIGNINGKEY'
 #
