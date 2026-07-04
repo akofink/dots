@@ -11,6 +11,40 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
+install_llm_cli() {
+  local name="$1"
+  local url="$2"
+  shift 2
+
+  if ! command -v curl >/dev/null 2>&1; then
+    fatal "curl not found; install curl before setting up LLM CLI tools"
+  fi
+
+  local install_script
+  install_script=$(mktemp) || fatal "Failed to create temp file for $name installer"
+
+  if ! curl -fsSL "$url" -o "$install_script"; then
+    rm -f "$install_script"
+    fatal "Failed to download $name installer"
+  fi
+
+  if ! "$@" "$install_script"; then
+    rm -f "$install_script"
+    fatal "Failed to run $name installer"
+  fi
+
+  rm -f "$install_script"
+}
+
+install_llm_cli "Claude Code" "https://claude.ai/install.sh" bash
+install_llm_cli "Codex" "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh
+install_llm_cli "Pi Coding Agent" "https://pi.dev/install.sh" sh
+
+if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
+  # shellcheck source=setup/opencode.sh
+  source "$script_dir/opencode.sh"
+fi
+
 notes_repo="${NOTES_REPO:-"$DEV_REPOS/notes"}"
 agents_template="$notes_repo/agents/global-personal.md"
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then

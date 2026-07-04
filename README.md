@@ -75,6 +75,17 @@ The top-level `setup.sh` orchestrates a curated subset of modules: `vim`, `tmux`
 `opencode`, `rbenv`, `go`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module
 script directly.
 
+#### LLM CLI tools
+
+`bash setup/llm.sh` installs the common LLM CLI tools configured by this repo using their official installers:
+
+- Claude Code from `https://claude.ai/install.sh`
+- Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
+- Pi Coding Agent from `https://pi.dev/install.sh`
+- opencode via `setup/opencode.sh`
+
+Rovo/RovoDev is configuration-only; setup does not auto-install it.
+
 #### opencode module
 
 `bash setup/opencode.sh` installs opencode using the official installer from `https://opencode.ai/install`.
