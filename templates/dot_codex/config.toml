@@ -1,5 +1,5 @@
 personality = "pragmatic"
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "medium"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
@@ -30,3 +30,13 @@ trust_level = "trusted"
 
 [notice]
 hide_full_access_warning = true
+
+[notice.model_migrations]
+"gpt-5.4" = "gpt-5.5"
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "context-used", "five-hour-limit", "weekly-limit", "context-window-size", "total-input-tokens", "total-output-tokens", "task-progress"]
+status_line_use_colors = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 3

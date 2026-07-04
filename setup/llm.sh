@@ -147,6 +147,7 @@ mkdir -p \
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 eval_template "$DOTS_REPO/templates/dot_codex/instructions.md" "$HOME/.codex/instructions.md" ''
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
+eval_template "$DOTS_REPO/templates/dot_config/opencode/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc" ''
 
 if [[ $has_notes_agents -eq 1 ]]; then
   install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"

@@ -56,6 +56,9 @@ fi
 
 # Customize to your needs...
 export PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
+if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
 # Atlas CLI env setup
 if [ -d /opt/atlassian/bin ]; then
   export PATH=$PATH:/opt/atlassian/bin

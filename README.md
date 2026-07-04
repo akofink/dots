@@ -125,6 +125,7 @@ from the private notes repo (`~/dev/repos/notes` by default):
 - `~/.claude/CLAUDE.md`
 - `~/.claude/agents/test-writer.md` when the notes repo has the target file
 - `~/.config/opencode/AGENTS.md`
+- `~/.config/opencode/opencode.jsonc`
 - `~/.codex/config.toml`
 - `~/.codex/AGENTS.md`
 - `~/.codex/instructions.md`
@@ -146,6 +147,14 @@ On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev an
 The Codex rules file is a repo-managed baseline for portable allow-prefix rules. Keep machine-specific or
 task-specific approvals in separate files such as `~/.codex/rules/default.rules`; `setup/llm.sh` will not
 overwrite those.
+
+The LLM tools do not expose one common config model, so shared behaviour is kept as explicit per-tool templates
+instead of an abstraction layer. When changing durable defaults, check the corresponding tool config directly:
+
+- Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
+- opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; it currently enables LSP support.
+- Shared agent instructions and skills are notes-backed symlinks where each tool supports them.
+- Tool-specific auth, cache, history, project trust, missing features, and one-off permission/access grants remain local.
 
 Shared agent instructions intentionally diverge by machine role and are canonical in the notes repo:
 
