@@ -222,6 +222,43 @@ list (e.g. `'$FOO $BAR'`). This controls which variables `envsubst` expands:
 When adding a variable to any template, decide whether it is setup-time or
 runtime. If the template mixes both kinds, supply the explicit variable list.
 
+### Backup audit and pruning
+
+Setup scripts archive replaced destinations in place with a dots-managed backup
+suffix before installing the new file or symlink.
+Most backups look like `<destination>.old.YYMMDDHHMMSS`; a few directory setup
+scripts use `<destination>.old.YYYYMMDDTHHMMSS`.
+
+Audit backups first:
+
+```sh
+bin/dots-backups.sh
+```
+
+The audit is a dry run.
+It scans `$HOME`, reports matching backups, and prints `WOULD DELETE` only for
+older backups it can prove are redundant because they match the current
+destination or a newer backup for the same destination.
+It always keeps the newest matching backup for each destination and skips
+backups whose safety cannot be confidently determined.
+
+To inspect a smaller tree, pass `--root`:
+
+```sh
+bin/dots-backups.sh --root ~/.config
+```
+
+Prune only after reviewing the audit output:
+
+```sh
+bin/dots-backups.sh --prune
+```
+
+The prune mode only targets the same exact `.old.<timestamp>` suffixes used by
+this repo.
+It does not delete unique backups, the newest backup for a destination, or paths
+with non-dots backup names.
+
 ### Contributing
 
 Fork this repo, and add your own templates. Pull requests for updates to setup scripts are welcome!
