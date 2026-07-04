@@ -6,3 +6,5 @@ windows:
   - vim:
     - nvm use --lts
     - vim
+  - notes:
+      root: ~/dev/repos/notes

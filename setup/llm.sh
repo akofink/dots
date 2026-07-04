@@ -36,9 +36,41 @@ install_llm_cli() {
   rm -f "$install_script"
 }
 
+install_agent_skill() {
+  local name="$1"
+  shift
+
+  if ! command -v npx >/dev/null 2>&1; then
+    fatal "npx not found; install Node.js before setting up $name"
+  fi
+
+  if ! npx -y skills add "$@" -g; then
+    fatal "Failed to install $name agent skill"
+  fi
+}
+
+clone_llm_accessory() {
+  local url="$1"
+  local destination="$2"
+
+  mkdir -p "$(dirname -- "$destination")"
+  if [[ ! -d "$destination/.git" ]]; then
+    git clone "$url" "$destination"
+  else
+    git -C "$destination" pull --ff-only
+  fi
+}
+
 install_llm_cli "Claude Code" "https://claude.ai/install.sh" bash
 install_llm_cli "Codex" "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh
 install_llm_cli "Pi Coding Agent" "https://pi.dev/install.sh" sh
+install_llm_cli "treehouse" "https://kunchenguid.github.io/treehouse/install.sh" sh
+
+install_agent_skill "AXI" kunchenguid/axi
+install_agent_skill "gh-axi" kunchenguid/gh-axi --skill gh-axi
+install_agent_skill "chrome-devtools-axi" kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi
+
+clone_llm_accessory "https://github.com/kunchenguid/firstmate.git" "$DEV_REPOS/firstmate"
 
 if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
   # shellcheck source=setup/opencode.sh
