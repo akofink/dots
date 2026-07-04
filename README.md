@@ -138,6 +138,20 @@ when `NOTES_REPO` is missing:
 If the notes repo is not present when the LLM module runs directly, the module still renders the repo-managed Codex
 config and rules, then skips the notes-backed agent and skill symlinks with a warning.
 
+#### Firstmate local state
+
+`bash setup/firstmate.sh` keeps firstmate's durable local state portable by symlinking these gitignored paths into
+the private notes repo:
+
+- `~/dev/repos/firstmate/data` -> `~/dev/repos/notes/firstmate/local-state/data`
+- `~/dev/repos/firstmate/config` -> `~/dev/repos/notes/firstmate/local-state/config`
+
+When those firstmate paths already contain local files, setup first copies them into the notes-backed directory,
+refuses to overwrite different existing files, then archives the original directory with a `.migrated.<timestamp>`
+suffix before installing the symlink.
+Firstmate `state/` remains local because it contains volatile runtime supervision signals and in-flight process state
+that should not be transferred blindly between machines.
+
 On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
 
 - `~/dev/AGENTS.bbc-core.md` when the notes repo has the target file
