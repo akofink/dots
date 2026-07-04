@@ -143,12 +143,9 @@ config and rules, then skips the notes-backed agent and skill symlinks with a wa
 `bash setup/firstmate.sh` keeps firstmate's durable local state portable by symlinking these gitignored paths into
 the private notes repo:
 
-- `~/dev/repos/firstmate/data` -> `~/dev/repos/notes/firstmate/local-state/data`
-- `~/dev/repos/firstmate/config` -> `~/dev/repos/notes/firstmate/local-state/config`
+- individual files under `~/dev/repos/firstmate/data/` are symlinked to `~/dev/repos/notes/firstmate/local-state/data/`
+  (e.g. `backlog.md` -> `.../local-state/data/backlog.md`)
 
-When those firstmate paths already contain local files, setup first copies them into the notes-backed directory,
-refuses to overwrite different existing files, then archives the original directory with a `.migrated.<timestamp>`
-suffix before installing the symlink.
 Firstmate `state/` remains local because it contains volatile runtime supervision signals and in-flight process state
 that should not be transferred blindly between machines.
 
