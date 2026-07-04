@@ -24,13 +24,27 @@ Solution
 
 Use the imperative mood. Protect inline backticks from shell substitution by
 using single-quoted `-m` strings or `git commit -F`. Commits are signed with
-GPG by default; if signing fails, stop and report it. Do not push to any remote.
+GPG by default; if signing fails, stop and report it. This repo may be updated
+and pushed to its remote whenever verification passes.
 
 Default workflow: edit → stage → commit → respond. Rely on the pre-commit
 hooks to run checks during commit rather than running `make check` manually
 first, unless diagnosing a hook failure or the user explicitly asks for a
 separate verification command. Do not leave tracked files uncommitted unless
 the task is intentionally incomplete or blocked.
+
+## Delivery and privacy policy
+
+`dots` is a public/open-source dotfiles repo. It can be updated and pushed at
+will, similar to the author's private notes repo, but the privacy bar is higher
+because every pushed change may be public.
+
+Before committing or pushing, check that changes do not expose sensitive data,
+keys, tokens, PII, private user-generated content, or non-public personal
+details beyond information the author has already published on GitHub, such as
+email addresses and other open-source projects. It is fine to mention that
+private repos exist, including the private notes repo, as long as no private
+contents or sensitive details are disclosed.
 
 ## Architecture overview
 
