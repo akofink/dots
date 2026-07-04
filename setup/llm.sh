@@ -36,6 +36,23 @@ install_llm_cli() {
   rm -f "$install_script"
 }
 
+install_pi_coding_agent() {
+  if ! command -v npm >/dev/null 2>&1; then
+    fatal "npm not found; install Node.js before setting up Pi Coding Agent"
+  fi
+
+  if ! npm install -g \
+    --ignore-scripts \
+    --min-release-age=0 \
+    --no-fund \
+    --no-audit \
+    --loglevel=error \
+    --progress=false \
+    @earendil-works/pi-coding-agent; then
+    fatal "Failed to install Pi Coding Agent"
+  fi
+}
+
 install_agent_skill() {
   local name="$1"
   shift
@@ -44,7 +61,7 @@ install_agent_skill() {
     fatal "npx not found; install Node.js before setting up $name"
   fi
 
-  if ! npx -y skills add "$@" -g; then
+  if ! npx -y skills add --yes "$@" -g; then
     fatal "Failed to install $name agent skill"
   fi
 }
@@ -63,7 +80,7 @@ clone_llm_accessory() {
 
 install_llm_cli "Claude Code" "https://claude.ai/install.sh" bash
 install_llm_cli "Codex" "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh
-install_llm_cli "Pi Coding Agent" "https://pi.dev/install.sh" sh
+install_pi_coding_agent
 install_llm_cli "treehouse" "https://kunchenguid.github.io/treehouse/install.sh" sh
 
 install_agent_skill "AXI" kunchenguid/axi
