@@ -133,7 +133,7 @@ unlink_notes_symlinks() {
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
 }
 
-common_skills=(coding-workflow no-mistakes pr-review)
+common_skills=(coding-workflow no-mistakes pr-review tmux)
 work_skills=(atlas-updates jira-ticket-authoring working-state-cleanup)
 
 mkdir -p \
