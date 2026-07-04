@@ -19,6 +19,7 @@ alias gpush='git push'
 alias :e="vim"
 alias v='vim'
 alias g='git'
+alias dots='cd ~/dev/repos/dots'
 
 plugins=(gem git rails ruby zsh-autosuggestions)
 
