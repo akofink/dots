@@ -4,4 +4,4 @@ root: ~/dev/repos/firstmate
 windows:
   - zsh:
   - vim: vim
-  - llm: opencode
+  - firstmate: opencode
