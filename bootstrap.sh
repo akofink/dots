@@ -16,6 +16,8 @@ if [ "$current_script_name" != "bootstrap.sh" ]; then
 fi
 
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
+export NOTES_REPO="${NOTES_REPO:-"$DEV_REPOS/notes"}"
+export NOTES_REPO_URL="${NOTES_REPO_URL:-"https://github.com/akofink/notes.git"}"
 
 if [ "$current_script_name" = "bootstrap.sh" ]; then
   dots_repo_default="$DEV_REPOS/dots"
@@ -402,6 +404,11 @@ mkdir -p "$DEV_REPOS"
 if [[ ! -d "$DOTS_REPO" ]]
 then
   git clone https://github.com/akofink/dots.git "$DOTS_REPO"
+fi
+
+if [[ ! -d "$NOTES_REPO" ]]
+then
+  git clone "$NOTES_REPO_URL" "$NOTES_REPO"
 fi
 
 eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore" ''

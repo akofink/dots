@@ -77,7 +77,7 @@ if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/opencode.sh"
 fi
 
-notes_repo="${NOTES_REPO:-"$DEV_REPOS/notes"}"
+notes_repo="$NOTES_REPO"
 agents_template="$notes_repo/agents/global-personal.md"
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   agents_template="$notes_repo/agents/global-work.md"

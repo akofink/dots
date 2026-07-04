@@ -18,6 +18,11 @@ then
   git clone https://github.com/akofink/dots.git "$DOTS_REPO"
 fi
 
+if [[ ! -d "$NOTES_REPO" ]]
+then
+  git clone "$NOTES_REPO_URL" "$NOTES_REPO"
+fi
+
 eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore" ''
 eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 

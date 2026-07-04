@@ -118,7 +118,9 @@ then WSL restarted.
 #### LLM config module
 
 `bash setup/llm.sh` renders tool configs and symlinks shared agent/skill files
-from the private notes repo (`~/dev/repos/notes` by default):
+from the private notes repo (`~/dev/repos/notes` by default). `setup/repos.sh`
+clones it from `NOTES_REPO_URL` (`https://github.com/akofink/notes.git` by default)
+when `NOTES_REPO` is missing:
 
 - `~/.agents/AGENTS.md`
 - `~/.claude/AGENTS.md`
@@ -133,8 +135,8 @@ from the private notes repo (`~/dev/repos/notes` by default):
 - `~/.pi/AGENTS.md`
 - `~/dev/AGENTS.md`
 
-If the notes repo is not present, the module still renders the repo-managed Codex config and rules, then skips the
-notes-backed agent and skill symlinks with a warning.
+If the notes repo is not present when the LLM module runs directly, the module still renders the repo-managed Codex
+config and rules, then skips the notes-backed agent and skill symlinks with a warning.
 
 On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
 
