@@ -37,6 +37,9 @@ install_firstmate_data_file_symlinks() {
     fi
 
     if [[ -e "$target" ]]; then
+      if [[ -d "$target" ]]; then
+        continue
+      fi
       fatal "Refusing to replace existing firstmate data path: $target"
     fi
 
