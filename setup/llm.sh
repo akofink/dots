@@ -20,13 +20,17 @@ install_llm_cli() {
     fatal "curl not found; install curl before setting up LLM CLI tools"
   fi
 
+  echo "Downloading $name installer script..."
+
   local install_script
   install_script=$(mktemp) || fatal "Failed to create temp file for $name installer"
 
-  if ! curl -fsSL "$url" -o "$install_script"; then
+  if ! curl -fL --progress-bar "$url" -o "$install_script"; then
     rm -f "$install_script"
     fatal "Failed to download $name installer"
   fi
+
+  echo "Running $name installer (inner downloads may be silent; watch htop)..."
 
   if ! "$@" "$install_script"; then
     rm -f "$install_script"
@@ -40,6 +44,8 @@ install_pi_coding_agent() {
   if ! command -v npm >/dev/null 2>&1; then
     fatal "npm not found; install Node.js before setting up Pi Coding Agent"
   fi
+
+  echo "Installing Pi Coding Agent (npm)..."
 
   if ! npm install -g \
     --ignore-scripts \
@@ -61,6 +67,8 @@ install_agent_skill() {
     fatal "npx not found; install Node.js before setting up $name"
   fi
 
+  echo "Installing agent skill: $name ..."
+
   if ! npx -y skills add --yes "$@" -g; then
     fatal "Failed to install $name agent skill"
   fi
@@ -72,21 +80,36 @@ clone_llm_accessory() {
 
   mkdir -p "$(dirname -- "$destination")"
   if [[ ! -d "$destination/.git" ]]; then
+    echo "Cloning $(basename "$url" .git) to $destination ..."
     git clone "$url" "$destination"
   else
+    echo "Updating $(basename "$destination") ..."
     git -C "$destination" pull --ff-only
   fi
 }
 
+echo "→ Installing Claude Code CLI..."
 install_llm_cli "Claude Code" "https://claude.ai/install.sh" bash
+
+echo "→ Installing Codex CLI..."
 install_llm_cli "Codex" "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh
+
+echo "→ Installing Pi Coding Agent..."
 install_pi_coding_agent
+
+echo "→ Installing treehouse..."
 install_llm_cli "treehouse" "https://kunchenguid.github.io/treehouse/install.sh" sh
 
+echo "→ Installing AXI skill..."
 install_agent_skill "AXI" kunchenguid/axi
+
+echo "→ Installing gh-axi skill..."
 install_agent_skill "gh-axi" kunchenguid/gh-axi --skill gh-axi
+
+echo "→ Installing chrome-devtools-axi skill..."
 install_agent_skill "chrome-devtools-axi" kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi
 
+echo "→ Cloning firstmate (if needed)..."
 clone_llm_accessory "https://github.com/kunchenguid/firstmate.git" "$DEV_REPOS/firstmate"
 
 if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
