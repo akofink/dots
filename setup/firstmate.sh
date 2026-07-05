@@ -29,7 +29,7 @@ install_firstmate_data_file_symlinks() {
 
     if [[ -L "$target" ]]; then
       local current
-      current=$(readlink "$target") || fatal "Failed to read symlink $target"
+      current=$(readlink -f "$target") || fatal "Failed to read symlink $target"
       if [[ "$current" == "$notes_file" ]]; then
         continue
       fi
