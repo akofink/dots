@@ -173,6 +173,10 @@ if ! declare -F fatal >/dev/null 2>&1; then
   fatal() { err "$@" 1>&2; exit 1; }
 fi
 
+if ! declare -F warn >/dev/null 2>&1; then
+  warn() { err "$@"; }
+fi
+
 if [[ -z "${DOTS_REPO:-}" ]]; then
   util_script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
   DOTS_REPO=$(cd -- "$util_script_dir/.." && pwd)

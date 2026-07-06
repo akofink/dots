@@ -54,7 +54,7 @@ esac
 export GLOW_CONFIG_DIR="$glow_config_dir"
 mkdir -p "$glow_config_dir"
 
-eval_template "$DOTS_REPO/templates/glow/glow.yml" "$glow_config_dir/glow.yml" ''
+eval_template "$DOTS_REPO/templates/glow/glow.yml" "$glow_config_dir/glow.yml"
 eval_template "$DOTS_REPO/templates/glow/solarized-light.json" "$glow_config_dir/solarized-light.json" ''
 eval_template "$DOTS_REPO/templates/glow/solarized-dark.json" "$glow_config_dir/solarized-dark.json" ''
 
