@@ -1,10 +1,14 @@
 # style name or JSON path (default "auto")
 style: "${GLOW_CONFIG_DIR}/solarized-light.json"
-# mouse support (TUI-mode only)
-mouse: false
+# mouse wheel support (TUI-mode only)
+mouse: true
 # use pager to display markdown
 pager: true
 # word-wrap at width
 width: 80
 # show all files, including hidden and ignored.
 all: false
+# show line numbers (TUI-mode only)
+showLineNumbers: false
+# preserve newlines in the output
+preserveNewLines: false
