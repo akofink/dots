@@ -11,24 +11,39 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
-if ! command -v curl >/dev/null 2>&1; then
-  fatal "curl not found; install curl before setting up opencode"
-fi
-
 opencode_install_dir="$HOME/.opencode/bin"
 legacy_opencode_bin="/usr/local/bin/opencode"
 
-opencode_install_script=$(mktemp) || fatal "Failed to create temp file for opencode installer"
+# opencode config linking (handled by llm.sh) should proceed even when the CLI
+# install is skipped or fails, so treat every install failure as a warning that
+# returns without setting the completion guard.
+if command -v opencode >/dev/null 2>&1; then
+  echo "opencode already installed; skipping."
+  export OPENCODE_SETUP_COMPLETE=1
+  return 0
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+  warn "curl not found; skipping opencode install"
+  return 1
+fi
+
+if ! opencode_install_script=$(mktemp); then
+  warn "Failed to create temp file for opencode installer; skipping"
+  return 1
+fi
 cleanup_opencode_install_script() {
   rm -f "$opencode_install_script"
 }
 trap cleanup_opencode_install_script RETURN
 
 if ! curl -fsSL https://opencode.ai/install -o "$opencode_install_script"; then
-  fatal "Failed to download opencode installer"
+  warn "Failed to download opencode installer; skipping"
+  return 1
 fi
 if ! bash "$opencode_install_script" --no-modify-path; then
-  fatal "Failed to run opencode installer"
+  warn "Failed to run opencode installer; skipping"
+  return 1
 fi
 
 export PATH="$opencode_install_dir:$PATH"
@@ -38,6 +53,7 @@ if [[ -x "$opencode_install_dir/opencode" && -f "$legacy_opencode_bin" ]] && gre
 fi
 
 if ! command -v opencode >/dev/null 2>&1; then
-  fatal "opencode installer completed but no opencode executable is available on PATH"
+  warn "opencode installer completed but no opencode executable is available on PATH; skipping"
+  return 1
 fi
 export OPENCODE_SETUP_COMPLETE=1

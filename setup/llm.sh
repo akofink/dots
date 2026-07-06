@@ -11,38 +11,64 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
+# install_llm_cli <name> <command> <url> <runner...>
+#
+# Installs an LLM CLI by downloading and running its installer script. Skips the
+# install when <command> is already on PATH. Returns non-zero (without aborting
+# the caller) when a prerequisite is missing or any step fails, so downstream
+# config setup can still proceed.
 install_llm_cli() {
   local name="$1"
-  local url="$2"
-  shift 2
+  local command_name="$2"
+  local url="$3"
+  shift 3
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    echo "$name already installed; skipping."
+    return 0
+  fi
 
   if ! command -v curl >/dev/null 2>&1; then
-    fatal "curl not found; install curl before setting up LLM CLI tools"
+    warn "curl not found; skipping $name install"
+    return 1
   fi
 
   echo "Downloading $name installer script..."
 
   local install_script
-  install_script=$(mktemp) || fatal "Failed to create temp file for $name installer"
+  if ! install_script=$(mktemp); then
+    warn "Failed to create temp file for $name installer; skipping"
+    return 1
+  fi
 
   if ! curl -fL --progress-bar "$url" -o "$install_script"; then
     rm -f "$install_script"
-    fatal "Failed to download $name installer"
+    warn "Failed to download $name installer; skipping"
+    return 1
   fi
 
   echo "Running $name installer (inner downloads may be silent; watch htop)..."
 
   if ! "$@" "$install_script"; then
     rm -f "$install_script"
-    fatal "Failed to run $name installer"
+    warn "Failed to run $name installer; skipping"
+    return 1
   fi
 
   rm -f "$install_script"
 }
 
+# Installs the Pi Coding Agent via npm. Skips when `pi` is already on PATH and
+# warns (without aborting) when npm is missing or the install fails.
 install_pi_coding_agent() {
+  if command -v pi >/dev/null 2>&1; then
+    echo "Pi Coding Agent already installed; skipping."
+    return 0
+  fi
+
   if ! command -v npm >/dev/null 2>&1; then
-    fatal "npm not found; install Node.js before setting up Pi Coding Agent"
+    warn "npm not found; skipping Pi Coding Agent install"
+    return 1
   fi
 
   echo "Installing Pi Coding Agent (npm)..."
@@ -55,25 +81,41 @@ install_pi_coding_agent() {
     --loglevel=error \
     --progress=false \
     @earendil-works/pi-coding-agent; then
-    fatal "Failed to install Pi Coding Agent"
+    warn "Failed to install Pi Coding Agent; skipping"
+    return 1
   fi
 }
 
+# install_agent_skill <name> <skill_dir> <skills-add-args...>
+#
+# Installs a global agent skill via `npx skills add`. Skips when the skill is
+# already present under ~/.agents/skills/<skill_dir>, and warns (without
+# aborting) when npx is missing or the install fails.
 install_agent_skill() {
   local name="$1"
-  shift
+  local skill_dir="$2"
+  shift 2
+
+  if [[ -d "$HOME/.agents/skills/$skill_dir" ]]; then
+    echo "Agent skill $name already installed; skipping."
+    return 0
+  fi
 
   if ! command -v npx >/dev/null 2>&1; then
-    fatal "npx not found; install Node.js before setting up $name"
+    warn "npx not found; skipping $name agent skill install"
+    return 1
   fi
 
   echo "Installing agent skill: $name ..."
 
   if ! npx -y skills add --yes "$@" -g; then
-    fatal "Failed to install $name agent skill"
+    warn "Failed to install $name agent skill; skipping"
+    return 1
   fi
 }
 
+# Clones (or fast-forward updates) a git-backed LLM accessory repo. Warns
+# (without aborting) when the clone or update fails so config setup can proceed.
 clone_llm_accessory() {
   local url="$1"
   local destination="$2"
@@ -81,40 +123,51 @@ clone_llm_accessory() {
   mkdir -p "$(dirname -- "$destination")"
   if [[ ! -d "$destination/.git" ]]; then
     echo "Cloning $(basename "$url" .git) to $destination ..."
-    git clone "$url" "$destination"
+    if ! git clone "$url" "$destination"; then
+      warn "Failed to clone $(basename "$url" .git); skipping"
+      return 1
+    fi
   else
     echo "Updating $(basename "$destination") ..."
-    git -C "$destination" pull --ff-only
+    if ! git -C "$destination" pull --ff-only; then
+      warn "Failed to update $(basename "$destination"); skipping"
+      return 1
+    fi
   fi
 }
 
+# Tool installs are best-effort: each helper skips work that is already present
+# and warns instead of aborting on failure. The `|| true` guards keep a single
+# failed install from tripping `set -e` and skipping the config setup below.
 echo "→ Installing Claude Code CLI..."
-install_llm_cli "Claude Code" "https://claude.ai/install.sh" bash
+install_llm_cli "Claude Code" claude "https://claude.ai/install.sh" bash || true
 
 echo "→ Installing Codex CLI..."
-install_llm_cli "Codex" "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh
+install_llm_cli "Codex" codex "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh || true
 
 echo "→ Installing Pi Coding Agent..."
-install_pi_coding_agent
+install_pi_coding_agent || true
 
 echo "→ Installing treehouse..."
-install_llm_cli "treehouse" "https://kunchenguid.github.io/treehouse/install.sh" sh
+install_llm_cli "treehouse" treehouse "https://kunchenguid.github.io/treehouse/install.sh" sh || true
 
 echo "→ Installing AXI skill..."
-install_agent_skill "AXI" kunchenguid/axi
+install_agent_skill "AXI" axi kunchenguid/axi || true
 
 echo "→ Installing gh-axi skill..."
-install_agent_skill "gh-axi" kunchenguid/gh-axi --skill gh-axi
+install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
 
 echo "→ Installing chrome-devtools-axi skill..."
-install_agent_skill "chrome-devtools-axi" kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi
+install_agent_skill "chrome-devtools-axi" chrome-devtools-axi kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi || true
 
 echo "→ Cloning firstmate (if needed)..."
-clone_llm_accessory "https://github.com/kunchenguid/firstmate.git" "$DEV_REPOS/firstmate"
+clone_llm_accessory "https://github.com/kunchenguid/firstmate.git" "$DEV_REPOS/firstmate" || true
 
 if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
+  # opencode.sh returns non-zero (without setting its guard) when the install is
+  # skipped or fails; tolerate that so the config linking below still runs.
   # shellcheck source=setup/opencode.sh
-  source "$script_dir/opencode.sh"
+  source "$script_dir/opencode.sh" || true
 fi
 
 notes_repo="$NOTES_REPO"
