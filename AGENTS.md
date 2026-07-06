@@ -84,7 +84,7 @@ variables `envsubst` expands:
 - **No third argument** — envsubst expands every `$VAR` in the template.
   Use this only for templates whose variables are all setup-time values
   (e.g. `templates/.gitconfig`, which contains only `$GIT_EMAIL`,
-  `$GIT_SIGNINGKEY`, `$GITHUB_USER`, `$GIT_CREDENTIAL_HELPER`, and `$HOME`).
+  `$GIT_SIGNINGKEY`, `$GIT_CREDENTIAL_HELPER`, and `$HOME`).
 
 - **Explicit variable list** — only the listed variables are substituted;
   all other `$VAR` references are passed through verbatim. Use this for
