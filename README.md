@@ -233,9 +233,10 @@ bin/dots-backups.sh
 ```
 
 The audit is a dry run.
-It scans `$HOME`, reports matching backups, and prints `WOULD DELETE` only for
-older backups it can prove are redundant because they match the current
-destination or a newer backup for the same destination.
+It only checks known destinations managed by this repo, reports matching
+backups, and prints `WOULD DELETE` only for older backups it can prove are
+redundant because they match the current destination or a newer backup for the
+same destination.
 It always keeps the newest matching backup for each destination and skips
 backups whose safety cannot be confidently determined.
 
@@ -255,6 +256,27 @@ The prune mode only targets the same exact `.old.<timestamp>` suffixes used by
 this repo.
 It does not delete unique backups, the newest backup for a destination, or paths
 with non-dots backup names.
+
+To also select the newest backup for a known destination when it matches the
+current destination, pass `--delete-newest`.
+Add `--prune` after reviewing the dry run:
+
+```sh
+bin/dots-backups.sh --delete-newest
+bin/dots-backups.sh --prune --delete-newest
+```
+
+To select every matching backup for known destinations, including unique backups,
+pass `--all`.
+Add `--prune` after reviewing the dry run:
+
+```sh
+bin/dots-backups.sh --all
+bin/dots-backups.sh --prune --all
+```
+
+Both flags are intentionally explicit and still ignore unrelated paths, source
+repos, current dotfiles, and files without dots backup suffixes.
 
 ### Contributing
 

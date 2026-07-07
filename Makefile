@@ -16,6 +16,10 @@ check:
 		$(SHELLCHECK) $(SHELLCHECK_ARGS) $(SHELLCHECK_SOURCES); \
 	fi
 
+.PHONY: test
+test:
+	bash test/dots-backups-test.sh
+
 .PHONY: clean
 clean:
 	@bash setup/clean.sh --print
