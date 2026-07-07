@@ -4,6 +4,7 @@ set -euo pipefail
 
 mode=audit
 root=${HOME:-}
+home_base=${HOME:-}
 delete_newest=0
 delete_all=0
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -89,6 +90,15 @@ if [[ -z "$root" || ! -d "$root" ]]; then
 fi
 
 root=$(cd -- "$root" && pwd -P)
+if [[ -z "$home_base" || ! -d "$home_base" ]]; then
+  home_base=$root
+else
+  home_base=$(cd -- "$home_base" && pwd -P)
+fi
+
+if [[ "$root" != "$home_base" && "$root" != "$home_base"/* ]]; then
+  home_base=$root
+fi
 
 add_destination() {
   local destination=$1
@@ -112,7 +122,7 @@ path_is_under_root() {
 }
 
 known_destinations() {
-  local home_root=$root
+  local home_root=$home_base
   local config_root
   local glow_config_dir
   local vim_template
