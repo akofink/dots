@@ -68,14 +68,9 @@ windows:
         - vim:
           - cd core-notes
           - vim
-        - zsh:
   # - orochi:
   #     root: ~/dev/repos/atlassian/orochi
   #     layout: even-vertical
   #     panes:
   #       - vim:
   #         - vim
-  - ai:
-  - ai:
-  - ai:
-  - ai:
