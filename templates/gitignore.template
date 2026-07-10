@@ -41,3 +41,4 @@ tags
 *.orig
 *.rej
 .worktrees/
+tmuxinator-notes
