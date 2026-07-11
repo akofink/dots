@@ -114,28 +114,6 @@ install_agent_skill() {
   fi
 }
 
-# Clones (or fast-forward updates) a git-backed LLM accessory repo. Warns
-# (without aborting) when the clone or update fails so config setup can proceed.
-clone_llm_accessory() {
-  local url="$1"
-  local destination="$2"
-
-  mkdir -p "$(dirname -- "$destination")"
-  if [[ ! -d "$destination/.git" ]]; then
-    echo "Cloning $(basename "$url" .git) to $destination ..."
-    if ! git clone "$url" "$destination"; then
-      warn "Failed to clone $(basename "$url" .git); skipping"
-      return 1
-    fi
-  else
-    echo "Updating $(basename "$destination") ..."
-    if ! git -C "$destination" pull --ff-only; then
-      warn "Failed to update $(basename "$destination"); skipping"
-      return 1
-    fi
-  fi
-}
-
 # Tool installs are best-effort: each helper skips work that is already present
 # and warns instead of aborting on failure. The `|| true` guards keep a single
 # failed install from tripping `set -e` and skipping the config setup below.
@@ -148,9 +126,6 @@ install_llm_cli "Codex" codex "https://chatgpt.com/codex/install.sh" env CODEX_N
 echo "→ Installing Pi Coding Agent..."
 install_pi_coding_agent || true
 
-echo "→ Installing treehouse..."
-install_llm_cli "treehouse" treehouse "https://kunchenguid.github.io/treehouse/install.sh" sh || true
-
 echo "→ Installing AXI skill..."
 install_agent_skill "AXI" axi kunchenguid/axi || true
 
@@ -159,9 +134,6 @@ install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
 
 echo "→ Installing chrome-devtools-axi skill..."
 install_agent_skill "chrome-devtools-axi" chrome-devtools-axi kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi || true
-
-echo "→ Cloning firstmate (if needed)..."
-clone_llm_accessory "https://github.com/kunchenguid/firstmate.git" "$DEV_REPOS/firstmate" || true
 
 if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
   # opencode.sh returns non-zero (without setting its guard) when the install is

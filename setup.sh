@@ -27,10 +27,6 @@ run_setup_script() {
       # shellcheck source=setup/llm.sh
       source "$DOTS_REPO/setup/llm.sh"
       ;;
-    firstmate)
-      # shellcheck source=setup/firstmate.sh
-      source "$DOTS_REPO/setup/firstmate.sh"
-      ;;
     opencode)
       # shellcheck source=setup/opencode.sh
       source "$DOTS_REPO/setup/opencode.sh"
@@ -57,7 +53,7 @@ run_setup_script() {
   esac
 }
 
-for script in vim tmux zsh llm firstmate opencode rbenv go tmuxinator glow; do
+for script in vim tmux zsh llm opencode rbenv go tmuxinator glow; do
   script_path="$DOTS_REPO/setup/$script.sh"
   if [ -f "$script_path" ]; then
     echo
