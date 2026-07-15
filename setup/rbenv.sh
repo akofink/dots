@@ -18,7 +18,7 @@ fi
 if [ ! -d ~/.rbenv ]; then
   git clone https://github.com/rbenv/rbenv.git ~/.rbenv
 fi
-(cd ~/.rbenv && git pull -q)
+(cd ~/.rbenv && git pull -q --ff-only)
 
 PATH=$PATH:~/.rbenv/bin
 
@@ -26,7 +26,7 @@ if [ ! -d "$(rbenv root)"/plugins/ruby-build ]; then
   git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
 fi
 
-(cd "$(rbenv root)/plugins/ruby-build" && git pull -q)
+(cd "$(rbenv root)/plugins/ruby-build" && git pull -q --ff-only)
 
 LATEST_RUBY_VERSION=$(rbenv install -l | grep -v - | tail -1)
 

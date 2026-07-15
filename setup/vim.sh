@@ -26,7 +26,7 @@ if [[ ! -d "$HOME/dev/repos/vim" ]]; then
 fi
 
 # Pull latest vim
-(cd "$HOME/dev/repos/vim" && git pull -q)
+(cd "$HOME/dev/repos/vim" && git pull -q --ff-only)
 
 vim_needs_rebuild() {
   local vim_path
