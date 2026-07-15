@@ -62,17 +62,6 @@ should_build_tmux() {
     return 0
   fi
 
-  # Check if tmux binary is older than 24 hours
-  local tmux_path
-  tmux_path=$(command -v tmux)
-  if [[ -n "$tmux_path" ]]; then
-    # Check if file is older than 24 hours (1440 minutes)
-    if [[ $(find "$tmux_path" -mmin +1440 2>/dev/null) ]]; then
-      echo "tmux binary is older than 24 hours - will build"
-      return 0
-    fi
-  fi
-
   echo "tmux is up to date"
   return 1
 }

@@ -22,26 +22,41 @@ fi
 
 mkdir -p "$DEV_REPOS"
 
+glow_needs_build=0
 if [[ ! -d "$glow_repo/.git" ]]; then
   git clone -q "$glow_remote" "$glow_repo"
+  glow_needs_build=1
 else
+  glow_commit_before_update=$(git -C "$glow_repo" rev-parse HEAD)
   git -C "$glow_repo" fetch -q
   git -C "$glow_repo" pull -q --ff-only
+  glow_commit_after_update=$(git -C "$glow_repo" rev-parse HEAD)
+  if [[ "$glow_commit_before_update" != "$glow_commit_after_update" ]]; then
+    glow_needs_build=1
+  fi
 fi
 
-tmp_gobin=$(mktemp -d) || fatal "Failed to create temp GOBIN for glow"
-(
-  cd "$glow_repo" || exit 1
-  GOBIN="$tmp_gobin" go install .
-) || {
-  rm -rf "$tmp_gobin"
-  fatal "Failed to install glow"
-}
-if ! "${SUDO[@]}" install -m 0755 "$tmp_gobin/glow" "$glow_bin"; then
-  rm -rf "$tmp_gobin"
-  fatal "Failed to install glow binary to $glow_bin"
+if [[ ! -x "$glow_bin" ]]; then
+  glow_needs_build=1
 fi
-rm -rf "$tmp_gobin"
+
+if [[ "$glow_needs_build" -eq 1 ]]; then
+  tmp_gobin=$(mktemp -d) || fatal "Failed to create temp GOBIN for glow"
+  (
+    cd "$glow_repo" || exit 1
+    GOBIN="$tmp_gobin" go install .
+  ) || {
+    rm -rf "$tmp_gobin"
+    fatal "Failed to install glow"
+  }
+  if ! "${SUDO[@]}" install -m 0755 "$tmp_gobin/glow" "$glow_bin"; then
+    rm -rf "$tmp_gobin"
+    fatal "Failed to install glow binary to $glow_bin"
+  fi
+  rm -rf "$tmp_gobin"
+else
+  echo "glow is up to date"
+fi
 
 case "$PLATFORM" in
   Darwin)
