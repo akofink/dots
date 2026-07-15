@@ -12,6 +12,7 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
 fi
 
 export GOENV_ROOT="${GOENV_ROOT:-$HOME/.goenv}"
+export GO_VERSION="${GO_VERSION:-1.25.9}"
 goenvrc="$HOME/.goenvrc"
 
 export GOENV_PATH_ORDER=front
@@ -47,13 +48,8 @@ fi
 export PATH="$GOENV_ROOT/bin:$PATH"
 eval "$(goenv init -)"
 
-latest_go_version=$(goenv install -l | grep -E '^[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+$' | tail -1 | tr -d '[:space:]')
-if [[ -z "$latest_go_version" ]]; then
-  fatal "Failed to determine latest Go version"
-fi
-
-goenv install -s "$latest_go_version"
-goenv global "$latest_go_version"
+goenv install -s "$GO_VERSION"
+goenv global "$GO_VERSION"
 
 if ! command -v go >/dev/null 2>&1; then
   fatal "go not found after installation"

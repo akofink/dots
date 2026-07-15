@@ -5,6 +5,7 @@ if [[ -n "${RBENV_SETUP_COMPLETE:-}" ]]; then
 fi
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+export RUBY_VERSION="${RUBY_VERSION:-4.0.6}"
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
   # shellcheck source=setup/repos.sh
@@ -28,9 +29,7 @@ fi
 
 (cd "$(rbenv root)/plugins/ruby-build" && git pull -q --ff-only)
 
-LATEST_RUBY_VERSION=$(rbenv install -l | grep -v - | tail -1)
-
-rbenv install -s $LATEST_RUBY_VERSION \
-  && rbenv global $LATEST_RUBY_VERSION
+rbenv install -s "$RUBY_VERSION" \
+  && rbenv global "$RUBY_VERSION"
 
 export RBENV_SETUP_COMPLETE=1
