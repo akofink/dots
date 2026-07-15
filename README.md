@@ -53,6 +53,19 @@ curl -O https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh && sour
 ./setup.sh
 ```
 
+##### Preview or select modules
+
+```sh
+# Validate and print the default module plan without changing the machine.
+./setup.sh --dry-run
+
+# Run only the selected curated modules.
+./setup.sh --only tmux,glow
+```
+
+`--only` accepts the module names listed above and still runs each module's dependencies.
+Use `./setup.sh --help` to see all top-level options.
+
 ##### Set up just one module:
 
 ```sh
@@ -100,8 +113,13 @@ directory to `PATH`, so the setup script runs the installer with `--no-modify-pa
 
 #### go module
 
-`bash setup/go.sh` installs Go through `goenv` at `~/.goenv`, installs the latest stable Go version,
-sets it globally, and ensures `~/go/bin` is available on `PATH` for binaries installed with `go install`.
+`bash setup/go.sh` installs Go `1.25.9` through `goenv` at `~/.goenv`, sets it globally, and ensures `~/go/bin` is available on `PATH` for binaries installed with `go install`.
+Set `GO_VERSION` before running the module to intentionally install a different version.
+
+#### Ruby module
+
+`bash setup/rbenv.sh` installs Ruby `4.0.6` through rbenv and sets it globally.
+Set `RUBY_VERSION` before running the module to intentionally install a different version.
 
 #### glow module
 
