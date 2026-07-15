@@ -173,6 +173,12 @@ Skills are also symlinked from `~/dev/repos/notes/.rovodev/skills/` into the too
 Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
 linked only when `MACHINE_CLASS=work`.
 
+The rovo-managed twg (Teamwork Graph) skill bundle at `~/.local/share/rovo/current/twg/skills/` is also
+symlinked into the non-rovo LLM CLIs (`~/.agents`, `~/.claude`, `~/.codex`, `~/.config/opencode`, `~/.pi`) on
+`MACHINE_CLASS=work` machines only, so those tools surface the same twg skills that Rovo/RovoDev load natively.
+The skill set is discovered at runtime, so it tracks rovo upgrades without a hardcoded list, and the links are
+removed on personal machines or when rovo is not installed.
+
 Rovo/RovoDev setup is work-only because those tools and instructions assume Atlassian-specific workflows.
 
 ### Template system
