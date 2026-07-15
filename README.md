@@ -62,6 +62,12 @@ bash setup/<module>.sh
 Standalone module scripts resolve the checked-out repo automatically, so they can be run from inside the
 repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/dots`.
 
+#### Repository sync
+
+`syncdots` pulls with rebase and pushes the dots and notes repositories.
+It is also launched asynchronously at most once every six hours when a managed zsh shell starts, so it never delays shell startup.
+Failures, missing repositories, and an already-running sync are harmless no-ops; run `syncdots` manually to see Git output.
+
 If you are iterating on setup scripts in the same shell, clear the exported setup state first:
 
 ```sh

@@ -19,6 +19,7 @@ check:
 .PHONY: test
 test:
 	bash test/dots-backups-test.sh
+	bash test/dots-sync-test.sh
 
 .PHONY: clean
 clean:

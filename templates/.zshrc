@@ -21,6 +21,19 @@ alias v='vim'
 alias g='git'
 alias dots='cd ~/dev/repos/dots'
 
+syncdots() {
+  "$HOME/dev/repos/dots/bin/dots-sync.sh" "$@"
+}
+
+# Sync in the background at most once every six hours so shell startup never waits on Git or the network.
+zmodload zsh/datetime 2>/dev/null
+dots_sync_state="${XDG_STATE_HOME:-$HOME/.local/state}/dots-sync"
+dots_sync_stamp="$dots_sync_state/last-attempt"
+if [[ -x "$HOME/dev/repos/dots/bin/dots-sync.sh" ]] && { [[ ! -f "$dots_sync_stamp" ]] || (( EPOCHSECONDS - $(<"$dots_sync_stamp") >= 21600 )); }; then
+  "$HOME/dev/repos/dots/bin/dots-sync.sh" --quiet &!
+fi
+unset dots_sync_state dots_sync_stamp
+
 plugins=(gem git rails ruby zsh-autosuggestions)
 
 # rbenv completions need to be on fpath before compinit runs
