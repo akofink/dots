@@ -31,9 +31,8 @@ if [[ "$PLATFORM" == "Darwin" ]]; then
   CONFIGURE_ARGS+=(--enable-sixel)
   CONFIGURE_ARGS+=(--sysconfdir=/usr/local/etc)
 
-  # Force use of Homebrew's ncurses instead of system ncurses
+  # Ensure configure discovers Homebrew's ncurses instead of the system library.
   ncurses_prefix=$(brew --prefix ncurses)
-  CONFIGURE_ARGS+=(--with-ncurses="${ncurses_prefix}")
 
   # Set environment variables to ensure proper linking
   export LDFLAGS="${LDFLAGS:-} -L${ncurses_prefix}/lib"
