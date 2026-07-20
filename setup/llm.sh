@@ -253,7 +253,7 @@ unlink_notes_symlinks() {
 }
 
 common_skills=(agent-orchestrator coding-workflow no-mistakes pr-review skills-via-dots-notes tmux)
-work_skills=(atlas-updates jira-ticket-authoring working-state-cleanup)
+work_skills=(atlas-updates elbow-pits-oncall jira-ticket-authoring working-state-cleanup)
 
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
