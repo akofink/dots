@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
+  # shellcheck source=setup/util.sh
+  source "$script_dir/util.sh"
+fi
+
 mkdir -p ~/dev/repos/
 
 # Clone NvChad
@@ -14,13 +20,7 @@ fi
 
 # Set up NvChad
 mkdir -p "$HOME/.config"
-if [ ! -h "$HOME/.config/nvim" ]; then
-  if [ -d "$HOME/.config/nvim" ]; then
-    timestamp="$(date +"%Y%m%dT%H%M%S")"
-    mv "$HOME/.config/nvim" "$HOME/.config/nvim.old.$timestamp"
-  fi
-  ln -s "$HOME/dev/repos/NvChad" "$HOME/.config/nvim"
-fi
+install_symlink "$HOME/dev/repos/NvChad" "$HOME/.config/nvim"
 
 
 # Link in custom NvChad settings

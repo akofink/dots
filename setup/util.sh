@@ -53,11 +53,21 @@ if [[ -z "${ENV_SETUP_COMPLETE:-}" ]]; then
   fi
 fi
 
+DOTS_BACKUP_DIR=${DOTS_BACKUP_DIR:-$DOTS_REPO/.backups}
+export DOTS_BACKUP_DIR
+
+backup_path_prefix() {
+  local destination="$1"
+  printf '%s/%s' "$DOTS_BACKUP_DIR" "${destination#/}"
+}
+
 # Returns 0 when an archived copy of the destination already has the same contents.
 destination_has_matching_backup() {
   local destination="$1"
   local backup
-  for backup in "$destination".old.*; do
+  local backup_prefix
+  backup_prefix=$(backup_path_prefix "$destination") || fatal "Failed to determine backup path for $destination"
+  for backup in "$backup_prefix".old.*; do
     [[ -e "$backup" ]] || continue
     if cmp -s "$destination" "$backup"; then
       return 0
@@ -76,7 +86,10 @@ backup_destination_if_needed() {
 
   local timestamp
   timestamp=$(date +%y%m%d%H%M%S) || fatal "Failed to generate backup timestamp"
-  mv "$destination" "$destination.old.$timestamp"
+  local backup
+  backup="$(backup_path_prefix "$destination").old.$timestamp"
+  mkdir -p "$(dirname -- "$backup")"
+  mv "$destination" "$backup"
 }
 
 install_symlink() {
@@ -106,7 +119,10 @@ install_symlink() {
   if [[ -e "$destination" || -L "$destination" ]]; then
     local timestamp
     timestamp=$(date +%y%m%d%H%M%S) || fatal "Failed to generate backup timestamp"
-    mv "$destination" "$destination.old.$timestamp"
+    local backup
+    backup="$(backup_path_prefix "$destination").old.$timestamp"
+    mkdir -p "$(dirname -- "$backup")"
+    mv "$destination" "$backup"
   fi
 
   ln -s "$source" "$destination"
