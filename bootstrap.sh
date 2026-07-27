@@ -390,14 +390,17 @@ command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
 _default_github_user="akofink"
+_default_github_credential_config=$'[credential "https://github.com"]\n  username = akofink'
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   _default_git_email="akofink@atlassian.com"
   _default_github_user="akofink-atlassian"
+  _default_github_credential_config=""
 fi
 export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"
 
 export GIT_SIGNINGKEY="${GIT_SIGNINGKEY:-"2C911B0A"}"
 export GITHUB_USER="${GITHUB_USER:-"${_default_github_user}"}"
+export GITHUB_CREDENTIAL_CONFIG="${GITHUB_CREDENTIAL_CONFIG:-"${_default_github_credential_config}"}"
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
   GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"/mnt/c/Program\\\\ Files/Git/mingw64/bin/git-credential-manager.exe"}
 elif [[ "$PLATFORM" == "Darwin" ]]; then

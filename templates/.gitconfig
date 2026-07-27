@@ -28,6 +28,7 @@
   ui = auto
 [credential]
   helper = $GIT_CREDENTIAL_HELPER
+$GITHUB_CREDENTIAL_CONFIG
 [push]
   default = simple
 [branch]
