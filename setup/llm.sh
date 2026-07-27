@@ -114,6 +114,21 @@ install_agent_skill() {
   fi
 }
 
+set_skill_disable_model_invocation() {
+  local skill_file="$HOME/.agents/skills/$1/SKILL.md"
+  [[ -f "$skill_file" ]] || return 0
+
+  local updated_file
+  updated_file=$(mktemp) || return 1
+  awk '
+    NR == 2 { print "disable-model-invocation: true" }
+    /^disable-model-invocation:/ { next }
+    { print }
+  ' "$skill_file" >"$updated_file"
+  cat "$updated_file" >"$skill_file"
+  rm -f "$updated_file"
+}
+
 # Tool installs are best-effort: each helper skips work that is already present
 # and warns instead of aborting on failure. The `|| true` guards keep a single
 # failed install from tripping `set -e` and skipping the config setup below.
@@ -134,6 +149,7 @@ install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
 
 echo "→ Installing chrome-devtools-axi skill..."
 install_agent_skill "chrome-devtools-axi" chrome-devtools-axi kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi || true
+set_skill_disable_model_invocation chrome-devtools-axi || warn "Failed to disable model invocation for chrome-devtools-axi"
 
 if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
   # opencode.sh returns non-zero (without setting its guard) when the install is
@@ -252,8 +268,9 @@ unlink_notes_symlinks() {
   done
 }
 
-common_skills=(agent-orchestrator coding-workflow no-mistakes pr-review skills-via-dots-notes tmux)
+common_skills=(agent-orchestrator coding-workflow pr-review skills-via-dots-notes tmux)
 work_skills=(atlas-updates elbow-pits-oncall jira-ticket-authoring working-state-cleanup)
+removed_skills=(no-mistakes)
 
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
@@ -265,6 +282,14 @@ twg_skill_dests=(
   "$HOME/.pi/skills"
 )
 discover_twg_skills
+
+unlink_skill_set "$HOME/.agents/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.claude/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.codex/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.config/opencode/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.pi/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.rovodev/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/dev/.rovodev/skills" "${removed_skills[@]}"
 
 mkdir -p \
   "$HOME/.agents" \
