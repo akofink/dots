@@ -62,12 +62,12 @@ windows:
         - logs:
           - cd main/bitbucket
           - ./supervisorctl tail -f background-tasks
-  - core-notes:
-      layout: even-vertical
-      panes:
-        - vim:
-          - cd core-notes
-          - vim
+  # - core-notes:
+  #     layout: even-vertical
+  #     panes:
+  #       - vim:
+  #         - cd core-notes
+  #         - vim
   # - orochi:
   #     root: ~/dev/repos/atlassian/orochi
   #     layout: even-vertical
