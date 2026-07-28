@@ -114,21 +114,6 @@ install_agent_skill() {
   fi
 }
 
-set_skill_disable_model_invocation() {
-  local skill_file="$HOME/.agents/skills/$1/SKILL.md"
-  [[ -f "$skill_file" ]] || return 0
-
-  local updated_file
-  updated_file=$(mktemp) || return 1
-  awk '
-    NR == 2 { print "disable-model-invocation: true" }
-    /^disable-model-invocation:/ { next }
-    { print }
-  ' "$skill_file" >"$updated_file"
-  cat "$updated_file" >"$skill_file"
-  rm -f "$updated_file"
-}
-
 # Tool installs are best-effort: each helper skips work that is already present
 # and warns instead of aborting on failure. The `|| true` guards keep a single
 # failed install from tripping `set -e` and skipping the config setup below.
@@ -146,10 +131,6 @@ install_agent_skill "AXI" axi kunchenguid/axi || true
 
 echo "→ Installing gh-axi skill..."
 install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
-
-echo "→ Installing chrome-devtools-axi skill..."
-install_agent_skill "chrome-devtools-axi" chrome-devtools-axi kunchenguid/chrome-devtools-axi --skill chrome-devtools-axi || true
-set_skill_disable_model_invocation chrome-devtools-axi || warn "Failed to disable model invocation for chrome-devtools-axi"
 
 if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
   # opencode.sh returns non-zero (without setting its guard) when the install is
