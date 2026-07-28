@@ -37,3 +37,5 @@ $GITHUB_CREDENTIAL_CONFIG
   defaultBranch = main
 [commit]
   gpgsign = true
+[gpg]
+  program = $GIT_GPG_PROGRAM

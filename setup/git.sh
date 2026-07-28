@@ -24,6 +24,7 @@ fi
 export GIT_EMAIL="${GIT_EMAIL:-"${_default_git_email}"}"
 
 export GIT_SIGNINGKEY="${GIT_SIGNINGKEY:-"2C911B0A"}"
+export GIT_GPG_PROGRAM="${GIT_GPG_PROGRAM:-"$DOTS_REPO/bin/git-gpg.sh"}"
 export GITHUB_USER="${GITHUB_USER:-"${_default_github_user}"}"
 export GITHUB_CREDENTIAL_CONFIG="${GITHUB_CREDENTIAL_CONFIG:-"${_default_github_credential_config}"}"
 if [[ -n "$WSL_DISTRO_NAME" ]]; then
