@@ -250,8 +250,8 @@ Use `eval "$(make clean)"` to clear those guards while iterating in the same she
 Do not edit it directly.
 The pre-commit hook regenerates and stages it when a staged `setup/*.sh` change affects the generated bootstrap.
 
-There is no hosted CI pipeline.
-ShellCheck runs locally through `make check` and pre-commit, while cross-distribution Docker testing is manual.
+GitHub Actions runs `make check` on every push to `main` through `.github/workflows/check.yml`.
+ShellCheck also runs locally through `make check` and pre-commit, while cross-distribution Docker testing is manual.
 
 ### Backup audit and pruning
 
