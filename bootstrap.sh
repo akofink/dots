@@ -37,7 +37,7 @@ export HAS_JAMF="${HAS_JAMF:-"$has_jamf_default"}"
 # Current values: "work" | "personal"
 # Defaults to "work" on Jamf-managed hosts; override before running setup
 # to force a specific class (e.g. MACHINE_CLASS=personal ./setup.sh).
-# Avoid adding new behaviour gated directly on HAS_JAMF; use MACHINE_CLASS
+# Avoid adding new behavior gated directly on HAS_JAMF; use MACHINE_CLASS
 # instead so the detection logic stays in one place.
 _default_machine_class=personal
 if is_truthy "${HAS_JAMF}"; then

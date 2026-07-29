@@ -27,7 +27,7 @@ MACHINE_CLASS=personal ./setup.sh
 ```
 
 Current valid values are `work` and `personal`. The variable is the single place to gate
-role-dependent behaviour; do not add new logic that branches on `HAS_JAMF` directly.
+role-dependent behavior; do not add new logic that branches on `HAS_JAMF` directly.
 
 ## Set up on any machine
 
@@ -100,7 +100,7 @@ script directly.
 
 - Claude Code from `https://claude.ai/install.sh`
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
-- Pi Coding Agent from `https://pi.dev/install.sh`
+- Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
 - opencode via `setup/opencode.sh`
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.
@@ -147,20 +147,20 @@ clones it from `NOTES_REPO_URL` (`https://github.com/akofink/notes.git` by defau
 when `NOTES_REPO` is missing:
 
 - `~/.agents/AGENTS.md`
-- `~/.claude/AGENTS.md`
 - `~/.claude/CLAUDE.md`
 - `~/.claude/agents/test-writer.md` when the notes repo has the target file
 - `~/.config/opencode/AGENTS.md`
 - `~/.config/opencode/opencode.jsonc`
 - `~/.codex/config.toml`
 - `~/.codex/AGENTS.md`
-- `~/.codex/instructions.md`
 - `~/.codex/rules/dots.rules`
 - `~/.pi/AGENTS.md`
 - `~/dev/AGENTS.md`
 
 If the notes repo is not present when the LLM module runs directly, the module still renders the repo-managed Codex
 config and rules, then skips the notes-backed agent and skill symlinks with a warning.
+Codex reads its canonical global guidance from `~/.codex/AGENTS.md`; setup does not deploy a second generic
+`instructions.md` layer.
 
 On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
 
@@ -174,12 +174,13 @@ The Codex rules file is a repo-managed baseline for portable allow-prefix rules.
 task-specific approvals in separate files such as `~/.codex/rules/default.rules`; `setup/llm.sh` will not
 overwrite those.
 
-The LLM tools do not expose one common config model, so shared behaviour is kept as explicit per-tool templates
-instead of an abstraction layer. When changing durable defaults, check the corresponding tool config directly:
+The LLM tools do not expose one common config model, so tool-specific configuration remains explicit rather than
+hidden behind an abstraction layer. When changing durable defaults, check the corresponding tool config directly:
 
 - Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
 - opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; it currently enables LSP support.
 - Shared agent instructions and skills are notes-backed symlinks where each tool supports them.
+- Each tool receives the canonical global instructions at one native path; setup does not alias the same file under multiple names for one tool.
 - Tool-specific auth, cache, history, project trust, missing features, and one-off permission/access grants remain local.
 
 Shared agent instructions intentionally diverge by machine role and are canonical in the notes repo:
@@ -237,6 +238,20 @@ list (e.g. `'$FOO $BAR'`). This controls which variables `envsubst` expands:
 
 When adding a variable to any template, decide whether it is setup-time or
 runtime. If the template mixes both kinds, supply the explicit variable list.
+
+### Setup architecture
+
+`setup.sh` sources the curated modules in dependency order, while each script can also be run directly.
+Scripts that must run only once per shell session use exported `*_SETUP_COMPLETE` guards.
+Use `eval "$(make clean)"` to clear those guards while iterating in the same shell.
+
+`bootstrap.sh` is generated from `setup/env.sh`, `setup/util.sh`, `setup/git.sh`, and `setup/repos.sh` by
+`create_bootstrap.sh`.
+Do not edit it directly.
+The pre-commit hook regenerates and stages it when a staged `setup/*.sh` change affects the generated bootstrap.
+
+There is no hosted CI pipeline.
+ShellCheck runs locally through `make check` and pre-commit, while cross-distribution Docker testing is manual.
 
 ### Backup audit and pruning
 
