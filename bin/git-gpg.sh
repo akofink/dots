@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -t 2 ]]; then
+if { : >/dev/tty; } 2>/dev/null; then
   exec gpg "$@"
 fi
 
