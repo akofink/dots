@@ -5,5 +5,47 @@
     "external_directory": {
       "~/dev/**": "allow"
     }
+  },
+  "mcp": {
+    "ops-sherpa": {
+      "type": "local",
+      "command": ["npx", "-y", "@atlassian/ops-sherpa"],
+      "environment": {
+        "ATLASSIAN_API_TOKEN": "{env:ATLASSIAN_API_TOKEN}",
+        "BITBUCKET_API_TOKEN": "{env:BITBUCKET_API_TOKEN}",
+        "ATLASSIAN_EMAIL": "{env:ATLASSIAN_EMAIL}",
+        "SENTRY_API_TOKEN": "{env:SENTRY_API_TOKEN}",
+        "OPS_JIRA_TOKEN": "{env:OPS_JIRA_TOKEN}",
+        "SIGNALFX_API_TOKEN": "{env:SIGNALFX_API_TOKEN}",
+        "SIGNALFX_REALM": "us1",
+        "SPLUNK_TIMEOUT": "60000"
+      }
+    },
+    "code-navigator-mcp": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "--from",
+        "atlassian-code-navigator-mcp",
+        "code-navigator-mcp",
+        "--email",
+        "{env:ATLASSIAN_EMAIL}",
+        "--api-key",
+        "{env:CODE_NAVIGATOR_API_KEY}"
+      ]
+    },
+    "atlassian-remote": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-remote", "https://mcp.atlassian.com/v1/mcp"]
+    },
+    "integrations-service": {
+      "type": "remote",
+      "url": "https://api.atlassian.com/rovodev/v3/mcp/integrations",
+      "headers": {
+        "X-RovoDev-CloudId": "{env:INTEGRATIONS_SERVICE_MCP_CLOUD_ID}",
+        "Atl-Surface": "rovo",
+        "Authorization": "{env:INTEGRATIONS_SERVICE_MCP_AUTH_HEADER}"
+      }
+    }
   }
 }
