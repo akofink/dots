@@ -178,7 +178,7 @@ The LLM tools do not expose one common config model, so tool-specific configurat
 hidden behind an abstraction layer. When changing durable defaults, check the corresponding tool config directly:
 
 - Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
-- opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; it currently enables LSP support.
+- opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; work-only Atlassian MCP servers live in the adjacent `work.jsonc` fragment.
 - Shared agent instructions and skills are notes-backed symlinks where each tool supports them.
 - Each tool receives the canonical global instructions at one native path; setup does not alias the same file under multiple names for one tool.
 - Tool-specific auth, cache, history, project trust, missing features, and one-off permission/access grants remain local.
@@ -197,6 +197,7 @@ The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 Skills are also symlinked from `~/dev/repos/notes/.rovodev/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
 linked only when `MACHINE_CLASS=work`.
+OpenCode's Atlassian MCP servers follow the same machine-role gate and are omitted from personal-machine config.
 
 The rovo-managed twg (Teamwork Graph) skill bundle at `~/.local/share/rovo/current/twg/skills/` is also
 symlinked into the non-rovo LLM CLIs (`~/.agents`, `~/.claude`, `~/.codex`, `~/.config/opencode`, `~/.pi`) on

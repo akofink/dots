@@ -282,7 +282,17 @@ mkdir -p \
 
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
-eval_template "$DOTS_REPO/templates/dot_config/opencode/opencode.jsonc" "$HOME/.config/opencode/opencode.jsonc" ''
+OPENCODE_WORK_CONFIG=''
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+  OPENCODE_WORK_CONFIG=$(< "$DOTS_REPO/templates/dot_config/opencode/work.jsonc")
+fi
+export OPENCODE_WORK_CONFIG
+# shellcheck disable=SC2016 # Pass the variable name to envsubst, not its value.
+eval_template \
+  "$DOTS_REPO/templates/dot_config/opencode/opencode.jsonc" \
+  "$HOME/.config/opencode/opencode.jsonc" \
+  '$OPENCODE_WORK_CONFIG'
+unset OPENCODE_WORK_CONFIG
 
 # Claude uses CLAUDE.md as its single global instruction path.
 remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
