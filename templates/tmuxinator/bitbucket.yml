@@ -62,6 +62,10 @@ windows:
         - logs:
           - cd main/bitbucket
           - ./supervisorctl tail -f background-tasks
+  - frontbucket:
+      root: ~/dev/repos/atlassian/frontbucket
+  - bbbs:
+      root: ~/dev/repos/atlassian/bitbucket-billing-service
   # - core-notes:
   #     layout: even-vertical
   #     panes:
