@@ -10,6 +10,8 @@ fi
 
 export EDITOR=vim
 
+export PATH="$HOME/.local/bin:$PATH"
+
 export GOPATH=$HOME/go
 export PATH="$GOPATH/bin:$PATH"
 
