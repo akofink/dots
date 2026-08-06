@@ -5,8 +5,7 @@ if [[ "${1:-}" == "--quiet" ]]; then
   quiet=1
 fi
 
-script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-dots_repo=${DOTS_REPO:-$(cd -- "$script_dir/.." && pwd)}
+dots_repo=${DOTS_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/dots"}
 notes_repo=${NOTES_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/notes"}
 state_dir=${XDG_STATE_HOME:-"$HOME/.local/state"}/dots-sync
 lock_dir="$state_dir/lock"
