@@ -91,9 +91,15 @@ eval "$(make clean)"
 This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setup variables so a later
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
-The top-level `setup.sh` orchestrates a curated subset of modules: `vim`, `tmux`, `zsh`, `llm`,
+The top-level `setup.sh` orchestrates a curated subset of modules: `http`, `aws`, `vim`, `tmux`, `zsh`, `llm`,
 `opencode`, `rbenv`, `go`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module
 script directly.
+
+#### AWS CLI module
+
+`bash setup/aws.sh` installs AWS CLI v2 for the current user using the official installer from
+`https://awscli.amazonaws.com/v2/install.sh`. The managed zsh configuration enables command completion
+through the bundled `aws_completer` executable when it is available.
 
 #### LLM CLI tools
 

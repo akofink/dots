@@ -51,6 +51,12 @@ if [ -f $ZSH/oh-my-zsh.sh ]; then source $ZSH/oh-my-zsh.sh; fi
 if [ -f ~/.secrets ]; then source ~/.secrets; fi # Secret key environment variables
 if [ -f ~/.env ]; then source ~/.env; fi # Other environment variables
 
+# AWS CLI ships a bash-compatible completer.
+if command -v aws_completer >/dev/null 2>&1; then
+  autoload -Uz bashcompinit && bashcompinit
+  complete -C "$(command -v aws_completer)" aws
+fi
+
 # Keep curses pinentry attached to the current terminal, especially inside tmux.
 if GPG_TTY=$(tty 2>/dev/null); then
   export GPG_TTY
