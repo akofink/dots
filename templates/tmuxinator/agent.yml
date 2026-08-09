@@ -19,4 +19,4 @@ root: <%= root %>
 windows:
   - zsh:
   - vim: vim
-  - ai: opencode
+  - ai:
