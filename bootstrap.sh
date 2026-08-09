@@ -75,7 +75,7 @@ then
   TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkgconf utf8proc)
   # shellcheck disable=SC2034
   RUBY_BUILD_DEPS=()
-  PKG_LIST=(make)
+  PKG_LIST=(make ripgrep)
   if [[ -n "$ENVSUBST_PKG" ]]; then
     PKG_LIST+=("$ENVSUBST_PKG")
   fi
@@ -101,7 +101,7 @@ then
     TMUX_BUILD_DEPS=(autoconf automake bison gcc g++ libevent-devel libncurses-devel locales pkg-config)
     # shellcheck disable=SC2034
     RUBY_BUILD_DEPS=()
-    PKG_LIST=(make)
+    PKG_LIST=(make ripgrep)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
     fi
@@ -117,7 +117,7 @@ then
     TMUX_BUILD_DEPS=(autoconf automake bison build-essential libevent-dev libncurses-dev locales pkg-config)
     # shellcheck disable=SC2034
     RUBY_BUILD_DEPS=(git autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev)
-    PKG_LIST=(gettext)
+    PKG_LIST=(gettext ripgrep)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
     fi
@@ -133,7 +133,7 @@ then
     # shellcheck disable=SC2034
     RUBY_BUILD_DEPS=()
     ENVSUBST_PKG=gettext
-    PKG_LIST=(shadow bash)
+    PKG_LIST=(shadow bash ripgrep)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
     fi
@@ -159,6 +159,9 @@ if [[ ${#PKG_LIST[@]} -gt 0 ]]; then
   "${PKG_INSTALL[@]}" "${PKG_LIST[@]}"
 fi
 
+if ! command -v rg >/dev/null 2>&1; then
+  fatal "ripgrep did not install rg"
+fi
 
 export ENV_SETUP_COMPLETE=1
 #!/usr/bin/env bash

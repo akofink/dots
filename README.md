@@ -130,6 +130,8 @@ On Linux it uses the system package manager for HTTPie and xh when the distribut
 The resulting binaries are `http`, `https`, `xh`, and `xhs`.
 Interactive zsh sessions alias `http` and `https` to xh when xh is available, while agents should invoke `xh` or `xhs` directly.
 
+The common environment setup also installs ripgrep (`rg`) for file and content searches.
+
 #### glow module
 
 `bash setup/glow.sh` installs glow from the local source checkout at `~/dev/repos/glow`.
