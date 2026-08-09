@@ -20,6 +20,7 @@ alias :e="vim"
 alias v='vim'
 alias g='git'
 alias dots='cd ~/dev/repos/dots'
+alias aka='akagent'
 
 # Sync in the background at most once every six hours so shell startup never waits on Git or the network.
 zmodload zsh/datetime 2>/dev/null

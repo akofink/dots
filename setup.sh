@@ -3,7 +3,7 @@
 echo
 echo "🍄 Dots setup.sh started..."
 
-setup_modules=(http aws vim tmux zsh llm opencode rbenv go tmuxinator glow)
+setup_modules=(http aws vim tmux zsh llm opencode rbenv go tmuxinator glow akagent)
 selected_modules=("${setup_modules[@]}")
 dry_run=0
 full_setup=1
@@ -119,6 +119,10 @@ run_setup_script() {
     glow)
       # shellcheck source=setup/glow.sh
       source "$DOTS_REPO/setup/glow.sh"
+      ;;
+    akagent)
+      # shellcheck source=setup/akagent.sh
+      source "$DOTS_REPO/setup/akagent.sh"
       ;;
     *)
       return 1

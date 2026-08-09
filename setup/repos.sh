@@ -18,7 +18,7 @@ then
   git clone https://github.com/akofink/dots.git "$DOTS_REPO"
 fi
 
-if [[ ! -d "$NOTES_REPO" ]]
+if is_truthy "${SETUP_NOTES_REPO:-1}" && [[ ! -d "$NOTES_REPO" ]]
 then
   git clone "$NOTES_REPO_URL" "$NOTES_REPO"
 fi

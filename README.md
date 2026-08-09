@@ -15,6 +15,7 @@ module script individually.
 - go
 - tmuxinator
 - glow
+- akagent
 
 Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`, `nvim.sh`) and can be run directly.
 
@@ -29,6 +30,9 @@ MACHINE_CLASS=personal ./setup.sh
 
 Current valid values are `work` and `personal`. The variable is the single place to gate
 role-dependent behavior; do not add new logic that branches on `HAS_JAMF` directly.
+
+Operator policy and private context are separate from machine class.
+Set `SETUP_NOTES_REPO=0` to skip cloning the private notes repository, including when provisioning a remote worker from the public setup.
 
 ## Set up on any machine
 
@@ -92,7 +96,7 @@ This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setu
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
 The top-level `setup.sh` orchestrates a curated subset of modules: `http`, `aws`, `vim`, `tmux`, `zsh`, `llm`,
-`opencode`, `rbenv`, `go`, `tmuxinator`, and `glow`. Feel free to tailor that list or run any other module
+`opencode`, `rbenv`, `go`, `tmuxinator`, `glow`, and `akagent`. Feel free to tailor that list or run any other module
 script directly.
 
 #### AWS CLI module
@@ -145,6 +149,18 @@ It clones `https://github.com/charmbracelet/glow.git` when missing, fast-forward
 builds with `go install`, and installs the resulting binary at `/usr/local/bin/glow`.
 The managed solarized config is rendered to `~/Library/Preferences/glow` on macOS and
 `${XDG_CONFIG_HOME:-~/.config}/glow` elsewhere.
+
+#### akagent module
+
+`bash setup/akagent.sh` builds `github.com/akofink/akagent-cli/cmd/akagent` with Go and installs it at `~/.local/bin/akagent`.
+It installs the latest available version by default; set `AKAGENT_VERSION` to a release or commit when reproducible provisioning is required.
+The managed zsh configuration provides `aka` as a short interactive alias while agents and integrations should invoke the stable `akagent` binary name.
+
+A remote worker can install only the required public modules without cloning private operator context:
+
+```sh
+SETUP_NOTES_REPO=0 ./setup.sh --only tmux,zsh,go,akagent
+```
 
 #### Ubuntu / WSL2 notes
 
