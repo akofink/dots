@@ -5,6 +5,7 @@ module script individually.
 
 ## Modules
 
+- http
 - vim
 - tmux
 - zsh
@@ -120,6 +121,14 @@ Set `GO_VERSION` before running the module to intentionally install a different 
 
 `bash setup/rbenv.sh` installs Ruby `4.0.6` through rbenv and sets it globally.
 Set `RUBY_VERSION` before running the module to intentionally install a different version.
+
+#### HTTP clients module
+
+`bash setup/http.sh` installs HTTPie and xh.
+On macOS it uses Homebrew for both tools.
+On Linux it uses the system package manager for HTTPie and xh when the distribution packages xh; otherwise it uses xh's official release installer.
+The resulting binaries are `http`, `https`, `xh`, and `xhs`.
+Interactive zsh sessions alias `http` and `https` to xh when xh is available, while agents should invoke `xh` or `xhs` directly.
 
 #### glow module
 

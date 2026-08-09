@@ -3,7 +3,7 @@
 echo
 echo "🍄 Dots setup.sh started..."
 
-setup_modules=(vim tmux zsh llm opencode rbenv go tmuxinator glow)
+setup_modules=(http vim tmux zsh llm opencode rbenv go tmuxinator glow)
 selected_modules=("${setup_modules[@]}")
 dry_run=0
 full_setup=1
@@ -76,6 +76,10 @@ fi
 run_setup_script() {
   local name="$1"
   case "$name" in
+    http)
+      # shellcheck source=setup/http.sh
+      source "$DOTS_REPO/setup/http.sh"
+      ;;
     vim)
       # shellcheck source=setup/vim.sh
       source "$DOTS_REPO/setup/vim.sh"

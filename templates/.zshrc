@@ -76,6 +76,19 @@ if [ -d /opt/homebrew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
+# Keep the memorable HTTPie command names while preferring xh when available.
+# Without xh, the aliases invoke HTTPie's native binaries without recursion.
+if command -v xh >/dev/null 2>&1; then
+  alias http='xh'
+else
+  alias http='command http'
+fi
+if command -v xhs >/dev/null 2>&1; then
+  alias https='xhs'
+else
+  alias https='command https'
+fi
+
 # nvm env setup
 if [ -d ~/.nvm ]; then
   export NVM_DIR="$HOME/.nvm"
