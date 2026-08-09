@@ -156,7 +156,7 @@ link_skill_set() {
 
   mkdir -p "$destination_root"
   for skill_name in "$@"; do
-    local skill_source="$notes_repo/.rovodev/skills/$skill_name"
+    local skill_source="$notes_repo/agents/skills/$skill_name"
     if [[ -d "$skill_source" ]]; then
       install_symlink "$skill_source" "$destination_root/$skill_name"
     fi
@@ -168,7 +168,7 @@ unlink_skill_set() {
   shift
 
   for skill_name in "$@"; do
-    remove_symlink_if_points_to "$destination_root/$skill_name" "$notes_repo/.rovodev/skills/$skill_name"
+    remove_symlink_if_points_to "$destination_root/$skill_name" "$notes_repo/agents/skills/$skill_name"
   done
 }
 
@@ -176,7 +176,7 @@ unlink_skill_set() {
 # ~/.pi/agent/extensions where pi auto-discovers them. unlink_pi_extensions
 # reverses that when the notes repo is unavailable.
 link_pi_extensions() {
-  local pi_extensions_source="$notes_repo/.rovodev/pi-extensions"
+  local pi_extensions_source="$notes_repo/agents/pi-extensions"
 
   [[ -d "$pi_extensions_source" ]] || return 0
   mkdir -p "$HOME/.pi/agent/extensions"
@@ -188,7 +188,7 @@ link_pi_extensions() {
 }
 
 unlink_pi_extensions() {
-  local pi_extensions_source="$notes_repo/.rovodev/pi-extensions"
+  local pi_extensions_source="$notes_repo/agents/pi-extensions"
 
   [[ -d "$pi_extensions_source" ]] || return 0
   local extension_file

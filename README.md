@@ -205,7 +205,7 @@ The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 `~/dev/repos/notes/dev-root-personal-AGENTS.md`, while work machines link to
 `~/dev/repos/notes/dev-root-AGENTS.md`.
 
-Skills are also symlinked from `~/dev/repos/notes/.rovodev/skills/` into the tool-specific skill directories.
+Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
 linked only when `MACHINE_CLASS=work`.
 OpenCode's Atlassian MCP servers follow the same machine-role gate and are omitted from personal-machine config.
