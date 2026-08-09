@@ -172,6 +172,31 @@ unlink_skill_set() {
   done
 }
 
+# link_pi_extensions symlinks canonical pi extensions from the notes repo into
+# ~/.pi/agent/extensions where pi auto-discovers them. unlink_pi_extensions
+# reverses that when the notes repo is unavailable.
+link_pi_extensions() {
+  local pi_extensions_source="$notes_repo/.rovodev/pi-extensions"
+
+  [[ -d "$pi_extensions_source" ]] || return 0
+  mkdir -p "$HOME/.pi/agent/extensions"
+  local extension_file
+  for extension_file in "$pi_extensions_source"/*.ts; do
+    [[ -f "$extension_file" ]] || continue
+    install_symlink "$extension_file" "$HOME/.pi/agent/extensions/$(basename -- "$extension_file")"
+  done
+}
+
+unlink_pi_extensions() {
+  local pi_extensions_source="$notes_repo/.rovodev/pi-extensions"
+
+  [[ -d "$pi_extensions_source" ]] || return 0
+  local extension_file
+  for extension_file in "$pi_extensions_source"/*.ts; do
+    remove_symlink_if_points_to "$HOME/.pi/agent/extensions/$(basename -- "$extension_file")" "$extension_file"
+  done
+}
+
 # Rovo installs the twg (Teamwork Graph) skill bundle under a stable,
 # rovo-managed path. These skills are Atlassian-work-graph specific, so they are
 # linked into the other LLM CLIs on work machines only. Rovo/RovoDev discover
@@ -229,6 +254,7 @@ unlink_notes_symlinks() {
   remove_symlink_if_points_to "$HOME/.codex/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/.config/opencode/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/.pi/AGENTS.md" "$notes_repo"
+  remove_symlink_if_points_to "$HOME/.pi/agent/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/dev/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/dev/AGENTS.bbc-core.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/dev/AGENTS.dss.md" "$notes_repo"
@@ -239,7 +265,8 @@ unlink_notes_symlinks() {
   unlink_skill_set "$HOME/.claude/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.codex/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.pi/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.pi/agent/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_pi_extensions
   unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
 
@@ -260,7 +287,7 @@ twg_skill_dests=(
   "$HOME/.claude/skills"
   "$HOME/.codex/skills"
   "$HOME/.config/opencode/skills"
-  "$HOME/.pi/skills"
+  "$HOME/.pi/agent/skills"
 )
 discover_twg_skills
 
@@ -268,9 +295,14 @@ unlink_skill_set "$HOME/.agents/skills" "${removed_skills[@]}"
 unlink_skill_set "$HOME/.claude/skills" "${removed_skills[@]}"
 unlink_skill_set "$HOME/.codex/skills" "${removed_skills[@]}"
 unlink_skill_set "$HOME/.config/opencode/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/.pi/skills" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.pi/agent/skills" "${removed_skills[@]}"
 unlink_skill_set "$HOME/.rovodev/skills" "${removed_skills[@]}"
 unlink_skill_set "$HOME/dev/.rovodev/skills" "${removed_skills[@]}"
+
+# Legacy pi locations predate ~/.pi/agent; clean links created under the old
+# paths so re-runs converge on the current layout.
+remove_symlink_if_points_to "$HOME/.pi/AGENTS.md" "$notes_repo"
+unlink_skill_set "$HOME/.pi/skills" "${common_skills[@]}" "${work_skills[@]}" "${removed_skills[@]}"
 
 mkdir -p \
   "$HOME/.agents" \
@@ -278,7 +310,8 @@ mkdir -p \
   "$HOME/.codex" \
   "$HOME/.codex/rules" \
   "$HOME/.config/opencode" \
-  "$HOME/.pi"
+  "$HOME/.pi" \
+  "$HOME/.pi/agent"
 
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
@@ -302,7 +335,7 @@ if [[ $has_notes_agents -eq 1 ]]; then
   install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
   install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
   install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
-  install_symlink "$agents_template" "$HOME/.pi/AGENTS.md"
+  install_symlink "$agents_template" "$HOME/.pi/agent/AGENTS.md"
 
   if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
     install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
@@ -312,7 +345,8 @@ if [[ $has_notes_agents -eq 1 ]]; then
   link_skill_set "$HOME/.claude/skills" "${common_skills[@]}"
   link_skill_set "$HOME/.codex/skills" "${common_skills[@]}"
   link_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}"
-  link_skill_set "$HOME/.pi/skills" "${common_skills[@]}"
+  link_skill_set "$HOME/.pi/agent/skills" "${common_skills[@]}"
+  link_pi_extensions
 
   dev_agents_template="$notes_repo/dev-root-personal-AGENTS.md"
   if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
@@ -345,7 +379,7 @@ if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
     link_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
     link_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
     link_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
-    link_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
+    link_skill_set "$HOME/.pi/agent/skills" "${work_skills[@]}"
     link_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
     link_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}"
     link_skill_set "$HOME/dev/.rovodev/skills" "${work_skills[@]}"
@@ -370,7 +404,7 @@ else
   unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.pi/skills" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.pi/agent/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
 
