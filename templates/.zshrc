@@ -53,6 +53,9 @@ if [ -f ~/.env ]; then source ~/.env; fi # Other environment variables
 
 # AWS CLI ships a bash-compatible completer.
 if command -v aws_completer >/dev/null 2>&1; then
+  if (( ! $+functions[compdef] )); then
+    autoload -Uz compinit && compinit
+  fi
   autoload -Uz bashcompinit && bashcompinit
   complete -C "$(command -v aws_completer)" aws
 fi

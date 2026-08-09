@@ -22,7 +22,9 @@ if [ -f "$OH_MY_ZSH_FETCH_HEAD" ] && [ -n "$(find "$OH_MY_ZSH_FETCH_HEAD" -mtime
   rm -rf "$OH_MY_ZSH_DIR"
 fi
 
-if [ ! -d "$OH_MY_ZSH_DIR/lib" ]; then
+if [ ! -f "$OH_MY_ZSH_DIR/oh-my-zsh.sh" ]; then
+  # The installer refuses to repair a directory left behind by an interrupted install.
+  rm -rf "$OH_MY_ZSH_DIR"
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
