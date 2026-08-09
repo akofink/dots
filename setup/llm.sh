@@ -278,7 +278,6 @@ unlink_notes_symlinks() {
 
 common_skills=(agent-orchestrator coding-workflow managing-1password-cli pr-review skills-via-dots-notes tmux)
 work_skills=(atlas-updates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db working-state-cleanup)
-removed_skills=(no-mistakes)
 
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
@@ -291,18 +290,10 @@ twg_skill_dests=(
 )
 discover_twg_skills
 
-unlink_skill_set "$HOME/.agents/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/.claude/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/.codex/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/.config/opencode/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/.pi/agent/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/.rovodev/skills" "${removed_skills[@]}"
-unlink_skill_set "$HOME/dev/.rovodev/skills" "${removed_skills[@]}"
-
 # Legacy pi locations predate ~/.pi/agent; clean links created under the old
 # paths so re-runs converge on the current layout.
 remove_symlink_if_points_to "$HOME/.pi/AGENTS.md" "$notes_repo"
-unlink_skill_set "$HOME/.pi/skills" "${common_skills[@]}" "${work_skills[@]}" "${removed_skills[@]}"
+unlink_skill_set "$HOME/.pi/skills" "${common_skills[@]}" "${work_skills[@]}"
 
 mkdir -p \
   "$HOME/.agents" \
