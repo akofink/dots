@@ -69,7 +69,7 @@ if GPG_TTY=$(tty 2>/dev/null); then
 fi
 
 # Rubygems user binary path setup
-if which ruby >/dev/null && which gem >/dev/null; then
+if command -v ruby >/dev/null 2>&1 && command -v gem >/dev/null 2>&1; then
     PATH="$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH"
 fi
 
