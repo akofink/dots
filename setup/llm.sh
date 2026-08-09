@@ -327,6 +327,14 @@ eval_template \
   '$OPENCODE_WORK_CONFIG'
 unset OPENCODE_WORK_CONFIG
 
+# Pi settings are captured live state, re-asserted like other CLI configs so
+# drift from the canonical defaults is archived rather than silently kept.
+# Empty substitution list: settings.json must never expand shell variables.
+eval_template \
+  "$DOTS_REPO/templates/dot_pi/agent/settings.json" \
+  "$HOME/.pi/agent/settings.json" \
+  ''
+
 # Claude uses CLAUDE.md as its single global instruction path.
 remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
 
