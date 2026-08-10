@@ -11,6 +11,10 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
+if command -v rpm &>/dev/null && rpm -q gnupg2-minimal &>/dev/null && ! command -v gpg-agent &>/dev/null; then
+  "${PKG_MGR[@]}" swap -y gnupg2-minimal gnupg2
+fi
+
 command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
