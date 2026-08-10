@@ -48,7 +48,15 @@ fi
 export PATH="$GOENV_ROOT/bin:$PATH"
 eval "$(goenv init -)"
 
-goenv install -s "$GO_VERSION"
+go_version_dir="$GOENV_ROOT/versions/$GO_VERSION"
+goenv_install_args=(-s)
+if [[ -d "$go_version_dir/src" ]] && find "$go_version_dir/src" -type f -name '*.go' ! -path '*/testdata/*' -size 0c -print -quit | grep -q .; then
+  echo "Detected an incomplete Go $GO_VERSION installation; repairing..."
+  goenv_install_args=(-f)
+fi
+if ! goenv install "${goenv_install_args[@]}" "$GO_VERSION"; then
+  fatal "Failed to install Go $GO_VERSION"
+fi
 goenv global "$GO_VERSION"
 
 if ! command -v go >/dev/null 2>&1; then
