@@ -70,6 +70,18 @@ Plug 'tpope/vim-rhubarb'
 call plug#end()
 
 
+" Automatically install missing plugins on the first run. Vim-plug populates
+" g:plugs with every declared plugin after plug#end(), so a plugin whose
+" directory does not exist yet is missing. Install them synchronously
+" (--sync) and reload the config once so the new plugins take effect without
+" a restart. The check only fires while a plugin directory is absent, so it
+" is idempotent and never retriggers after a successful install.
+autocmd VimEnter *
+  \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+  \ |   PlugInstall --sync | source $MYVIMRC
+  \ | endif
+
+
 " Plug related keybindings
 map <leader>BI :PlugInstall<CR>
 map <leader>PI :PlugInstall<CR>
