@@ -121,6 +121,9 @@ Rovo/RovoDev is configuration-only; setup does not auto-install it.
 `bash setup/opencode.sh` installs opencode using the official installer from `https://opencode.ai/install`.
 The installer places the binary in `~/.opencode/bin`; the managed shell templates already add that
 directory to `PATH`, so the setup script runs the installer with `--no-modify-path`.
+The setup script invokes the official installer on each run so stale or broken binaries can be repaired.
+Set `OPENCODE_VERSION` to pin a specific upstream release when needed, for example
+`OPENCODE_VERSION=1.18.15 bash setup/opencode.sh`.
 
 #### go module
 

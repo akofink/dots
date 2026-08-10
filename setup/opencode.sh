@@ -14,15 +14,6 @@ fi
 opencode_install_dir="$HOME/.opencode/bin"
 legacy_opencode_bin="/usr/local/bin/opencode"
 
-# opencode config linking (handled by llm.sh) should proceed even when the CLI
-# install is skipped or fails, so treat every install failure as a warning that
-# returns without setting the completion guard.
-if command -v opencode >/dev/null 2>&1; then
-  echo "opencode already installed; skipping."
-  export OPENCODE_SETUP_COMPLETE=1
-  return 0
-fi
-
 if ! command -v curl >/dev/null 2>&1; then
   warn "curl not found; skipping opencode install"
   return 1
@@ -41,7 +32,15 @@ if ! curl -fsSL https://opencode.ai/install -o "$opencode_install_script"; then
   warn "Failed to download opencode installer; skipping"
   return 1
 fi
-if ! bash "$opencode_install_script" --no-modify-path; then
+opencode_install_args=(--no-modify-path)
+if [[ -n "${OPENCODE_VERSION:-}" ]]; then
+  opencode_install_args+=(--version "$OPENCODE_VERSION")
+fi
+
+# Let the official installer decide whether the installed version needs an
+# update. This also repairs stale or broken binaries that still answer
+# `opencode --version` successfully.
+if ! bash "$opencode_install_script" "${opencode_install_args[@]}"; then
   warn "Failed to run opencode installer; skipping"
   return 1
 fi
