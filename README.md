@@ -139,7 +139,9 @@ Set `RUBY_VERSION` before running the module to intentionally install a differen
 
 `bash setup/http.sh` installs HTTPie and xh.
 On macOS it uses Homebrew for both tools.
-On Linux it uses the system package manager for HTTPie and xh when the distribution packages xh; otherwise it uses xh's official release installer.
+On yum-based Linux systems it installs HTTPie with the system Python's user-level pip because
+Amazon Linux does not package HTTPie.
+On other Linux distributions it uses the system package manager for HTTPie and xh when the distribution packages xh; otherwise it uses xh's official release installer.
 The resulting binaries are `http`, `https`, `xh`, and `xhs`.
 Interactive zsh sessions alias `http` and `https` to xh when xh is available, while agents should invoke `xh` or `xhs` directly.
 

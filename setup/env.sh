@@ -98,7 +98,7 @@ then
     # shellcheck disable=SC2034
     VIM_BUILD_DEPS=(gcc make clang libtool ncurses-devel)
     # shellcheck disable=SC2034
-    TMUX_BUILD_DEPS=(autoconf automake bison gcc g++ libevent-devel libncurses-devel locales pkg-config)
+    TMUX_BUILD_DEPS=(autoconf automake bison gcc g++ libevent-devel ncurses-devel pkg-config)
     # shellcheck disable=SC2034
     RUBY_BUILD_DEPS=()
     PKG_LIST=(bubblewrap make)

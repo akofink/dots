@@ -10,8 +10,20 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
-# HTTPie is available from the package managers supported by env.sh.
-"${PKG_INSTALL[@]}" httpie
+install_httpie_from_pip() {
+  if ! command -v python3 >/dev/null 2>&1 || ! python3 -m pip --version >/dev/null 2>&1; then
+    fatal "Python 3 with pip is required to install HTTPie on yum-based Linux"
+  fi
+  python3 -m pip install --user --upgrade httpie || fatal "Failed to install HTTPie with pip"
+  export PATH="$HOME/.local/bin:$PATH"
+}
+
+if [[ "$PLATFORM" == "Linux" ]] && command -v yum >/dev/null 2>&1; then
+  # Amazon Linux does not package HTTPie or pip, but includes pip with Python.
+  install_httpie_from_pip
+else
+  "${PKG_INSTALL[@]}" httpie
+fi
 
 install_xh_from_release() {
   local installer
