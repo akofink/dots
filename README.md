@@ -144,6 +144,9 @@ The resulting binaries are `http`, `https`, `xh`, and `xhs`.
 Interactive zsh sessions alias `http` and `https` to xh when xh is available, while agents should invoke `xh` or `xhs` directly.
 
 The common environment setup also installs ripgrep (`rg`) for file and content searches.
+On yum-based Linux systems where ripgrep is not packaged, it installs the pinned official release
+under `~/.local/bin`.
+Linux setup also installs bubblewrap (`bwrap`), which Codex uses for sandboxing.
 
 #### glow module
 

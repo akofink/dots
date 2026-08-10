@@ -94,14 +94,14 @@ then
     PKG_MGR=("${SUDO[@]}" yum)
     PKG_INDEX_UPDATE_SUBCOMMAND=(check-update)
     PKG_INSTALL_SUBCOMMAND=(install -y)
-    ENVSUBST_PKG=gettext-envsubst
+    ENVSUBST_PKG=gettext
     # shellcheck disable=SC2034
     VIM_BUILD_DEPS=(gcc make clang libtool ncurses-devel)
     # shellcheck disable=SC2034
     TMUX_BUILD_DEPS=(autoconf automake bison gcc g++ libevent-devel libncurses-devel locales pkg-config)
     # shellcheck disable=SC2034
     RUBY_BUILD_DEPS=()
-    PKG_LIST=(make ripgrep)
+    PKG_LIST=(bubblewrap make)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
     fi
@@ -133,7 +133,7 @@ then
     # shellcheck disable=SC2034
     RUBY_BUILD_DEPS=()
     ENVSUBST_PKG=gettext
-    PKG_LIST=(shadow bash ripgrep)
+    PKG_LIST=(bubblewrap shadow bash ripgrep)
     if [[ -n "$ENVSUBST_PKG" ]]; then
       PKG_LIST+=("$ENVSUBST_PKG")
     fi
@@ -157,6 +157,42 @@ set -e
 if [[ ${#PKG_LIST[@]} -gt 0 ]]; then
   printf 'Installing: %s %s\n' "${PKG_INSTALL[*]}" "${PKG_LIST[*]}"
   "${PKG_INSTALL[@]}" "${PKG_LIST[@]}"
+fi
+
+if ! command -v rg >/dev/null 2>&1; then
+  if [[ "$PLATFORM" == "Linux" ]] && command -v yum >/dev/null 2>&1; then
+    ripgrep_version=14.1.1
+    case "$(uname -m)" in
+      aarch64)
+        ripgrep_target=aarch64-unknown-linux-gnu
+        ;;
+      x86_64)
+        ripgrep_target=x86_64-unknown-linux-gnu
+        ;;
+      *)
+        fatal "ripgrep is not packaged and no release is available for $(uname -m)"
+        ;;
+    esac
+
+    ripgrep_tmp_dir=$(mktemp -d) || fatal "Failed to create a temporary ripgrep directory"
+    ripgrep_archive="ripgrep-${ripgrep_version}-${ripgrep_target}.tar.gz"
+    ripgrep_url="https://github.com/BurntSushi/ripgrep/releases/download/${ripgrep_version}/${ripgrep_archive}"
+    if ! curl -fsSL "$ripgrep_url" -o "$ripgrep_tmp_dir/$ripgrep_archive"; then
+      rm -rf "$ripgrep_tmp_dir"
+      fatal "Failed to download ripgrep from $ripgrep_url"
+    fi
+    if ! tar -xzf "$ripgrep_tmp_dir/$ripgrep_archive" -C "$ripgrep_tmp_dir"; then
+      rm -rf "$ripgrep_tmp_dir"
+      fatal "Failed to unpack ripgrep"
+    fi
+    mkdir -p "$HOME/.local/bin"
+    if ! install -m 0755 "$ripgrep_tmp_dir/ripgrep-${ripgrep_version}-${ripgrep_target}/rg" "$HOME/.local/bin/rg"; then
+      rm -rf "$ripgrep_tmp_dir"
+      fatal "Failed to install ripgrep"
+    fi
+    rm -rf "$ripgrep_tmp_dir"
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
 fi
 
 if ! command -v rg >/dev/null 2>&1; then
