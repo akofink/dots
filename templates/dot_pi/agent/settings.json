@@ -5,6 +5,6 @@
   "defaultModel": "~deepseek/deepseek-v4-flash-latest",
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": true,
-  "tuiMode": "fullscreen",
+  "tuiMode": "regular",
   "steeringMode": "all"
 }
