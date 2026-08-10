@@ -27,6 +27,11 @@ else
 fi
 export DOTS_REPO="${DOTS_REPO:-"$dots_repo_default"}"
 
+# Keep large installer temp files off tiny tmpfs /tmp mounts, common on small EC2 instances.
+export DOTS_SETUP_TMPDIR="${DOTS_SETUP_TMPDIR:-"$HOME/.cache/dots/tmp"}"
+mkdir -p "$DOTS_SETUP_TMPDIR"
+export TMPDIR="${TMPDIR:-"$DOTS_SETUP_TMPDIR"}"
+
 has_jamf_default=0
 if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then
   has_jamf_default=1

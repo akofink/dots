@@ -23,10 +23,15 @@ if ! opencode_install_script=$(mktemp); then
   warn "Failed to create temp file for opencode installer; skipping"
   return 1
 fi
-cleanup_opencode_install_script() {
+if ! opencode_tmp_dir=$(mktemp -d); then
   rm -f "$opencode_install_script"
+  warn "Failed to create temp directory for opencode installer; skipping"
+  return 1
+fi
+cleanup_opencode_install() {
+  rm -rf "$opencode_install_script" "$opencode_tmp_dir"
 }
-trap cleanup_opencode_install_script RETURN
+trap cleanup_opencode_install RETURN
 
 if ! curl -fsSL https://opencode.ai/install -o "$opencode_install_script"; then
   warn "Failed to download opencode installer; skipping"
@@ -40,7 +45,7 @@ fi
 # Let the official installer decide whether the installed version needs an
 # update. This also repairs stale or broken binaries that still answer
 # `opencode --version` successfully.
-if ! bash "$opencode_install_script" "${opencode_install_args[@]}"; then
+if ! TMPDIR="$opencode_tmp_dir" bash "$opencode_install_script" "${opencode_install_args[@]}"; then
   warn "Failed to run opencode installer; skipping"
   return 1
 fi
