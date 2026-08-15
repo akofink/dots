@@ -355,6 +355,13 @@ eval_template \
   "$HOME/.pi/agent/settings.json" \
   ''
 
+pi_mcp_config_template="$DOTS_REPO/templates/dot_pi/agent/mcp.json"
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+  eval_template "$pi_mcp_config_template" "$HOME/.pi/agent/mcp.json" ''
+elif [[ -f "$HOME/.pi/agent/mcp.json" ]] && cmp -s "$pi_mcp_config_template" "$HOME/.pi/agent/mcp.json"; then
+  rm -f "$HOME/.pi/agent/mcp.json"
+fi
+
 # Claude uses CLAUDE.md as its single global instruction path.
 remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
 

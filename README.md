@@ -215,6 +215,7 @@ On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev an
 - `~/.rovodev/config.yml`
 - `~/.rovodev/AGENTS.md`
 - `~/.rovo/AGENTS.md`
+- `~/.pi/agent/mcp.json` with the work-only Pi MCP servers
 
 The Codex rules file is a repo-managed baseline for portable allow-prefix rules. Keep machine-specific or
 task-specific approvals in separate files such as `~/.codex/rules/default.rules`; `setup/llm.sh` will not
@@ -225,6 +226,7 @@ hidden behind an abstraction layer. When changing durable defaults, check the co
 
 - Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
 - opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; work-only Atlassian MCP servers live in the adjacent `work.jsonc` fragment.
+- Pi's work-only MCP servers mirror that configuration in `templates/dot_pi/agent/mcp.json`, rendered to `~/.pi/agent/mcp.json` only when `MACHINE_CLASS=work`.
 - Shared agent instructions and skills are notes-backed symlinks where each tool supports them.
 - Each tool receives the canonical global instructions at one native path; setup does not alias the same file under multiple names for one tool.
 - Tool-specific auth, cache, history, project trust, missing features, and one-off permission/access grants remain local.
@@ -244,8 +246,8 @@ Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-
 Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
 linked only when `MACHINE_CLASS=work`.
 
-Pi's MCP adapter is installed as a global Pi package and reads the shared `.mcp.json` configuration used by MCP clients.
-OpenCode's Atlassian MCP servers follow the same machine-role gate and are omitted from personal-machine config.
+Pi's MCP adapter is installed as a global Pi package.
+Its work profile receives the same Atlassian MCP servers as OpenCode, while personal setup removes the dots-managed Pi MCP config.
 
 The rovo-managed twg (Teamwork Graph) skill bundle at `~/.local/share/rovo/current/twg/skills/` is also
 symlinked into the non-rovo LLM CLIs (`~/.agents`, `~/.claude`, `~/.codex`, `~/.config/opencode`, `~/.pi`) on
