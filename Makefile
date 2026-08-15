@@ -20,6 +20,7 @@ check:
 test:
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
+	bash test/llm-skills-test.sh
 	bash test/util-backups-test.sh
 
 .PHONY: clean

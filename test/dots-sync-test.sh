@@ -32,11 +32,18 @@ git -C "$dots_repo" commit -m "local dots" >/dev/null
 printf 'local notes\n' >> "$notes_repo/README"
 git -C "$notes_repo" add README
 git -C "$notes_repo" commit -m "local notes" >/dev/null
+mkdir -p "$dots_repo/setup"
+cat > "$dots_repo/setup/llm.sh" <<'EOF'
+#!/usr/bin/env bash
+printf 'reapplied\n' > "$NOTES_REPO/.sync-linked"
+EOF
+chmod +x "$dots_repo/setup/llm.sh"
 
 DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" "$script" --quiet
 
 [[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ $(git -C "$notes_repo" rev-list --count '@{u}..') -eq 0 ]]
+[[ -f "$notes_repo/.sync-linked" ]]
 
 # Missing repositories are intentionally harmless for a portable shell setup.
 DOTS_REPO="$tmpdir/missing-dots" NOTES_REPO="$tmpdir/missing-notes" "$script" --quiet

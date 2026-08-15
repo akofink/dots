@@ -37,5 +37,18 @@ sync_repo() {
   fi
 }
 
+sync_llm_skill_links() {
+  [[ -f "$dots_repo/setup/llm.sh" && -d "$notes_repo" ]] || return 0
+
+  local command=(env DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" ENV_SETUP_COMPLETE=1 LLM_LINK_ONLY=1 bash "$dots_repo/setup/llm.sh")
+  if [[ $quiet -eq 1 ]]; then
+    "${command[@]}" >/dev/null 2>&1 || return 0
+  else
+    printf 'Reapplying configured agent skill links\n'
+    "${command[@]}" || return 0
+  fi
+}
+
 sync_repo "$dots_repo"
 sync_repo "$notes_repo"
+sync_llm_skill_links

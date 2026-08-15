@@ -83,6 +83,7 @@ repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/d
 #### Repository sync
 
 `syncdots` pulls with rebase and pushes the dots and notes repositories.
+After synchronization, it reapplies the configured notes-backed agent skill links without rerunning CLI installers.
 It is also launched asynchronously at most once every six hours when a managed zsh shell starts, so it never delays shell startup.
 Failures, missing repositories, and an already-running sync are harmless no-ops; run `syncdots` manually to see Git output.
 
@@ -207,6 +208,9 @@ If the notes repo is not present when the LLM module runs directly, the module s
 config and rules, then skips the notes-backed agent and skill symlinks with a warning.
 Codex reads its canonical global guidance from `~/.codex/AGENTS.md`; setup does not deploy a second generic
 `instructions.md` layer.
+Run `bin/verify-llm-skills.sh` to check that every configured common skill is present and points to its canonical source.
+A missing configured skill or broken link makes the verification fail instead of being silently omitted.
+OpenCode loads global skills at session startup, so restart an existing OpenCode session after setup or synchronization changes before checking discovery.
 
 On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
 

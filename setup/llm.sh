@@ -143,29 +143,28 @@ install_agent_skill() {
 # Tool installs are best-effort: each helper skips work that is already present
 # and warns instead of aborting on failure. The `|| true` guards keep a single
 # failed install from tripping `set -e` and skipping the config setup below.
-echo "→ Installing Claude Code CLI..."
-install_llm_cli "Claude Code" claude "https://claude.ai/install.sh" bash || true
+# Synchronization uses LLM_LINK_ONLY to reapply links without rerunning installers.
+if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
+  echo "→ Installing Claude Code CLI..."
+  install_llm_cli "Claude Code" claude "https://claude.ai/install.sh" bash || true
 
-echo "→ Installing Codex CLI..."
-install_llm_cli "Codex" codex "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh || true
+  echo "→ Installing Codex CLI..."
+  install_llm_cli "Codex" codex "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh || true
+  echo "→ Installing Pi Coding Agent..."
+  install_pi_coding_agent || true
+  echo "→ Installing Pi MCP Adapter..."
+  install_pi_extension "Pi MCP Adapter" "npm:pi-mcp-adapter" || true
+  echo "→ Installing AXI skill..."
+  install_agent_skill "AXI" axi kunchenguid/axi || true
+  echo "→ Installing gh-axi skill..."
+  install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
 
-echo "→ Installing Pi Coding Agent..."
-install_pi_coding_agent || true
-
-echo "→ Installing Pi MCP Adapter..."
-install_pi_extension "Pi MCP Adapter" "npm:pi-mcp-adapter" || true
-
-echo "→ Installing AXI skill..."
-install_agent_skill "AXI" axi kunchenguid/axi || true
-
-echo "→ Installing gh-axi skill..."
-install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
-
-if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
-  # opencode.sh returns non-zero (without setting its guard) when the install is
-  # skipped or fails; tolerate that so the config linking below still runs.
-  # shellcheck source=setup/opencode.sh
-  source "$script_dir/opencode.sh" || true
+  if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
+    # opencode.sh returns non-zero (without setting its guard) when the install is
+    # skipped or fails; tolerate that so the config linking below still runs.
+    # shellcheck source=setup/opencode.sh
+    source "$script_dir/opencode.sh" || true
+  fi
 fi
 
 notes_repo="$NOTES_REPO"
@@ -186,9 +185,11 @@ link_skill_set() {
   mkdir -p "$destination_root"
   for skill_name in "$@"; do
     local skill_source="$notes_repo/agents/skills/$skill_name"
-    if [[ -d "$skill_source" ]]; then
-      install_symlink "$skill_source" "$destination_root/$skill_name"
+    if [[ ! -d "$skill_source" ]]; then
+      warn "Configured agent skill source is missing: $skill_source"
+      return 1
     fi
+    install_symlink "$skill_source" "$destination_root/$skill_name"
   done
 }
 
@@ -307,6 +308,106 @@ unlink_notes_symlinks() {
 
 common_skills=(akagent agent-orchestrator coding-workflow managing-1password-cli pr-review skills-via-dots-notes tmux)
 work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db working-state-cleanup)
+notes_skill_dests=(
+  "$HOME/.agents/skills"
+  "$HOME/.claude/skills"
+  "$HOME/.codex/skills"
+  "$HOME/.config/opencode/skills"
+  "$HOME/.pi/agent/skills"
+)
+if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+  notes_skill_dests+=(
+    "$HOME/.rovodev/skills"
+    "$HOME/dev/.rovodev/skills"
+  )
+fi
+
+verify_skill_set() {
+  local destination_root="$1"
+  shift
+  local failed=0
+  local skill_name
+  local skill_source
+  local destination
+  local current_target
+
+  for skill_name in "$@"; do
+    skill_source="$notes_repo/agents/skills/$skill_name"
+    destination="$destination_root/$skill_name"
+    if [[ ! -d "$skill_source" ]]; then
+      warn "Configured agent skill source is missing: $skill_source"
+      failed=1
+      continue
+    fi
+    if [[ ! -L "$destination" ]]; then
+      warn "Configured agent skill link is missing: $destination"
+      failed=1
+      continue
+    fi
+    current_target=$(readlink -- "$destination") || {
+      warn "Unable to read configured agent skill link: $destination"
+      failed=1
+      continue
+    }
+    if [[ "$current_target" != "$skill_source" ]]; then
+      warn "Configured agent skill link points to $current_target, expected $skill_source"
+      failed=1
+      continue
+    fi
+    if [[ ! -f "$destination/SKILL.md" ]]; then
+      warn "Configured agent skill link is broken or incomplete: $destination"
+      failed=1
+    fi
+  done
+
+  return "$failed"
+}
+
+link_notes_skill_set() {
+  local failed=0
+  local destination_root
+  for destination_root in "${notes_skill_dests[@]}"; do
+    link_skill_set "$destination_root" "${common_skills[@]}" || failed=1
+    if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+      link_skill_set "$destination_root" "${work_skills[@]}" || failed=1
+    fi
+  done
+  return "$failed"
+}
+
+verify_notes_skill_set() {
+  local failed=0
+  local destination_root
+  for destination_root in "${notes_skill_dests[@]}"; do
+    verify_skill_set "$destination_root" "${common_skills[@]}" || failed=1
+    if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+      verify_skill_set "$destination_root" "${work_skills[@]}" || failed=1
+    fi
+  done
+  return "$failed"
+}
+
+finish_llm_script() {
+  local status="$1"
+  if [[ "${BASH_SOURCE[1]}" == "$0" ]]; then
+    exit "$status"
+  fi
+  return "$status"
+}
+
+if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
+  status=0
+  if [[ "$has_notes_agents" -eq 1 ]]; then
+    if [[ "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
+      link_notes_skill_set || status=$?
+    fi
+    verify_notes_skill_set || status=$?
+  else
+    echo "Skipping notes-backed agent skill verification; missing $agents_template"
+  fi
+  export LLM_SETUP_COMPLETE=1
+  finish_llm_script "$status"
+fi
 
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
@@ -376,11 +477,7 @@ if [[ $has_notes_agents -eq 1 ]]; then
     install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
   fi
 
-  link_skill_set "$HOME/.agents/skills" "${common_skills[@]}"
-  link_skill_set "$HOME/.claude/skills" "${common_skills[@]}"
-  link_skill_set "$HOME/.codex/skills" "${common_skills[@]}"
-  link_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}"
-  link_skill_set "$HOME/.pi/agent/skills" "${common_skills[@]}"
+  link_notes_skill_set
   link_pi_extensions
 
   dev_agents_template="$notes_repo/dev-root-personal-AGENTS.md"
@@ -410,14 +507,7 @@ if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
     # Rovo CLI reads global memory from ~/.rovo/; config and MCP are tool-managed.
     install_symlink "$agents_template" "$HOME/.rovo/AGENTS.md"
 
-    link_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
-    link_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
-    link_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
-    link_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
-    link_skill_set "$HOME/.pi/agent/skills" "${work_skills[@]}"
-    link_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
-    link_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}"
-    link_skill_set "$HOME/dev/.rovodev/skills" "${work_skills[@]}"
+    link_notes_skill_set
   else
     unlink_notes_symlinks
   fi
@@ -458,6 +548,10 @@ else
   if [[ -f "$HOME/.rovodev/config.yml" ]] && cmp -s "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml"; then
     rm -f "$HOME/.rovodev/config.yml"
   fi
+fi
+
+if [[ "$has_notes_agents" -eq 1 ]]; then
+  verify_notes_skill_set
 fi
 
 export LLM_SETUP_COMPLETE=1
