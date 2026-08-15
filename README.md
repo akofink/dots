@@ -112,6 +112,7 @@ through the bundled `aws_completer` executable when it is available.
 - Claude Code from `https://claude.ai/install.sh`
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
 - Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
+- Pi MCP Adapter from npm (`pi-mcp-adapter`)
 - opencode via `setup/opencode.sh`
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.
@@ -242,6 +243,8 @@ The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
 linked only when `MACHINE_CLASS=work`.
+
+Pi's MCP adapter is installed as a global Pi package and reads the shared `.mcp.json` configuration used by MCP clients.
 OpenCode's Atlassian MCP servers follow the same machine-role gate and are omitted from personal-machine config.
 
 The rovo-managed twg (Teamwork Graph) skill bundle at `~/.local/share/rovo/current/twg/skills/` is also

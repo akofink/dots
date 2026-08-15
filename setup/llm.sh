@@ -86,6 +86,32 @@ install_pi_coding_agent() {
   fi
 }
 
+# install_pi_extension <name> <source>
+#
+# Installs a Pi extension package and keeps setup best-effort. Skips when the
+# package is already registered in Pi's global package settings.
+install_pi_extension() {
+  local name="$1"
+  local source="$2"
+
+  if ! command -v pi >/dev/null 2>&1; then
+    warn "pi not found; skipping $name install"
+    return 1
+  fi
+
+  if pi list 2>/dev/null | grep -Fq -- "$source"; then
+    echo "Pi extension $name already installed; skipping."
+    return 0
+  fi
+
+  echo "Installing Pi extension: $name ..."
+
+  if ! pi install "$source"; then
+    warn "Failed to install $name; skipping"
+    return 1
+  fi
+}
+
 # install_agent_skill <name> <skill_dir> <skills-add-args...>
 #
 # Installs a global agent skill via `npx skills add`. Skips when the skill is
@@ -125,6 +151,9 @@ install_llm_cli "Codex" codex "https://chatgpt.com/codex/install.sh" env CODEX_N
 
 echo "→ Installing Pi Coding Agent..."
 install_pi_coding_agent || true
+
+echo "→ Installing Pi MCP Adapter..."
+install_pi_extension "Pi MCP Adapter" "npm:pi-mcp-adapter" || true
 
 echo "→ Installing AXI skill..."
 install_agent_skill "AXI" axi kunchenguid/axi || true
