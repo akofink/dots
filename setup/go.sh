@@ -46,6 +46,8 @@ else
 fi
 
 export PATH="$GOENV_ROOT/bin:$PATH"
+# goenv does not reposition an existing shim entry, even when front is requested.
+export PATH="$GOENV_ROOT/shims:$PATH"
 eval "$(goenv init -)"
 
 go_version_dir="$GOENV_ROOT/versions/$GO_VERSION"
