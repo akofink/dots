@@ -113,7 +113,7 @@ through the bundled `aws_completer` executable when it is available.
 - Claude Code from `https://claude.ai/install.sh`
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
 - Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
-- Pi MCP Adapter from npm (`pi-mcp-adapter`)
+- Pi MCP Adapter from GitHub (`git:github.com/nicobailon/pi-mcp-adapter@v2.29.0`)
 - opencode via `setup/opencode.sh`
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.

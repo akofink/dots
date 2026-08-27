@@ -153,7 +153,7 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   echo "→ Installing Pi Coding Agent..."
   install_pi_coding_agent || true
   echo "→ Installing Pi MCP Adapter..."
-  install_pi_extension "Pi MCP Adapter" "npm:pi-mcp-adapter" || true
+  install_pi_extension "Pi MCP Adapter" "git:github.com/nicobailon/pi-mcp-adapter@v2.29.0" || true
   echo "→ Installing AXI skill..."
   install_agent_skill "AXI" axi kunchenguid/axi || true
   echo "→ Installing gh-axi skill..."

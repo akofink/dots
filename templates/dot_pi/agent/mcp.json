@@ -1,4 +1,7 @@
 {
+  "settings": {
+    "strictDirectToolArguments": true
+  },
   "mcpServers": {
     "ops-sherpa": {
       "command": "npx",

@@ -8,6 +8,6 @@
   "tuiMode": "regular",
   "steeringMode": "all",
   "packages": [
-    "npm:pi-mcp-adapter"
+    "git:github.com/nicobailon/pi-mcp-adapter@v2.29.0"
   ]
 }
