@@ -231,6 +231,7 @@ hidden behind an abstraction layer. When changing durable defaults, check the co
 - Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
 - opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; work-only Atlassian MCP servers live in the adjacent `work.jsonc` fragment.
 - Pi's work-only MCP servers mirror that configuration in `templates/dot_pi/agent/mcp.json`, rendered to `~/.pi/agent/mcp.json` only when `MACHINE_CLASS=work`.
+- Pi's agent-level retry defaults are managed in `templates/dot_pi/agent/settings.json`: retries are enabled with up to 6 attempts and a 2-second base delay, while provider-level retries remain disabled.
 - Shared agent instructions and skills are notes-backed symlinks where each tool supports them.
 - Each tool receives the canonical global instructions at one native path; setup does not alias the same file under multiple names for one tool.
 - Tool-specific auth, cache, history, project trust, missing features, and one-off permission/access grants remain local.
