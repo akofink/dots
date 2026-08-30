@@ -127,7 +127,7 @@ known_destinations() {
   local glow_config_dir
   local vim_template
   local common_skills=(akagent agent-orchestrator coding-workflow pr-review skills-via-dots-notes tmux)
-  local work_skills=(atlas-updates jira-ticket-authoring)
+  local work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp)
 
   config_root=${XDG_CONFIG_HOME:-$home_root/.config}
   if [[ "$config_root" != /* ]]; then
@@ -165,6 +165,7 @@ known_destinations() {
   add_destination "$home_root/.codex/config.toml"
   add_destination "$home_root/.codex/rules/dots.rules"
   add_destination "$home_root/.config/opencode/opencode.jsonc"
+  add_destination "$home_root/.pi/agent/settings.json"
   add_destination "$home_root/.rovodev/config.yml"
 
   add_destination "$home_root/.agents/AGENTS.md"
@@ -172,7 +173,8 @@ known_destinations() {
   add_destination "$home_root/.claude/agents/test-writer.md"
   add_destination "$home_root/.codex/AGENTS.md"
   add_destination "$home_root/.config/opencode/AGENTS.md"
-  add_destination "$home_root/.pi/AGENTS.md"
+  add_destination "$home_root/.pi/agent/AGENTS.md"
+  add_destination "$home_root/.pi/agent/mcp.json"
   add_destination "$home_root/.rovodev/AGENTS.md"
   add_destination "$home_root/.rovo/AGENTS.md"
   add_destination "$home_root/dev/AGENTS.md"
@@ -183,7 +185,7 @@ known_destinations() {
   add_skill_destinations "$home_root/.claude/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.codex/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.config/opencode/skills" "${common_skills[@]}" "${work_skills[@]}"
-  add_skill_destinations "$home_root/.pi/skills" "${common_skills[@]}" "${work_skills[@]}"
+  add_skill_destinations "$home_root/.pi/agent/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
 

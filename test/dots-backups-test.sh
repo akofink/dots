@@ -26,7 +26,7 @@ assert_missing() {
 }
 
 home_one="$tmp_root/home-one"
-mkdir -p "$home_one/.config/opencode" "$home_one/.agents"
+mkdir -p "$home_one/.config/opencode" "$home_one/.agents" "$home_one/.pi/agent"
 printf 'current\n' > "$home_one/.zshrc"
 printf 'current\n' > "$home_one/.zshrc.old.240101000000"
 printf 'current\n' > "$home_one/.zshrc.old.240102000000"
@@ -36,11 +36,15 @@ printf 'config\n' > "$home_one/.config/opencode/opencode.jsonc.old.240102000000"
 printf 'agents\n' > "$home_one/.agents/AGENTS.md"
 printf 'agents\n' > "$home_one/.agents/AGENTS.md.old.240101000000"
 printf 'agents\n' > "$home_one/.agents/AGENTS.md.old.240102000000"
+printf 'pi agents\n' > "$home_one/.pi/agent/AGENTS.md"
+printf 'pi agents\n' > "$home_one/.pi/agent/AGENTS.md.old.240101000000"
+printf 'pi agents\n' > "$home_one/.pi/agent/AGENTS.md.old.240102000000"
 printf 'private\n' > "$home_one/private.old.240101000000"
 printf 'private\n' > "$home_one/.config/private.old.240101000000"
 
 audit_output=$(HOME="$home_one" "$script" --root "$home_one")
 [[ "$audit_output" == *"WOULD DELETE $home_one/.zshrc.old.240101000000"* ]] || fail "audit did not report older redundant backup"
+[[ "$audit_output" == *"WOULD DELETE $home_one/.pi/agent/AGENTS.md.old.240101000000"* ]] || fail "audit did not report current Pi guidance backup"
 [[ "$audit_output" == *"KEEP newest: $home_one/.zshrc.old.240102000000"* ]] || fail "audit did not preserve newest backup"
 [[ "$audit_output" != *"private.old"* ]] || fail "audit reported an unrelated backup"
 

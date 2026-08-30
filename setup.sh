@@ -6,7 +6,6 @@ echo "🍄 Dots setup.sh started..."
 setup_modules=(http aws vim tmux zsh llm opencode rbenv go tmuxinator glow akagent)
 selected_modules=("${setup_modules[@]}")
 dry_run=0
-full_setup=1
 
 print_usage() {
   cat <<'EOF'
@@ -39,7 +38,6 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       IFS=',' read -r -a selected_modules <<< "$2"
-      full_setup=0
       shift
       ;;
     --help)
@@ -143,11 +141,6 @@ for script in "${selected_modules[@]}"; do
     echo "💩 Error - script does not exist: $script_path"
   fi
 done
-
-if [[ "$full_setup" -eq 1 ]]; then
-  "$DOTS_REPO/bin/dots-backups.sh" --prune --all
-  rm -rf -- "$DOTS_BACKUP_DIR"
-fi
 
 echo
 echo "🎉🎉🎉🎉 Dots setup.sh success! 🎉🎉🎉🎉"

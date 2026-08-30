@@ -320,18 +320,18 @@ toolPermissions:
     - command: cd /tmp && python -m pytest billing/tests/test_api.py::test_account_deactivate_ccp_with_feature_flag
         -xvs
       permission: allow
-    - command: cd /Users/akofink/dev/repos/notes && grep -A 20 "<feedback>" 2025/06/30_peer_feedback_mert.md
+    - command: cd "$NOTES_REPO" && grep -A 20 "<feedback>" dated/2025/06/30_peer_feedback_mert.md
         | grep -B 20 "</feedback>" | sed '1d;$$d' | wc -w
       permission: allow
-    - command: cd /Users/akofink/dev/repos/notes && grep -A 10 "Opportunities" 2025/06/30_peer_feedback_mert.md
+    - command: cd "$NOTES_REPO" && grep -A 10 "Opportunities" dated/2025/06/30_peer_feedback_mert.md
         | grep -A 5 "<feedback>" | grep -B 5 "</feedback>" | sed '1d;$$d' | wc -w
       permission: allow
-    - command: cd /Users/akofink/dev/repos/notes && tail -n 10 2025/06/30_peer_feedback_mert.md
+    - command: cd "$NOTES_REPO" && tail -n 10 dated/2025/06/30_peer_feedback_mert.md
       permission: allow
-    - command: cd /Users/akofink/dev/repos/notes && sed -n '/^<feedback>$/,/^<\/feedback>$/p'
-        2025/06/30_peer_feedback_mert.md | head -n -1 | tail -n +2 | wc -w
+    - command: cd "$NOTES_REPO" && sed -n '/^<feedback>$/,/^<\/feedback>$/p'
+        dated/2025/06/30_peer_feedback_mert.md | head -n -1 | tail -n +2 | wc -w
       permission: allow
-    - command: cd /Users/akofink/dev/repos/notes && grep -A 20 "Strengths" 2025/06/30_peer_feedback_mert.md
+    - command: cd "$NOTES_REPO" && grep -A 20 "Strengths" dated/2025/06/30_peer_feedback_mert.md
       permission: allow
     - command: cd /workspace && ./gradlew test --tests "*BitbucketPlanTransformerTest*"
         --info
@@ -344,15 +344,15 @@ toolPermissions:
       permission: allow
     - command: python tmp_rovodev_clean_html.py
       permission: allow
-    - command: head -5 "2025/07/02_prs_authored_in_the_last_6_months.html"
+    - command: cd "$NOTES_REPO" && head -5 "dated/2025/07/02_prs_authored_in_the_last_6_months.html"
       permission: allow
-    - command: sed -i 's/ style="[^"]*"//g' "2025/07/02_prs_authored_in_the_last_6_months.html"
+    - command: cd "$NOTES_REPO" && sed -i 's/ style="[^"]*"//g' "dated/2025/07/02_prs_authored_in_the_last_6_months.html"
       permission: allow
-    - command: sed -i 's| style="[^"]*"||g' "2025/07/02_prs_authored_in_the_last_6_months.html"
+    - command: cd "$NOTES_REPO" && sed -i 's| style="[^"]*"||g' "dated/2025/07/02_prs_authored_in_the_last_6_months.html"
       permission: allow
-    - command: cd "2025/07" && sed -i 's/ style="[^"]*"//g' "02_prs_authored_in_the_last_6_months.html"
+    - command: cd "$NOTES_REPO/dated/2025/07" && sed -i 's/ style="[^"]*"//g' "02_prs_authored_in_the_last_6_months.html"
       permission: allow
-    - command: cd "2025/07" && sed -i 's# style="[^"]*"##g' "02_prs_authored_in_the_last_6_months.html"
+    - command: cd "$NOTES_REPO/dated/2025/07" && sed -i 's# style="[^"]*"##g' "02_prs_authored_in_the_last_6_months.html"
       permission: allow
     - command: cd /workspace && python tmp_rovodev_test_tcs_plan_info.py
       permission: allow

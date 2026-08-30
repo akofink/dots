@@ -48,6 +48,7 @@ run_setup
 run_verify
 
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-personal.md"
+test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 
 env \
   HOME="$home" \
@@ -61,6 +62,29 @@ env \
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
 test "$(readlink "$home/dev/AGENTS.dss.md")" = "$notes_repo/agents/guidance/dss.md"
+
+mkdir -p "$home/.rovodev"
+env NOTES_REPO="$notes_repo" envsubst '$NOTES_REPO' < \
+  "$repo_root/templates/dot_rovodev/config.yml" > "$home/.rovodev/config.yml"
+grep -Fq "cd \"$notes_repo\" && grep -A 20" "$home/.rovodev/config.yml"
+
+env \
+  HOME="$home" \
+  DOTS_REPO="$repo_root" \
+  NOTES_REPO="$notes_repo" \
+  ENV_SETUP_COMPLETE=1 \
+  MACHINE_CLASS=personal \
+  LLM_LINK_ONLY=1 \
+  bash "$repo_root/setup/llm.sh"
+
+test ! -e "$home/dev/AGENTS.bbc-core.md"
+test ! -e "$home/dev/AGENTS.dss.md"
+test ! -e "$home/.rovodev/AGENTS.md"
+test ! -e "$home/.rovodev/config.yml"
+test ! -e "$home/.agents/skills/atlas-updates"
+test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
+
+echo 'role switch cleanup passed'
 
 rm "$home/.config/opencode/skills/akagent"
 if run_verify >"$tmpdir/verify-output" 2>&1; then

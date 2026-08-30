@@ -443,20 +443,17 @@ finish_llm_script() {
   return "$status"
 }
 
-if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
-  status=0
-  if [[ "$has_notes_agents" -eq 1 ]]; then
-    if [[ "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
-      link_notes_skill_set || status=$?
-      link_development_guidance || status=$?
-    fi
-    verify_notes_skill_set || status=$?
-  else
-    echo "Skipping notes-backed agent skill verification; missing $agents_template"
+remove_managed_rovodev_config() {
+  [[ -f "$HOME/.rovodev/config.yml" ]] || return 0
+
+  local rendered_config
+  rendered_config=$(mktemp) || return 0
+  if envsubst '$NOTES_REPO' < "$DOTS_REPO/templates/dot_rovodev/config.yml" > "$rendered_config" \
+    && cmp -s "$rendered_config" "$HOME/.rovodev/config.yml"; then
+    rm -f "$HOME/.rovodev/config.yml"
   fi
-  export LLM_SETUP_COMPLETE=1
-  finish_llm_script "$status"
-fi
+  rm -f "$rendered_config"
+}
 
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
@@ -468,6 +465,54 @@ twg_skill_dests=(
   "$HOME/.pi/agent/skills"
 )
 discover_twg_skills
+
+if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
+  status=0
+  if [[ "$has_notes_agents" -eq 1 ]]; then
+    if [[ "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
+      if [[ "${MACHINE_CLASS:-personal}" != "work" ]]; then
+        # A role change must converge through the same cleanup path as a full
+        # setup, or syncdots can leave work-only links on a personal machine.
+        unlink_notes_symlinks
+        remove_managed_rovodev_config
+      fi
+
+      install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
+      install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
+      install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
+      install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
+      install_symlink "$agents_template" "$HOME/.pi/agent/AGENTS.md"
+      if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
+        install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
+      fi
+      link_notes_skill_set || status=$?
+      link_pi_extensions
+      link_development_guidance
+
+      if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+        install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
+        install_symlink "$agents_template" "$HOME/.rovo/AGENTS.md"
+        if [[ -d "$twg_skills_source" ]]; then
+          for twg_dest in "${twg_skill_dests[@]}"; do
+            link_twg_skill_set "$twg_dest"
+          done
+        else
+          for twg_dest in "${twg_skill_dests[@]}"; do
+            unlink_twg_skill_set "$twg_dest"
+          done
+        fi
+      fi
+    fi
+    verify_notes_skill_set || status=$?
+  else
+    if [[ "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
+      unlink_notes_symlinks
+    fi
+    echo "Skipping notes-backed agent skill verification; missing $agents_template"
+  fi
+  export LLM_SETUP_COMPLETE=1
+  finish_llm_script "$status"
+fi
 
 # Legacy pi locations predate ~/.pi/agent; clean links created under the old
 # paths so re-runs converge on the current layout.
@@ -534,7 +579,7 @@ fi
 
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   mkdir -p "$HOME/.rovodev" "$HOME/.rovo"
-  eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml" ''
+  eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml" '$NOTES_REPO'
 
   if [[ $has_notes_agents -eq 1 ]]; then
     install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
@@ -579,9 +624,7 @@ else
   if [[ $has_notes_agents -eq 0 ]]; then
     unlink_notes_symlinks
   fi
-  if [[ -f "$HOME/.rovodev/config.yml" ]] && cmp -s "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml"; then
-    rm -f "$HOME/.rovodev/config.yml"
-  fi
+  remove_managed_rovodev_config
 fi
 
 if [[ "$has_notes_agents" -eq 1 ]]; then

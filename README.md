@@ -201,7 +201,8 @@ when `NOTES_REPO` is missing:
 - `~/.codex/config.toml`
 - `~/.codex/AGENTS.md`
 - `~/.codex/rules/dots.rules`
-- `~/.pi/AGENTS.md`
+- `~/.pi/agent/AGENTS.md`
+- `~/.pi/agent/settings.json`
 - `~/dev/AGENTS.md`
 
 If the notes repo is not present when the LLM module runs directly, the module still renders the repo-managed Codex
@@ -315,6 +316,7 @@ suffix before installing the new file or symlink.
 Most backups look like `<destination>.old.YYMMDDHHMMSS`; a few directory setup
 scripts use `<destination>.old.YYYYMMDDTHHMMSS`.
 
+Setup leaves backups in the dots repository so they can be reviewed before cleanup.
 Audit backups first:
 
 ```sh
