@@ -18,6 +18,7 @@ check:
 
 .PHONY: test
 test:
+	bash test/akagent-test.sh
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
 	bash test/llm-skills-test.sh

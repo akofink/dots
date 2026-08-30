@@ -164,8 +164,8 @@ The managed solarized config is rendered to `~/Library/Preferences/glow` on macO
 
 `bash setup/akagent.sh` clones `github.com/akofink/akagent-cli` to `~/dev/repos/akagent-cli`, or safely fast-forwards an existing clean `main` checkout to `origin/main`.
 It builds the command from that checkout and atomically installs it at `~/.local/bin/akagent`.
+It also installs the optional `aka` command as the relative symlink `~/.local/bin/aka -> akagent`, so it works for interactive and noninteractive processes and follows atomic `akagent` replacements.
 The module refuses to update a dirty checkout or a checkout on another branch so setup cannot overwrite active development.
-The managed zsh configuration provides `aka` as a short interactive alias while agents and integrations should invoke the stable `akagent` binary name.
 
 Run `akagent update` to perform the same clean-main fast-forward, build, and atomic replacement from the installed command.
 Automatic network updates on every invocation are intentionally disabled so normal commands remain deterministic and fast.

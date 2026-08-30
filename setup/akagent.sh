@@ -19,6 +19,31 @@ fi
 akagent_repo="$DEV_REPOS/akagent-cli"
 akagent_remote="https://github.com/akofink/akagent-cli.git"
 akagent_bin_dir="$HOME/.local/bin"
+
+install_aka_link() {
+  local aka_link="$akagent_bin_dir/aka"
+  local current_target
+  local tmp_link
+
+  if [[ -L "$aka_link" ]]; then
+    current_target=$(readlink "$aka_link") || fatal "Failed to read symlink $aka_link"
+    if [[ "$current_target" == "akagent" ]]; then
+      return
+    fi
+    if [[ "$current_target" != "$akagent_bin_dir/akagent" ]]; then
+      fatal "Refusing to replace unrelated symlink at $aka_link"
+    fi
+  elif [[ -e "$aka_link" ]]; then
+    fatal "Refusing to replace unrelated file at $aka_link"
+  fi
+
+  tmp_link="$akagent_bin_dir/.aka-install.$$"
+  if ! ln -s akagent "$tmp_link" || ! mv -f "$tmp_link" "$aka_link"; then
+    rm -f "$tmp_link"
+    fatal "Failed to install aka at $aka_link"
+  fi
+}
+
 tmp_build_dir=$(mktemp -d) || fatal "Failed to create temporary build directory for akagent"
 
 mkdir -p "$DEV_REPOS"
@@ -62,5 +87,6 @@ if ! install -m 0755 "$tmp_build_dir/akagent" "$tmp_install" || ! mv -f "$tmp_in
   fatal "Failed to install akagent to $akagent_bin_dir/akagent"
 fi
 rm -rf "$tmp_build_dir"
+install_aka_link
 
 export AKAGENT_SETUP_COMPLETE=1
