@@ -12,7 +12,7 @@ with open(sys.argv[1], encoding="utf-8") as settings_file:
 
 assert settings["retry"] == {
     "enabled": True,
-    "maxRetries": 6,
+    "maxRetries": 8,
     "baseDelayMs": 2000,
     "provider": {"maxRetries": 0},
 }

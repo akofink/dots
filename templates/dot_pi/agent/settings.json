@@ -7,7 +7,7 @@
   "hideThinkingBlock": true,
   "retry": {
     "enabled": true,
-    "maxRetries": 6,
+    "maxRetries": 8,
     "baseDelayMs": 2000,
     "provider": {
       "maxRetries": 0
