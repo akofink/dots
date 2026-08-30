@@ -127,7 +127,7 @@ known_destinations() {
   local glow_config_dir
   local vim_template
   local common_skills=(akagent agent-orchestrator coding-workflow pr-review skills-via-dots-notes tmux)
-  local work_skills=(atlas-updates jira-ticket-authoring working-state-cleanup)
+  local work_skills=(atlas-updates jira-ticket-authoring)
 
   config_root=${XDG_CONFIG_HOME:-$home_root/.config}
   if [[ "$config_root" != /* ]]; then

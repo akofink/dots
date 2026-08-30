@@ -7,8 +7,8 @@
 #
 # `label` is freeform: a Jira key, a short slug, or anything tmux accepts as a
 # session name. Once a ticket exists, agents can rename their session via
-# `tmux rename-session -t <old> agent-<TICKET>` so the WORKING_STATE board and
-# session name stay in sync.
+# `tmux rename-session -t <old> agent-<TICKET>` so the session identity stays
+# aligned with durable task state.
 label = @args[0].to_s.strip
 name  = label.empty? ? "rovo" : "agent-#{label}"
 root  = (@settings["root"] || "~/dev/").to_s

@@ -335,7 +335,7 @@ unlink_notes_symlinks() {
 }
 
 common_skills=(akagent agent-orchestrator coding-workflow managing-1password-cli pr-review skills-via-dots-notes tmux)
-work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp working-state-cleanup)
+work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp)
 notes_skill_dests=(
   "$HOME/.agents/skills"
   "$HOME/.claude/skills"
@@ -395,6 +395,7 @@ link_notes_skill_set() {
   local failed=0
   local destination_root
   for destination_root in "${notes_skill_dests[@]}"; do
+    remove_symlink_if_points_to "$destination_root/working-state-cleanup" "$notes_repo/agents/skills/working-state-cleanup"
     link_skill_set "$destination_root" "${common_skills[@]}" || failed=1
     if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
       link_skill_set "$destination_root" "${work_skills[@]}" || failed=1
