@@ -248,8 +248,7 @@ The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 `~/dev/repos/notes/dev-root-AGENTS.md`.
 
 Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
-Common skills are linked for all machines; work-only skills such as Jira authoring and working-state cleanup are
-linked only when `MACHINE_CLASS=work`.
+Common skills are linked for all machines; work-only skills such as Jira authoring and on-call support are linked only when `MACHINE_CLASS=work`.
 
 Pi's MCP adapter is installed as a global Pi package.
 Its work profile receives the same Atlassian MCP servers as OpenCode, while personal setup removes the dots-managed Pi MCP config.
