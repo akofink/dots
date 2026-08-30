@@ -66,12 +66,6 @@ windows:
       root: ~/dev/repos/atlassian/frontbucket
   - bbbs:
       root: ~/dev/repos/atlassian/bitbucket-billing-service
-  # - core-notes:
-  #     layout: even-vertical
-  #     panes:
-  #       - vim:
-  #         - cd core-notes
-  #         - vim
   # - orochi:
   #     root: ~/dev/repos/atlassian/orochi
   #     layout: even-vertical
