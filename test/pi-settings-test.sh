@@ -10,6 +10,9 @@ import sys
 with open(sys.argv[1], encoding="utf-8") as settings_file:
     settings = json.load(settings_file)
 
+assert settings["defaultProvider"] == "openai-codex"
+assert settings["defaultModel"] == "gpt-5.6-luna"
+assert settings["defaultThinkingLevel"] == "high"
 assert settings["retry"] == {
     "enabled": True,
     "maxRetries": 8,
