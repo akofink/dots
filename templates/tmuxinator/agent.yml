@@ -18,5 +18,12 @@ root: <%= root %>
 
 windows:
   - zsh:
+      panes:
+        - dev:
+            root: <%= root %>
+        - notes:
+            root: ~/dev/repos/notes
+        - dots:
+            root: ~/dev/reops/dots
   - vim: vim
   - ai:
