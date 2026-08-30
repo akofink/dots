@@ -244,8 +244,8 @@ Shared agent instructions intentionally diverge by machine role and are canonica
   Atlassian-specific agent guidance
 
 The `~/dev/AGENTS.md` link follows the same split: personal machines link to
-`~/dev/repos/notes/dev-root-personal-AGENTS.md`, while work machines link to
-`~/dev/repos/notes/dev-root-AGENTS.md`.
+`~/dev/repos/notes/agents/guidance/dev-root-personal.md`, while work machines link to
+`~/dev/repos/notes/agents/guidance/dev-root-work.md`.
 
 Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and on-call support are linked only when `MACHINE_CLASS=work`.

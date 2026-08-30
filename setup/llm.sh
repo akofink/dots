@@ -404,6 +404,25 @@ link_notes_skill_set() {
   return "$failed"
 }
 
+link_development_guidance() {
+  local dev_agents_template="$notes_repo/agents/guidance/dev-root-personal.md"
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    dev_agents_template="$notes_repo/agents/guidance/dev-root-work.md"
+  fi
+  if [[ -f "$dev_agents_template" ]]; then
+    install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
+  fi
+
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    if [[ -f "$notes_repo/agents/guidance/bitbucket-core.md" ]]; then
+      install_symlink "$notes_repo/agents/guidance/bitbucket-core.md" "$HOME/dev/AGENTS.bbc-core.md"
+    fi
+    if [[ -f "$notes_repo/agents/guidance/dss.md" ]]; then
+      install_symlink "$notes_repo/agents/guidance/dss.md" "$HOME/dev/AGENTS.dss.md"
+    fi
+  fi
+}
+
 verify_notes_skill_set() {
   local failed=0
   local destination_root
@@ -429,6 +448,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
   if [[ "$has_notes_agents" -eq 1 ]]; then
     if [[ "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
       link_notes_skill_set || status=$?
+      link_development_guidance || status=$?
     fi
     verify_notes_skill_set || status=$?
   else
@@ -509,25 +529,10 @@ if [[ $has_notes_agents -eq 1 ]]; then
   link_notes_skill_set
   link_pi_extensions
 
-  dev_agents_template="$notes_repo/dev-root-personal-AGENTS.md"
-  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
-    dev_agents_template="$notes_repo/dev-root-AGENTS.md"
-  fi
-  if [[ -f "$dev_agents_template" ]]; then
-    install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
-  fi
+  link_development_guidance
 fi
 
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
-  if [[ $has_notes_agents -eq 1 ]]; then
-    if [[ -f "$notes_repo/bitbucket-core-AGENTS.md" ]]; then
-      install_symlink "$notes_repo/bitbucket-core-AGENTS.md" "$HOME/dev/AGENTS.bbc-core.md"
-    fi
-    if [[ -f "$notes_repo/dss-AGENTS.md" ]]; then
-      install_symlink "$notes_repo/dss-AGENTS.md" "$HOME/dev/AGENTS.dss.md"
-    fi
-  fi
-
   mkdir -p "$HOME/.rovodev" "$HOME/.rovo"
   eval_template "$DOTS_REPO/templates/dot_rovodev/config.yml" "$HOME/.rovodev/config.yml" ''
 
