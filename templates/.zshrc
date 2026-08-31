@@ -74,7 +74,7 @@ if command -v ruby >/dev/null 2>&1 && command -v gem >/dev/null 2>&1; then
 fi
 
 # Customize to your needs...
-export PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/usr/local/git/bin:$PATH
 # Atlas CLI env setup
 if [ -d /opt/atlassian/bin ]; then
   export PATH=$PATH:/opt/atlassian/bin
