@@ -46,6 +46,10 @@ install_symlink "$DOTS_REPO/bin/dots-sync.sh" "$HOME/.local/bin/syncdots"
 # be passed through verbatim.
 eval_template "$DOTS_REPO/templates/.zshrc" "$HOME/.zshrc" '$GIT_EMAIL'
 
-"${SUDO[@]}" chsh -s "$(command -v zsh)" "$USER"
+desired_shell=$(command -v zsh)
+current_shell=$(dscl . -read "/Users/$USER" UserShell 2>/dev/null | awk '{print $2}')
+if [[ "$current_shell" != "$desired_shell" ]]; then
+  "${SUDO[@]}" chsh -s "$desired_shell" "$USER"
+fi
 
 export ZSH_SETUP_COMPLETE=1

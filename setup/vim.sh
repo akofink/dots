@@ -29,11 +29,10 @@ fi
 (cd "$HOME/dev/repos/vim" && git pull -q --ff-only)
 
 vim_needs_rebuild() {
-  local vim_path
-  vim_path=$(command -v vim || true)
+  local vim_path="$HOME/.local/bin/vim"
 
-  # Build when vim is missing.
-  if [[ -z "$vim_path" ]]; then
+  # Build when the user-local executable is missing.
+  if [[ ! -x "$vim_path" ]]; then
     return 0
   fi
 
@@ -74,7 +73,7 @@ build_vim() {
       --enable-python3interp
       --enable-terminal
       --enable-cscope
-      --prefix=/usr/local
+      --prefix="$HOME/.local"
     )
     
     local build_deps=("${VIM_BUILD_DEPS[@]}")
@@ -99,7 +98,7 @@ build_vim() {
 
     ./configure "${vim_configure_flags[@]}"
 
-    make && "${SUDO[@]}" make install
+    make && make install
   )
 }
 

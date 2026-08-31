@@ -13,7 +13,7 @@ fi
 
 glow_repo="$DEV_REPOS/glow"
 glow_remote="https://github.com/charmbracelet/glow.git"
-glow_bin="/usr/local/bin/glow"
+glow_bin="$HOME/.local/bin/glow"
 
 if [[ -z "${GO_SETUP_COMPLETE:-}" ]]; then
   # shellcheck source=setup/go.sh
@@ -29,7 +29,8 @@ if [[ ! -d "$glow_repo/.git" ]]; then
 else
   glow_commit_before_update=$(git -C "$glow_repo" rev-parse HEAD)
   git -C "$glow_repo" fetch -q
-  git -C "$glow_repo" pull -q --ff-only
+  git -C "$glow_repo" checkout -q main
+  git -C "$glow_repo" merge -q --ff-only origin/main
   glow_commit_after_update=$(git -C "$glow_repo" rev-parse HEAD)
   if [[ "$glow_commit_before_update" != "$glow_commit_after_update" ]]; then
     glow_needs_build=1
@@ -49,7 +50,8 @@ if [[ "$glow_needs_build" -eq 1 ]]; then
     rm -rf "$tmp_gobin"
     fatal "Failed to install glow"
   }
-  if ! "${SUDO[@]}" install -m 0755 "$tmp_gobin/glow" "$glow_bin"; then
+  mkdir -p "$(dirname -- "$glow_bin")"
+  if ! install -m 0755 "$tmp_gobin/glow" "$glow_bin"; then
     rm -rf "$tmp_gobin"
     fatal "Failed to install glow binary to $glow_bin"
   fi

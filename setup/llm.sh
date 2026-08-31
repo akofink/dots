@@ -514,10 +514,21 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
   finish_llm_script "$status"
 fi
 
-# Legacy pi locations predate ~/.pi/agent; clean links created under the old
-# paths so re-runs converge on the current layout.
+# Legacy pi locations predate ~/.pi/agent; clean every notes-backed link so
+# removed skills and prior notes layouts do not leave broken links behind.
+unlink_legacy_pi_skills() {
+  local legacy_skills_root="$HOME/.pi/skills"
+  local entry
+
+  [[ -d "$legacy_skills_root" ]] || return 0
+  for entry in "$legacy_skills_root"/*; do
+    [[ -L "$entry" ]] || continue
+    remove_symlink_if_points_to "$entry" "$notes_repo"
+  done
+}
+
 remove_symlink_if_points_to "$HOME/.pi/AGENTS.md" "$notes_repo"
-unlink_skill_set "$HOME/.pi/skills" "${common_skills[@]}" "${work_skills[@]}"
+unlink_legacy_pi_skills
 
 mkdir -p \
   "$HOME/.agents" \

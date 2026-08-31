@@ -29,6 +29,7 @@ CONFIGURE_ARGS=()
 if [[ "$PLATFORM" == "Darwin" ]]; then
   CONFIGURE_ARGS+=(--enable-utf8proc)
   CONFIGURE_ARGS+=(--enable-sixel)
+  CONFIGURE_ARGS+=(--prefix="$HOME/.local")
   CONFIGURE_ARGS+=(--sysconfdir=/usr/local/etc)
 
   # Ensure configure discovers Homebrew's ncurses instead of the system library.
@@ -48,15 +49,17 @@ fi
 
 # Function to check if we need to build/install tmux
 should_build_tmux() {
-  # If tmux command doesn't exist, we need to build it
-  if ! command -v tmux >/dev/null 2>&1; then
+  local tmux_path="$HOME/.local/bin/tmux"
+
+  # Build when the user-local executable is missing.
+  if [[ ! -x "$tmux_path" ]]; then
     echo "tmux command not found - will build"
     return 0
   fi
 
-  # Check if current version matches desired version
+  # Check if current version matches desired version.
   local current_version
-  current_version=$(tmux -V 2>/dev/null | sed 's/tmux //')
+  current_version=$("$tmux_path" -V 2>/dev/null | sed 's/tmux //')
   if [[ "$current_version" != "$TMUX_VERSION" ]]; then
     echo "tmux version mismatch (current: $current_version, desired: $TMUX_VERSION) - will build"
     return 0
@@ -74,7 +77,7 @@ if should_build_tmux; then
     printf 'bash ./configure %s\n' "${CONFIGURE_ARGS[*]}"
     bash ./configure "${CONFIGURE_ARGS[@]}"
     make
-    "${SUDO[@]}" make install
+    make install-binPROGRAMS
   )
 
 fi

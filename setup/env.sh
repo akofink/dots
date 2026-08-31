@@ -50,6 +50,13 @@ if is_truthy "${HAS_JAMF}"; then
 fi
 export MACHINE_CLASS="${MACHINE_CLASS:-"$_default_machine_class"}"
 
+# Link-only synchronization needs the canonical machine classification without
+# refreshing packages or installing prerequisites.
+if is_truthy "${DOTS_SETUP_ENV_ONLY:-0}"; then
+  export ENV_SETUP_COMPLETE=1
+  return
+fi
+
 # Ensure USER
 if [[ -z "${USER-}" ]]
 then
