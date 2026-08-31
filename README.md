@@ -311,9 +311,10 @@ ShellCheck also runs locally through `make check` and pre-commit, while cross-di
 
 ### Backup audit and pruning
 
-Setup scripts archive replaced destinations in place with a dots-managed backup
-suffix before installing the new file or symlink.
-Most backups look like `<destination>.old.YYMMDDHHMMSS`; a few directory setup
+Setup scripts archive replaced destinations under the dots repository's
+`.backups/` directory before installing the new file or symlink.
+The archive preserves the destination's absolute path below `.backups/`.
+Most backups use a `<destination>.old.YYMMDDHHMMSS` suffix; a few directory setup
 scripts use `<destination>.old.YYYYMMDDTHHMMSS`.
 
 Setup leaves backups in the dots repository so they can be reviewed before cleanup.
@@ -324,8 +325,10 @@ bin/dots-backups.sh
 ```
 
 The audit is a dry run.
-It only checks known destinations managed by this repo, reports matching
-backups, and prints `WOULD DELETE` only for older backups it can prove are
+It only checks known destinations managed by this repo, including archives
+under `.backups/`; legacy in-place backups are also recognized.
+It reports matching backups and prints `WOULD DELETE` only for older backups it
+can prove are
 redundant because they match the current destination or a newer backup for the
 same destination.
 It always keeps the newest matching backup for each destination and skips

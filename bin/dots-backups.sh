@@ -9,12 +9,16 @@ delete_newest=0
 delete_all=0
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 DOTS_REPO=${DOTS_REPO:-$(cd -- "$script_dir/.." && pwd)}
+backup_root=${DOTS_BACKUP_DIR:-$DOTS_REPO/.backups}
 
 usage() {
   cat <<'USAGE'
 Usage: bin/dots-backups.sh [--root DIR] [--prune] [--delete-newest | --all]
 
 Audits dots-managed backup paths under DIR, defaulting to $HOME.
+
+Backups are stored under the dots repository's .backups directory by default;
+legacy in-place backups are also recognized.
 
 By default this is a dry run. It only reports backups that a prune run would
 remove. Pass --prune to delete those redundant backups.
@@ -121,6 +125,12 @@ path_is_under_root() {
   [[ "$path" == "$root" || "$path" == "$root"/* ]]
 }
 
+backup_path_prefix() {
+  local destination=$1
+
+  printf '%s/%s' "$backup_root" "${destination#/}"
+}
+
 known_destinations() {
   local home_root=$home_base
   local config_root
@@ -215,7 +225,13 @@ timestamp_for_backup() {
 destination_for_backup() {
   local path=$1
   local suffix=${path##*.old.}
-  printf '%s\n' "${path%".old.$suffix"}"
+  local archive=${path%".old.$suffix"}
+
+  if [[ "$archive" == "$backup_root"/* ]]; then
+    printf '/%s\n' "${archive#"$backup_root"/}"
+  else
+    printf '%s\n' "$archive"
+  fi
 }
 
 same_contents() {
@@ -242,11 +258,13 @@ same_contents() {
 
 list_backups() {
   local destination
+  local backup_prefix
   local backup
 
   while IFS= read -r -d '' destination; do
     path_is_under_root "$destination" || continue
-    for backup in "$destination".old.*; do
+    backup_prefix=$(backup_path_prefix "$destination")
+    for backup in "$backup_prefix".old.* "$destination".old.*; do
       [[ -e "$backup" || -L "$backup" ]] || continue
       printf '%s\0' "$backup"
     done
