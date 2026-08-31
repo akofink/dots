@@ -85,6 +85,9 @@ if [ -d /opt/homebrew ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
+# Homebrew prepends its bin directory. Keep tools built by dots ahead of it.
+export PATH="$HOME/.local/bin:$PATH"
+
 # Keep the memorable HTTPie command names while preferring xh when available.
 # Without xh, the aliases invoke HTTPie's native binaries without recursion.
 if command -v xh >/dev/null 2>&1; then
