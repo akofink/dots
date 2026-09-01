@@ -18,6 +18,7 @@ root: <%= root %>
 
 windows:
   - zsh:
+      layout: even-vertical
       panes:
         - dev:
             - cd <%= root %>
