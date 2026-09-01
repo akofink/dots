@@ -20,10 +20,10 @@ windows:
   - zsh:
       panes:
         - dev:
-            root: <%= root %>
+            - cd <%= root %>
         - notes:
-            root: ~/dev/repos/notes
+            - cd ~/dev/repos/notes
         - dots:
-            root: ~/dev/reops/dots
+            - cd ~/dev/repos/dots
   - vim: vim
   - ai:
