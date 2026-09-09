@@ -334,7 +334,7 @@ unlink_notes_symlinks() {
   done
 }
 
-common_skills=(akagent agent-orchestrator coding-workflow managing-1password-cli pr-review skills-via-dots-notes tmux)
+common_skills=(akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review skills-via-dots-notes tmux)
 work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp)
 notes_skill_dests=(
   "$HOME/.agents/skills"
