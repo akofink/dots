@@ -139,7 +139,7 @@ install_pi_extension() {
 
 # install_agent_skill <name> <skill_dir> <skills-add-args...>
 #
-# Installs a global agent skill via `npx skills add`. Skips when the skill is
+# Installs a global agent skill via `npx -y @atlassian/skills add`. Skips when the skill is
 # already present under ~/.agents/skills/<skill_dir>, and warns (without
 # aborting) when npx is missing or the install fails.
 install_agent_skill() {
@@ -159,7 +159,7 @@ install_agent_skill() {
 
   echo "Installing agent skill: $name ..."
 
-  if ! npx -y skills add --yes "$@" -g; then
+  if ! npx -y @atlassian/skills add --yes "$@" -g; then
     warn "Failed to install $name agent skill; skipping"
     return 1
   fi
@@ -182,8 +182,6 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   remove_pi_extension "legacy npm Pi MCP Adapter" "npm:pi-mcp-adapter" || true
   echo "→ Installing Pi MCP Adapter..."
   install_pi_extension "Pi MCP Adapter" "git:github.com/nicobailon/pi-mcp-adapter@v2.29.0" || true
-  echo "→ Installing AXI skill..."
-  install_agent_skill "AXI" axi kunchenguid/axi || true
   echo "→ Installing gh-axi skill..."
   install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
 
