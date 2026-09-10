@@ -16,8 +16,8 @@ printf 'work development guidance\n' > "$notes_repo/agents/guidance/dev-root-wor
 printf 'Bitbucket Cloud core guidance\n' > "$notes_repo/agents/guidance/bitbucket-core.md"
 printf 'DSS guidance\n' > "$notes_repo/agents/guidance/dss.md"
 
-common_skills=(akagent agent-orchestrator coding-workflow managing-1password-cli pr-review skills-via-dots-notes tmux)
-work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp)
+common_skills=(akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review skills-via-dots-notes tmux)
+work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp work-identity)
 for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
@@ -62,6 +62,7 @@ env \
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
 test "$(readlink "$home/dev/AGENTS.dss.md")" = "$notes_repo/agents/guidance/dss.md"
+test "$(readlink "$home/.pi/agent/skills/work-identity")" = "$notes_repo/agents/skills/work-identity"
 
 mkdir -p "$home/.rovodev"
 env NOTES_REPO="$notes_repo" envsubst '$NOTES_REPO' < \
@@ -82,6 +83,7 @@ test ! -e "$home/dev/AGENTS.dss.md"
 test ! -e "$home/.rovodev/AGENTS.md"
 test ! -e "$home/.rovodev/config.yml"
 test ! -e "$home/.agents/skills/atlas-updates"
+test ! -e "$home/.pi/agent/skills/work-identity"
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 
 echo 'role switch cleanup passed'
