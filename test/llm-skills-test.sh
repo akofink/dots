@@ -23,6 +23,21 @@ for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
 done
 
+obsolete_skill_roots=(
+  .agents/skills
+  .claude/skills
+  .codex/skills
+  .config/opencode/skills
+  .pi/skills
+  .pi/agent/skills
+  .rovodev/skills
+  dev/.rovodev/skills
+)
+for skill_root in "${obsolete_skill_roots[@]}"; do
+  mkdir -p "$home/$skill_root/no-mistakes.old.260706081004"
+  printf 'obsolete skill\n' > "$home/$skill_root/no-mistakes.old.260706081004/SKILL.md"
+done
+
 run_setup() {
   env \
     HOME="$home" \
@@ -46,6 +61,11 @@ run_verify() {
 
 run_setup
 run_verify
+
+for skill_root in "${obsolete_skill_roots[@]}"; do
+  test ! -e "$home/$skill_root/no-mistakes"
+  test ! -e "$home/$skill_root/no-mistakes.old.260706081004"
+done
 
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-personal.md"
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"

@@ -228,6 +228,33 @@ unlink_skill_set() {
   done
 }
 
+# Remove the obsolete skill and backups left by older skill-link migrations.
+remove_obsolete_skill_set() {
+  local destination_root="$1"
+  local entry
+
+  [[ -d "$destination_root" ]] || return 0
+  for entry in "$destination_root"/no-mistakes "$destination_root"/no-mistakes.*; do
+    [[ -e "$entry" || -L "$entry" ]] || continue
+    rm -rf -- "$entry"
+  done
+}
+
+remove_obsolete_agent_skills() {
+  local destination_root
+  for destination_root in \
+    "$HOME/.agents/skills" \
+    "$HOME/.claude/skills" \
+    "$HOME/.codex/skills" \
+    "$HOME/.config/opencode/skills" \
+    "$HOME/.pi/skills" \
+    "$HOME/.pi/agent/skills" \
+    "$HOME/.rovodev/skills" \
+    "$HOME/dev/.rovodev/skills"; do
+    remove_obsolete_skill_set "$destination_root"
+  done
+}
+
 # link_pi_extensions symlinks canonical pi extensions from the notes repo into
 # ~/.pi/agent/extensions where pi auto-discovers them. unlink_pi_extensions
 # reverses that when the notes repo is unavailable.
@@ -325,6 +352,7 @@ unlink_notes_symlinks() {
   unlink_pi_extensions
   unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+  remove_obsolete_agent_skills
 
   local twg_dest
   for twg_dest in "${twg_skill_dests[@]}"; do
@@ -392,6 +420,7 @@ verify_skill_set() {
 link_notes_skill_set() {
   local failed=0
   local destination_root
+  remove_obsolete_agent_skills
   for destination_root in "${notes_skill_dests[@]}"; do
     remove_symlink_if_points_to "$destination_root/working-state-cleanup" "$notes_repo/agents/skills/working-state-cleanup"
     link_skill_set "$destination_root" "${common_skills[@]}" || failed=1
