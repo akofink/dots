@@ -1,5 +1,13 @@
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
+# Keep machine role outside synchronized dotfiles so personal machines are not
+# classified as work when they use the same templates.
+machine_env_file="${DOTS_MACHINE_ENV_FILE:-$HOME/.config/dots/machine.env}"
+if [[ -r "$machine_env_file" ]]; then
+  source "$machine_env_file"
+fi
+unset machine_env_file
+
 # Discard versioned Homebrew zsh function paths inherited from old shells. Brew
 # cleanup removes those Cellar directories during zsh upgrades, which breaks
 # autoloaded functions such as compinit, add-zsh-hook, and colors.

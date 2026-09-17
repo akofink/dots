@@ -84,6 +84,12 @@ fi
 
 eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf" ''
 
+# Future panes inherit the machine role from the current setup process. A
+# missing tmux server is normal during first-time setup.
+if command -v tmux >/dev/null 2>&1; then
+  tmux set-environment -g MACHINE_CLASS "$MACHINE_CLASS" 2>/dev/null || true
+fi
+
 # Set up TPM
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"

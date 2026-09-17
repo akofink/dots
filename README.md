@@ -31,6 +31,19 @@ MACHINE_CLASS=personal ./setup.sh
 Current valid values are `work` and `personal`. The variable is the single place to gate
 role-dependent behavior; do not add new logic that branches on `HAS_JAMF` directly.
 
+For a persistent machine-local override, create `~/.config/dots/machine.env`.
+This file is intentionally outside the synchronized dots repository, so sharing these dotfiles does not classify a personal machine as work:
+
+```sh
+mkdir -p ~/.config/dots
+printf '%s\n' 'export MACHINE_CLASS="${MACHINE_CLASS:-work}"' > ~/.config/dots/machine.env
+chmod 600 ~/.config/dots/machine.env
+```
+
+The managed `.zshenv` and setup environment source this file when present.
+An explicitly supplied `MACHINE_CLASS` still wins for a one-off setup command.
+The tmux setup updates the current server environment when a server is available, but already-running processes keep their existing environment.
+
 Operator policy and private context are separate from machine class.
 Set `SETUP_NOTES_REPO=0` to skip cloning the private notes repository, including when provisioning a remote worker from the public setup.
 

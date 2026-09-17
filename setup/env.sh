@@ -32,6 +32,14 @@ export DOTS_SETUP_TMPDIR="${DOTS_SETUP_TMPDIR:-"$HOME/.cache/dots/tmp"}"
 mkdir -p "$DOTS_SETUP_TMPDIR"
 export TMPDIR="${TMPDIR:-"$DOTS_SETUP_TMPDIR"}"
 
+# Keep machine role selection outside synchronized dotfiles. An explicit
+# environment value still wins for one-off setup overrides.
+export DOTS_MACHINE_ENV_FILE="${DOTS_MACHINE_ENV_FILE:-"$HOME/.config/dots/machine.env"}"
+if [[ -z "${MACHINE_CLASS+x}" && -r "$DOTS_MACHINE_ENV_FILE" ]]; then
+  # shellcheck source=/dev/null
+  source "$DOTS_MACHINE_ENV_FILE"
+fi
+
 has_jamf_default=0
 if [[ -d /usr/local/jamf ]] || [[ -x /usr/local/bin/jamf ]]; then
   has_jamf_default=1
