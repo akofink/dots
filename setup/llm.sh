@@ -449,6 +449,10 @@ link_notes_skill_set() {
       link_skill_set "$destination_root" "${work_skills[@]}" || failed=1
     fi
   done
+  local wake_src="$notes_repo/agents/skills/agent-orchestrator/scripts/wake-orchestrator"
+  if [[ -f "$wake_src" ]]; then
+    install_symlink "$wake_src" "$HOME/.local/bin/wake-orchestrator" || failed=1
+  fi
   return "$failed"
 }
 
