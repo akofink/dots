@@ -98,7 +98,8 @@ repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/d
 `syncdots` pulls with rebase and pushes the dots and notes repositories.
 After synchronization, it reapplies the configured notes-backed agent skill links without rerunning CLI installers.
 It is also launched asynchronously at most once every six hours when a managed zsh shell starts, so it never delays shell startup.
-Failures, missing repositories, and an already-running sync are harmless no-ops; run `syncdots` manually to see Git output.
+Missing repositories remain harmless no-ops, but Git, lock, and skill-link failures are reported.
+If another sync is already running, `syncdots` waits up to five one-second retries before failing; run it manually to see the full Git output.
 
 If you are iterating on setup scripts in the same shell, clear the exported setup state first:
 
