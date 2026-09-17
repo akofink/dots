@@ -58,20 +58,26 @@ install_llm_cli() {
   rm -f "$install_script"
 }
 
-# Installs the Pi Coding Agent via npm. Skips when `pi` is already on PATH and
-# warns (without aborting) when npm is missing or the install fails.
-install_pi_coding_agent() {
-  if command -v pi >/dev/null 2>&1; then
-    echo "Pi Coding Agent already installed; skipping."
+# install_npm_cli <name> <command> <package>
+#
+# Installs a global npm CLI when its command is not already on PATH. It keeps
+# setup best-effort when npm is missing or the install fails.
+install_npm_cli() {
+  local name="$1"
+  local command_name="$2"
+  local package_name="$3"
+
+  if command -v "$command_name" >/dev/null 2>&1; then
+    echo "$name already installed; skipping."
     return 0
   fi
 
   if ! command -v npm >/dev/null 2>&1; then
-    warn "npm not found; skipping Pi Coding Agent install"
+    warn "npm not found; skipping $name install"
     return 1
   fi
 
-  echo "Installing Pi Coding Agent (npm)..."
+  echo "Installing $name (npm)..."
 
   if ! npm install -g \
     --ignore-scripts \
@@ -80,10 +86,23 @@ install_pi_coding_agent() {
     --no-audit \
     --loglevel=error \
     --progress=false \
-    @earendil-works/pi-coding-agent; then
-    warn "Failed to install Pi Coding Agent; skipping"
+    "$package_name"; then
+    warn "Failed to install $name; skipping"
     return 1
   fi
+}
+
+install_pi_coding_agent() {
+  install_npm_cli "Pi Coding Agent" pi @earendil-works/pi-coding-agent
+}
+
+install_acpx() {
+  local status=0
+
+  install_npm_cli "ACPX" acpx acpx || status=1
+  install_npm_cli "Pi ACP adapter" pi-acp pi-acp || status=1
+
+  return "$status"
 }
 
 # remove_pi_extension <name> <source>
@@ -177,6 +196,8 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   install_llm_cli "Codex" codex "https://chatgpt.com/codex/install.sh" env CODEX_NON_INTERACTIVE=1 sh || true
   echo "→ Installing Pi Coding Agent..."
   install_pi_coding_agent || true
+  echo "→ Installing ACPX and Pi ACP adapter..."
+  install_acpx || true
   # Older dots setups installed this package from npm. Pi loads packages from
   # both sources, and the duplicate adapter registers conflicting MCP tools.
   remove_pi_extension "legacy npm Pi MCP Adapter" "npm:pi-mcp-adapter" || true

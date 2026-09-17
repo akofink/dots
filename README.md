@@ -113,6 +113,7 @@ through the bundled `aws_completer` executable when it is available.
 - Claude Code from `https://claude.ai/install.sh`
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
 - Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
+- ACPX and the Pi ACP adapter from npm (`acpx` and `pi-acp`)
 - Pi MCP Adapter from GitHub (`git:github.com/nicobailon/pi-mcp-adapter@v2.29.0`)
 - opencode via `setup/opencode.sh`
 
