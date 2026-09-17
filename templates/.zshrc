@@ -101,14 +101,9 @@ else
   alias https='command https'
 fi
 
-# nvm env setup
+# nvm lazy wrappers. Default Node bin PATH lives in .zshenv for non-interactive shells.
 if [ -d ~/.nvm ]; then
   export NVM_DIR="$HOME/.nvm"
-  nvm_node_bins=("$NVM_DIR"/versions/node/*/bin(Nom[1]))
-  if [ ${#nvm_node_bins[@]} -gt 0 ]; then
-    export PATH="${nvm_node_bins[1]}:$PATH"
-  fi
-  unset nvm_node_bins
 
   load_nvm() {
     unset -f nvm node npm npx codex 2>/dev/null

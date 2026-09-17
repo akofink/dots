@@ -18,6 +18,30 @@ export PATH="$GOPATH/bin:$PATH"
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 
+# Default nvm Node bin for non-interactive shells (SSH, tmux).
+# Do not source nvm.sh here; it is too heavy for every zsh invocation.
+export NVM_DIR="$HOME/.nvm"
+if [[ -d "$NVM_DIR/versions/node" ]]; then
+  nvm_alias_name=default
+  nvm_alias_target=
+  while [[ -r "$NVM_DIR/alias/$nvm_alias_name" ]]; do
+    nvm_alias_target=${$(<"$NVM_DIR/alias/$nvm_alias_name")%%$'\n'*}
+    nvm_alias_target=${nvm_alias_target%%[[:space:]]#}
+    [[ -z "$nvm_alias_target" || "$nvm_alias_target" == "$nvm_alias_name" ]] && break
+    nvm_alias_name=$nvm_alias_target
+  done
+  if [[ -d "$NVM_DIR/versions/node/$nvm_alias_name/bin" ]]; then
+    export PATH="$NVM_DIR/versions/node/$nvm_alias_name/bin:$PATH"
+  else
+    nvm_node_bins=("$NVM_DIR"/versions/node/*/bin(N[1]))
+    if (( ${#nvm_node_bins[@]} > 0 )); then
+      export PATH="${nvm_node_bins[1]}:$PATH"
+    fi
+    unset nvm_node_bins
+  fi
+  unset nvm_alias_name nvm_alias_target
+fi
+
 # Ubuntu runs compinit from /etc/zsh/zshrc before ~/.zshrc unless this is set.
 # Only disable the global invocation under WSL, where Docker Desktop can
 # leave a broken vendor completion symlink behind.
