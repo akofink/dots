@@ -118,6 +118,7 @@ through the bundled `aws_completer` executable when it is available.
 - opencode via `setup/opencode.sh`
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.
+Atlassian CLI (`acli`) is not installed by dots on any machine class.
 
 #### opencode module
 

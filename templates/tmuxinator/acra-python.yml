@@ -54,4 +54,4 @@ windows:
         - zsh:
         - zsh:
   - vim: vim
-  - ai: acli rovodev --yolo
+  - ai: rovo --yolo
