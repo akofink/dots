@@ -16,7 +16,7 @@ windows:
     - vim
     - ' n'
   - http:
-      root: ~/dev/http
+      root: ~/dev/notes/domain/http
       layout: main-horizontal
       panes:
         - http:
