@@ -2,11 +2,21 @@
 
 # Keep machine role outside synchronized dotfiles so personal machines are not
 # classified as work when they use the same templates.
+# Export MACHINE_CLASS for ordinary zsh, tmux panes, and agent shells, not only
+# during a dots setup run.
 machine_env_file="${DOTS_MACHINE_ENV_FILE:-$HOME/.config/dots/machine.env}"
 if [[ -r "$machine_env_file" ]]; then
   source "$machine_env_file"
 fi
 unset machine_env_file
+if [[ -z "${MACHINE_CLASS:-}" ]]; then
+  if [[ -d /usr/local/jamf || -x /usr/local/bin/jamf ]]; then
+    MACHINE_CLASS=work
+  else
+    MACHINE_CLASS=personal
+  fi
+fi
+export MACHINE_CLASS
 
 # Discard versioned Homebrew zsh function paths inherited from old shells. Brew
 # cleanup removes those Cellar directories during zsh upgrades, which breaks

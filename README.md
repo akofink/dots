@@ -40,9 +40,11 @@ printf '%s\n' 'export MACHINE_CLASS="${MACHINE_CLASS:-work}"' > ~/.config/dots/m
 chmod 600 ~/.config/dots/machine.env
 ```
 
-The managed `.zshenv` and setup environment source this file when present.
-An explicitly supplied `MACHINE_CLASS` still wins for a one-off setup command.
-The tmux setup updates the current server environment when a server is available, but already-running processes keep their existing environment.
+The managed `.zshenv` always exports `MACHINE_CLASS` for ordinary zsh, tmux, and agent shells.
+It sources this file when present, then defaults to `work` on Jamf-managed hosts and `personal` elsewhere.
+An explicitly supplied `MACHINE_CLASS` still wins for a one-off setup command or a current shell.
+The tmux configuration and tmux setup both publish the value into the tmux global environment so non-zsh panes inherit it.
+Already-running processes keep their existing environment until a new shell or tmux server starts.
 
 Operator policy and private context are separate from machine class.
 Set `SETUP_NOTES_REPO=0` to skip cloning the private notes repository, including when provisioning a remote worker from the public setup.

@@ -52,4 +52,11 @@ zsh_value=$(env -i \
   "$zsh_bin" -dfc 'source "$1/templates/.zshenv"; print -r -- "$MACHINE_CLASS"' zsh "$repo_root")
 [[ "$zsh_value" == personal ]]
 
+rm -f "$machine_env"
+zsh_value=$(env -i \
+  HOME="$home" \
+  PATH="/usr/bin:/bin" \
+  "$zsh_bin" -dfc 'source "$1/templates/.zshenv"; print -r -- "$MACHINE_CLASS"' zsh "$repo_root")
+[[ "$zsh_value" == personal ]]
+
 printf 'machine-class-test: ok\n'
