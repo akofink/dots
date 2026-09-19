@@ -8,16 +8,17 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 notes_repo="$tmpdir/notes"
 home="$tmpdir/home"
-mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$home/dev"
+mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev"
 printf 'global instructions\n' > "$notes_repo/agents/global-personal.md"
 printf 'work instructions\n' > "$notes_repo/agents/global-work.md"
 printf 'personal development guidance\n' > "$notes_repo/agents/guidance/dev-root-personal.md"
 printf 'work development guidance\n' > "$notes_repo/agents/guidance/dev-root-work.md"
 printf 'Bitbucket Cloud core guidance\n' > "$notes_repo/agents/guidance/bitbucket-core.md"
 printf 'DSS guidance\n' > "$notes_repo/agents/guidance/dss.md"
+printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/disable-animations.ts"
 
-common_skills=(akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes tmux)
-work_skills=(atlas-updates confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp work-identity)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes tmux)
+work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp work-identity)
 for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
@@ -69,6 +70,7 @@ done
 
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-personal.md"
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
+test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
 
 env \
   HOME="$home" \
@@ -105,6 +107,7 @@ test ! -e "$home/.rovodev/config.yml"
 test ! -e "$home/.agents/skills/atlas-updates"
 test ! -e "$home/.pi/agent/skills/work-identity"
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
+test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
 
 echo 'role switch cleanup passed'
 
