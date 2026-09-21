@@ -26,5 +26,7 @@ windows:
             - cd ~/dev/repos/notes
         - dots:
             - cd ~/dev/repos/dots
+        - sandbox:
+            - cd ~/dev/repos/sandbox
   - vim: vim
   - ai:
