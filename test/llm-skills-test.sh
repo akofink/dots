@@ -17,7 +17,7 @@ printf 'Bitbucket Cloud core guidance\n' > "$notes_repo/agents/guidance/bitbucke
 printf 'DSS guidance\n' > "$notes_repo/agents/guidance/dss.md"
 printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/disable-animations.ts"
 
-common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes tmux)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp work-identity)
 for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
