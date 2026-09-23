@@ -1,10 +1,32 @@
-name: default
-root: ~/dev/
+<%
+# Usage:
+#   mux ai                        -> session "ai",      root ~/dev/
+#   mux ai BBCEEP-1234            -> session "ai-BBCEEP-1234"
+#   mux ai cleanup-old-flags      -> session "ai-cleanup-old-flags"
+#   mux ai BBCEEP-1234 root=PATH  -> root override (else ~/dev/)
+#
+# `label` is freeform: a Jira key, a short slug, or anything tmux accepts as a
+# session name. Once a ticket exists, ais can rename their session via
+# `tmux rename-session -t <old> ai-<TICKET>` so the session identity stays
+# aligned with durable task state.
+label = @args[0].to_s.strip
+name  = label.empty? ? "ai" : "ai-#{label}"
+root  = (@settings["root"] || "~/dev/").to_s
+%>
+name: <%= name %>
+root: <%= root %>
 
 windows:
   - zsh:
+      layout: even-vertical
+      panes:
+        - dev:
+            - cd <%= root %>
+        - notes:
+            - cd ~/dev/repos/notes
+        - dots:
+            - cd ~/dev/repos/dots
+        - sandbox:
+            - cd ~/dev/repos/sandbox
   - vim: vim
   - ai:
-      panes:
-        - ai:
-        - zsh:
