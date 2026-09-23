@@ -158,7 +158,8 @@ install_pi_extension() {
 
 # install_agent_skill <name> <skill_dir> <skills-add-args...>
 #
-# Installs a global agent skill via `npx -y @atlassian/skills add`. Skips when the skill is
+# Installs a global agent skill via `npx -y skills add`, or the Atlassian-internal
+# `@atlassian/skills` CLI on work machines. Skips when the skill is
 # already present under ~/.agents/skills/<skill_dir>, and warns (without
 # aborting) when npx is missing or the install fails.
 install_agent_skill() {
@@ -178,7 +179,12 @@ install_agent_skill() {
 
   echo "Installing agent skill: $name ..."
 
-  if ! npx -y @atlassian/skills add --yes "$@" -g; then
+  local skills_cli=skills
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    skills_cli=@atlassian/skills
+  fi
+
+  if ! npx -y "$skills_cli" add --yes "$@" -g; then
     warn "Failed to install $name agent skill; skipping"
     return 1
   fi
