@@ -92,7 +92,7 @@ then
   # shellcheck disable=SC2034
   VIM_BUILD_DEPS=(gcc make libtool)
   # shellcheck disable=SC2034
-  TMUX_BUILD_DEPS=(autoconf automake bison gcc libevent ncurses pkgconf utf8proc)
+  TMUX_BUILD_DEPS=(autoconf automake bison gcc jemalloc libevent ncurses pkgconf utf8proc)
   # shellcheck disable=SC2034
   RUBY_BUILD_DEPS=()
   PKG_LIST=(make ripgrep)

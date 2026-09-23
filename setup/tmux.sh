@@ -4,7 +4,7 @@ if [[ -n "${TMUX_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
-TMUX_VERSION=${TMUX_VERSION:-3.7b}
+TMUX_VERSION=${TMUX_VERSION:-3.7c}
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
@@ -28,6 +28,9 @@ fi
 CONFIGURE_ARGS=()
 if [[ "$PLATFORM" == "Darwin" ]]; then
   CONFIGURE_ARGS+=(--enable-utf8proc)
+  # tmux 3.7c requires an explicit choice on macOS and recommends jemalloc
+  # because macOS calloc(3) does not reliably zero some allocations.
+  CONFIGURE_ARGS+=(--enable-jemalloc)
   CONFIGURE_ARGS+=(--enable-sixel)
   CONFIGURE_ARGS+=(--prefix="$HOME/.local")
   CONFIGURE_ARGS+=(--sysconfdir=/usr/local/etc)
