@@ -146,6 +146,8 @@ if [ -d ~/.goenv ]; then
   export GOENV_PATH_ORDER=front
   export PATH="$GOENV_ROOT/bin:$PATH"
   eval "$(goenv init -)"
+  # goenv does not reposition an existing shim entry, even when front is requested.
+  export PATH="$GOENV_ROOT/shims:$PATH"
 fi
 
 if [ -d "$HOME/.sdkman" ]; then
@@ -156,6 +158,11 @@ fi
 # opencode
 if [ -d "$HOME/.opencode/bin" ]; then
   export PATH="$HOME/.opencode/bin:$PATH"
+fi
+
+# grok
+if [ -d "$HOME/.grok/bin" ]; then
+  export PATH="$HOME/.grok/bin:$PATH"
 fi
 
 # Local source build of rovodev (patched to keep claude-opus selections).
