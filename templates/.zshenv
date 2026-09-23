@@ -33,6 +33,13 @@ export PATH="$HOME/.local/bin:$PATH"
 export GOPATH=$HOME/go
 export PATH="$GOPATH/bin:$PATH"
 
+# goenv shims for non-interactive shells (SSH, agents); .zshrc runs `goenv init`.
+export GOENV_ROOT="$HOME/.goenv"
+if [[ -d $GOENV_ROOT ]]; then
+  export GOENV_PATH_ORDER=front
+  export PATH="$GOENV_ROOT/shims:$GOENV_ROOT/bin:$PATH"
+fi
+
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 

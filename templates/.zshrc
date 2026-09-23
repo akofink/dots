@@ -141,10 +141,8 @@ if [ -d ~/.pyenv ]; then
 fi
 
 # goenv
-if [ -d ~/.goenv ]; then
-  export GOENV_ROOT="$HOME/.goenv"
-  export GOENV_PATH_ORDER=front
-  export PATH="$GOENV_ROOT/bin:$PATH"
+# .zshenv puts goenv on PATH; the PATH reset above pushes its shims behind system bins.
+if [ -d "$GOENV_ROOT" ]; then
   eval "$(goenv init -)"
   # goenv does not reposition an existing shim entry, even when front is requested.
   export PATH="$GOENV_ROOT/shims:$PATH"
