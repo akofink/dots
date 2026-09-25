@@ -221,6 +221,13 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
 fi
 
 notes_repo="$NOTES_REPO"
+# Keep private work-tool installation details in the canonical work skill.
+work_tools_setup="$notes_repo/agents/skills/work-investigation-tools/scripts/setup.sh"
+if [[ "${MACHINE_CLASS:-personal}" == work && "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
+  if [[ -f "$work_tools_setup" ]]; then
+    MACHINE_CLASS=work bash "$work_tools_setup" || warn "Work investigation tool setup incomplete; see its output."
+  fi
+fi
 agents_template="$notes_repo/agents/global-personal.md"
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   agents_template="$notes_repo/agents/global-work.md"
@@ -388,7 +395,7 @@ unlink_notes_symlinks() {
 }
 
 common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
-work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db slack-mcp work-identity)
+work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-identity work-investigation-tools)
 notes_skill_dests=(
   "$HOME/.agents/skills"
   "$HOME/.claude/skills"
