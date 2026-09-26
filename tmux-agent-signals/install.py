@@ -32,7 +32,7 @@ def main():
         hooks = data.setdefault("hooks", {})
         command = "python3 " + shlex.quote(str(home / ".claude/hooks/tmux-agent-state.py"))
         changed = False
-        for event in ("SessionStart", "UserPromptSubmit", "Stop", "Notification", "SessionEnd"):
+        for event in ("SessionStart", "UserPromptSubmit", "PostToolUse", "Stop", "Notification", "SessionEnd"):
             entries = hooks.setdefault(event, [])
             if any(h.get("command") == command for entry in entries for h in entry.get("hooks", []) if isinstance(h, dict)):
                 continue

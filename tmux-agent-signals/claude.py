@@ -9,6 +9,8 @@ import sys
 EVENTS = {
     "SessionStart": "idle",
     "UserPromptSubmit": "working",
+    # An approved permission prompt clears blocked once the tool runs.
+    "PostToolUse": "working",
     "Stop": "done",
     "SessionEnd": "idle",
 }

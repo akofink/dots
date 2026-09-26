@@ -44,7 +44,7 @@ class SignalsTest(unittest.TestCase):
         module = load("claude")
         from io import StringIO
         for event, expected in (("SessionStart", "idle"), ("UserPromptSubmit", "working"),
-                                ("Stop", "done"), ("Notification", "blocked"),
+                                ("PostToolUse", "working"), ("Stop", "done"), ("Notification", "blocked"),
                                 ("SessionEnd", "idle")):
             payload = {"hook_event_name": event, "notification_type": "permission_prompt"}
             with patch.dict(os.environ, {"TMUX_PANE": "%1", "HERDR_ENV": "0"}), \
@@ -77,6 +77,8 @@ class SignalsTest(unittest.TestCase):
             self.assertEqual(config.read_text(), 'notify = ["other"]\n')
             codex_hooks = json.loads((home / ".codex/hooks.json").read_text())["hooks"]
             self.assertEqual(len(codex_hooks["Stop"]), 1)
+            claude_hooks = json.loads(first)["hooks"]
+            self.assertEqual(len(claude_hooks["PostToolUse"]), 1)
             self.assertTrue((home / ".pi/agent/extensions/tmux-agent-state.ts").is_symlink())
 
 
