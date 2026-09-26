@@ -30,6 +30,12 @@ export EDITOR=vim
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# Bun global executables are available to interactive and non-interactive zsh.
+if [[ -d "$HOME/.bun/bin" ]]; then
+  typeset -U path
+  path=("$HOME/.bun/bin" $path)
+fi
+
 export GOPATH=$HOME/go
 export PATH="$GOPATH/bin:$PATH"
 
