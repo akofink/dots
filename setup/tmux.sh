@@ -87,6 +87,11 @@ fi
 
 eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf" ''
 
+# Provider hooks coexist with Herdr's hooks and do nothing inside Herdr.
+if command -v python3 >/dev/null 2>&1; then
+  python3 "$DOTS_REPO/tmux-agent-signals/install.py"
+fi
+
 # Future panes inherit the machine role from the current setup process. A
 # missing tmux server is normal during first-time setup.
 if command -v tmux >/dev/null 2>&1; then
