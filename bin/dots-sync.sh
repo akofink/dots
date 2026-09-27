@@ -58,14 +58,26 @@ fi
 sync_repo() {
   local repo=$1
   local status
+  local dirty_paths
 
   [[ -d "$repo/.git" ]] || return 0
 
+  dirty_paths=$(git -C "$repo" status --short --untracked-files=no)
+  status=$?
+  if (( status != 0 )); then
+    printf 'Failed to inspect tracked changes in %s (exit %d)\n' "$repo" "$status" >&2
+    return "$status"
+  fi
+  if [[ -n "$dirty_paths" ]]; then
+    printf 'Skipping %s because tracked paths have uncommitted changes:\n%s\n' "$repo" "$dirty_paths" >&2
+    return 1
+  fi
+
   if [[ $quiet -eq 1 ]]; then
-    git -C "$repo" pull --rebase --autostash >/dev/null
+    git -C "$repo" pull --rebase >/dev/null
   else
     printf 'Syncing %s\n' "$repo"
-    git -C "$repo" pull --rebase --autostash
+    git -C "$repo" pull --rebase
   fi
   status=$?
   if (( status != 0 )); then
@@ -104,6 +116,8 @@ sync_llm_skill_links() {
   fi
 }
 
-sync_repo "$dots_repo" || exit $?
-sync_repo "$notes_repo" || exit $?
-sync_llm_skill_links || exit $?
+sync_status=0
+sync_repo "$dots_repo" || sync_status=$?
+sync_repo "$notes_repo" || sync_status=$?
+sync_llm_skill_links || sync_status=$?
+exit "$sync_status"

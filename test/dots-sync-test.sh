@@ -33,6 +33,7 @@ real_git=$(command -v git)
 cat > "$git_wrapper_dir/git" <<'EOF'
 #!/usr/bin/env bash
 : > "$GIT_STARTED_FILE"
+printf '%s\n' "$*" >> "$GIT_LOG_FILE"
 exec "$REAL_GIT" "$@"
 EOF
 chmod +x "$git_wrapper_dir/git"
@@ -57,8 +58,9 @@ mkdir -p "$state_home/dots-sync/lock"
   rmdir "$state_home/dots-sync/lock"
 ) &
 lock_holder=$!
+git_log="$tmpdir/git.log"
 PATH="$git_wrapper_dir:$PATH" \
-  REAL_GIT="$real_git" GIT_STARTED_FILE="$git_started" \
+  REAL_GIT="$real_git" GIT_STARTED_FILE="$git_started" GIT_LOG_FILE="$git_log" \
   XDG_STATE_HOME="$state_home" DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" \
   "$script" --quiet
 wait "$lock_holder"
@@ -66,6 +68,32 @@ wait "$lock_holder"
 [[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ $(git -C "$notes_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ -f "$notes_repo/.sync-linked" ]]
+
+# Untracked files do not block a sync.
+printf 'another agent report\n' > "$notes_repo/new-report.md"
+PATH="$git_wrapper_dir:$PATH" \
+  REAL_GIT="$real_git" GIT_STARTED_FILE="$git_started" GIT_LOG_FILE="$git_log" \
+  XDG_STATE_HOME="$tmpdir/untracked-state" DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" \
+  "$script" --quiet
+
+# Tracked dirt skips that repository but still syncs the other and reapplies links.
+printf 'uncommitted notes edit\n' >> "$notes_repo/README"
+: > "$git_log"
+set +e
+failure_output=$(PATH="$git_wrapper_dir:$PATH" \
+  REAL_GIT="$real_git" GIT_STARTED_FILE="$git_started" GIT_LOG_FILE="$git_log" \
+  XDG_STATE_HOME="$tmpdir/dirty-state" DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" \
+  "$script" 2>&1)
+failure_status=$?
+set -e
+[[ $failure_status -ne 0 ]]
+[[ $failure_output == *'Skipping '* ]] || { printf '%s\n' "$failure_output" >&2; exit 1; }
+[[ $failure_output == *README* ]]
+[[ $failure_output == *'Reapplying configured agent skill links'* ]]
+[[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 0 ]]
+[[ -f "$notes_repo/.sync-linked" ]]
+[[ $(rg -c 'pull --rebase$' "$git_log") -eq 1 ]]
+! rg '^pull --rebase --autostash$' "$git_log"
 
 # Git failures are reported instead of being mistaken for a successful sync.
 git -C "$notes_repo" remote set-url origin "$tmpdir/missing-remote.git"
