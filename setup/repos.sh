@@ -6,6 +6,11 @@ fi
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
+if [[ -z "${GIT_SETUP_COMPLETE:-}" ]]; then
+  # shellcheck source=setup/git.sh
+  source "$script_dir/git.sh"
+fi
+
 primary_repo="${DOTS_PRIMARY_REPO:-$DEV_REPOS/dots}"
 if [[ ! -d "$primary_repo/.git" ]]; then
   echo "Refusing to render machine config: primary dots clone not found at $primary_repo" >&2
@@ -20,11 +25,6 @@ actual_repo=$(cd -- "$actual_repo" && pwd -P)
 if [[ "$actual_repo" != "$primary_repo" ]]; then
   echo "Refusing to render machine config from $actual_repo; use the primary dots clone at $primary_repo" >&2
   exit 1
-fi
-
-if [[ -z "${GIT_SETUP_COMPLETE:-}" ]]; then
-  # shellcheck source=setup/git.sh
-  source "$script_dir/git.sh"
 fi
 
 mkdir -p "$DEV_REPOS"
