@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-if __name__ == "__main__" and os.environ.get("HERDR_ENV") != "1" and os.environ.get("TMUX_PANE"):
+if __name__ == "__main__" and os.environ.get("TMUX_PANE"):
     try:
         payload = json.loads(sys.argv[1]) if len(sys.argv) > 1 else json.load(sys.stdin)
         if payload.get("agent_id"):

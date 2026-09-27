@@ -17,7 +17,7 @@ EVENTS = {
 
 
 def main():
-    if os.environ.get("HERDR_ENV") == "1" or not os.environ.get("TMUX_PANE"):
+    if not os.environ.get("TMUX_PANE"):
         return
     try:
         data = json.load(sys.stdin)
