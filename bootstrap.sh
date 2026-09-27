@@ -453,7 +453,7 @@ command -v git &>/dev/null || "${PKG_INSTALL[@]}" git
 
 _default_git_email="ajkofink@gmail.com"
 _default_github_user="akofink"
-_default_github_credential_config=$'[credential "https://github.com"]\n  username = akofink'
+_default_github_credential_config=$'[credential "https://github.com"]\n  username = akofink\n  helper = !gh auth git-credential'
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   _default_git_email="akofink@atlassian.com"
   _default_github_user="akofink-atlassian"
