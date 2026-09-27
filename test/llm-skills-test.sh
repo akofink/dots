@@ -17,7 +17,7 @@ printf 'Bitbucket Cloud core guidance\n' > "$notes_repo/agents/guidance/bitbucke
 printf 'DSS guidance\n' > "$notes_repo/agents/guidance/dss.md"
 printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/disable-animations.ts"
 
-common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes herdr managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
@@ -37,6 +37,9 @@ obsolete_skill_roots=(
 for skill_root in "${obsolete_skill_roots[@]}"; do
   mkdir -p "$home/$skill_root/no-mistakes.old.260706081004"
   printf 'obsolete skill\n' > "$home/$skill_root/no-mistakes.old.260706081004/SKILL.md"
+done
+for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+  ln -s "$notes_repo/agents/skills/herdr" "$home/$skill_root/herdr"
 done
 
 run_setup() {
@@ -62,6 +65,10 @@ run_verify() {
 
 run_setup
 run_verify
+
+for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+  test ! -L "$home/$skill_root/herdr"
+done
 
 for skill_root in "${obsolete_skill_roots[@]}"; do
   test ! -e "$home/$skill_root/no-mistakes"

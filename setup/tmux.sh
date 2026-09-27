@@ -87,7 +87,7 @@ fi
 
 eval_template "$DOTS_REPO/templates/.tmux.conf" "$HOME/.tmux.conf" ''
 
-# Provider hooks coexist with Herdr's hooks and do nothing inside Herdr.
+# Install provider hooks for tmux agent-state reporting.
 if command -v python3 >/dev/null 2>&1; then
   python3 "$DOTS_REPO/tmux-agent-signals/install.py"
 fi

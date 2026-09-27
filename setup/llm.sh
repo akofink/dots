@@ -386,6 +386,13 @@ unlink_notes_symlinks() {
   unlink_pi_extensions
   unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_skill_set "$HOME/.agents/skills" herdr
+  unlink_skill_set "$HOME/.claude/skills" herdr
+  unlink_skill_set "$HOME/.codex/skills" herdr
+  unlink_skill_set "$HOME/.config/opencode/skills" herdr
+  unlink_skill_set "$HOME/.pi/agent/skills" herdr
+  unlink_skill_set "$HOME/.rovodev/skills" herdr
+  unlink_skill_set "$HOME/dev/.rovodev/skills" herdr
   remove_obsolete_agent_skills
 
   local twg_dest
@@ -394,7 +401,7 @@ unlink_notes_symlinks() {
   done
 }
 
-common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes herdr managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 notes_skill_dests=(
   "$HOME/.agents/skills"
