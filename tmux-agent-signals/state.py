@@ -13,26 +13,57 @@ def run(*args):
     return subprocess.run(args, capture_output=True, text=True, timeout=2, check=True).stdout.strip()
 
 
-def macos_notification_command(state, label, session, window, pane, client=None):
-    target_client = ["-c", client] if client else []
-    jump = " ".join(shlex.quote(value) for value in (
-        "tmux", "switch-client", *target_client, "-t", f"{session}:{window}"))
-    select = " ".join(shlex.quote(value) for value in (
-        "tmux", "select-pane", "-t", pane))
+def macos_notification_command(state, label, tmux_path, socket_path, session_id, pane_id,
+                               open_path="/usr/bin/open"):
+    tmux = shlex.quote(tmux_path)
+    socket = shlex.quote(socket_path)
+    session = shlex.quote(session_id)
+    pane = shlex.quote(pane_id)
+    detached = " ".join(shlex.quote(value) for value in (
+        tmux_path, "-S", socket_path, "attach-session", "-t", session_id,
+        ";", "select-pane", "-t", pane_id))
+    launch = " ".join(shlex.quote(value) for value in (
+        open_path, "-na", "/Applications/Ghostty.app", "--args", "-e",
+        "/bin/sh", "-lc", f"exec {detached}"))
+    script = (
+        f"tmux={tmux}; socket={socket}; session={session}; pane={pane}; "
+        f"record=$(\"$tmux\" -S \"$socket\" list-clients "
+        "-F '#{client_activity} #{client_name}' 2>/dev/null | "
+        "/usr/bin/sort -nr | /usr/bin/head -n 1); "
+        "client=${record#* }; "
+        "if [ -n \"$client\" ]; then "
+        "\"$tmux\" -S \"$socket\" switch-client -c \"$client\" -t \"$session\" && "
+        "\"$tmux\" -S \"$socket\" select-pane -t \"$pane\"; "
+        f"else {launch}; fi"
+    )
     return ["terminal-notifier", "-title", label, "-message", state,
-            "-activate", "com.mitchellh.ghostty", "-execute", f"{jump} && {select}"]
+            "-activate", "com.mitchellh.ghostty", "-execute", script]
 
 
-def notify(state, label, session=None, window=None, pane=None, client=None):
+def tmux_server_binary(tmux, pane):
+    resolved = shutil.which(tmux)
+    if resolved:
+        resolved = os.path.realpath(resolved)
+    try:
+        pid = run(tmux, "display-message", "-p", "-t", pane, "#{pid}")
+        result = subprocess.run(["/usr/sbin/lsof", "-a", "-p", pid, "-d", "txt", "-Fn"],
+                                capture_output=True, text=True, timeout=2, check=True)
+        for line in result.stdout.splitlines():
+            if line.startswith("n") and line[1:].endswith("/tmux"):
+                return os.path.realpath(line[1:])
+    except (OSError, subprocess.SubprocessError):
+        pass
+    if resolved:
+        return resolved
+    raise FileNotFoundError("cannot resolve tmux server executable")
+
+
+def notify(state, label, tmux_path, socket_path, session_id, pane_id):
     if sys.platform == "darwin":
-        if not all((session, window, pane, client)) or not shutil.which("terminal-notifier"):
-            subprocess.Popen(["open", "-a", "com.mitchellh.ghostty"],
-                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL, start_new_session=True)
-            return
-        subprocess.Popen(macos_notification_command(state, label, session, window, pane, client),
-                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, start_new_session=True)
+        subprocess.Popen(macos_notification_command(
+            state, label, tmux_path, socket_path, session_id, pane_id),
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, start_new_session=True)
     elif sys.platform == "win32" or shutil.which("powershell.exe"):
         script = ("[Windows.UI.Notifications.ToastNotificationManager,Windows.UI.Notifications,ContentType=WindowsRuntime] > $null; "
                   "$xml = New-Object Windows.Data.Xml.Dom.XmlDocument; "
@@ -72,13 +103,11 @@ def main():
             run(tmux, "set-option", "-wu", "-t", window, "@agent_state")
         if after in ("blocked", "waiting", "done"):
             label = run(tmux, "display-message", "-p", "-t", pane, "#{window_name}")
-            session = run(tmux, "display-message", "-p", "-t", pane, "#{session_name}")
-            window_index = run(tmux, "display-message", "-p", "-t", pane, "#{window_index}")
-            client = run(tmux, "display-message", "-p", "-t", pane, "#{client_name}")
-            if client:
-                notify(after, label or "Agent", session, window_index, pane, client)
-            else:
-                notify(after, label or "Agent", session, window_index, pane)
+            socket_path = run(tmux, "display-message", "-p", "-t", pane, "#{socket_path}")
+            session_id = run(tmux, "display-message", "-p", "-t", pane, "#{session_id}")
+            pane_id = run(tmux, "display-message", "-p", "-t", pane, "#{pane_id}")
+            tmux_path = tmux_server_binary(tmux, pane)
+            notify(after, label or "Agent", tmux_path, socket_path, session_id, pane_id)
     except (OSError, subprocess.SubprocessError):
         pass  # Hooks must not interrupt the provider if tmux is gone.
     return 0
