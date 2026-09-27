@@ -8,7 +8,8 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 notes_repo="$tmpdir/notes"
 home="$tmpdir/home"
-mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev"
+mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev" "$home/.claude"
+printf '{"theme":"light"}\n' > "$home/.claude/settings.json"
 printf 'global instructions\n' > "$notes_repo/agents/global-personal.md"
 printf 'work instructions\n' > "$notes_repo/agents/global-work.md"
 printf 'personal development guidance\n' > "$notes_repo/agents/guidance/dev-root-personal.md"
@@ -76,6 +77,9 @@ for skill_root in "${obsolete_skill_roots[@]}"; do
 done
 
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-personal.md"
+test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
+test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
+test "$(jq -r .theme "$home/.claude/settings.json")" = light
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
 
@@ -89,6 +93,7 @@ env \
   bash "$repo_root/setup/llm.sh"
 
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
+test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
 test "$(readlink "$home/dev/AGENTS.dss.md")" = "$notes_repo/agents/guidance/dss.md"
 test "$(readlink "$home/.pi/agent/skills/work-identity")" = "$notes_repo/agents/skills/work-identity"

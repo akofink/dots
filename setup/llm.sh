@@ -483,6 +483,7 @@ link_development_guidance() {
   fi
   if [[ -f "$dev_agents_template" ]]; then
     install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
+    install_symlink "$HOME/dev/AGENTS.md" "$HOME/dev/CLAUDE.md"
   fi
 
   if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
@@ -538,6 +539,20 @@ twg_skill_dests=(
 )
 discover_twg_skills
 
+disable_claude_auto_memory() {
+  local claude_settings="$HOME/.claude/settings.json"
+  local claude_settings_tmp
+  mkdir -p "$(dirname -- "$claude_settings")"
+  claude_settings_tmp=$(mktemp "${claude_settings}.XXXXXX") || fatal "Failed to create Claude settings temp file"
+  if [[ -f "$claude_settings" ]]; then
+    jq '.autoMemoryEnabled = false' "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude auto-memory setting"
+  else
+    printf '{\n  "autoMemoryEnabled": false\n}\n' > "$claude_settings_tmp"
+  fi
+  chmod 600 "$claude_settings_tmp"
+  mv -f "$claude_settings_tmp" "$claude_settings"
+}
+
 if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
   status=0
   if [[ "$has_notes_agents" -eq 1 ]]; then
@@ -560,6 +575,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       link_notes_skill_set || status=$?
       link_pi_extensions
       link_development_guidance
+      disable_claude_auto_memory
 
       if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
         install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
@@ -642,6 +658,8 @@ fi
 
 # Claude uses CLAUDE.md as its single global instruction path.
 remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
+
+disable_claude_auto_memory
 
 if [[ $has_notes_agents -eq 1 ]]; then
   install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
