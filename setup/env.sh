@@ -18,6 +18,7 @@ fi
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
 export NOTES_REPO="${NOTES_REPO:-"$DEV_REPOS/notes"}"
 export NOTES_REPO_URL="${NOTES_REPO_URL:-"https://github.com/akofink/notes.git"}"
+export DOTS_PRIMARY_REPO="${DOTS_PRIMARY_REPO:-"$DEV_REPOS/dots"}"
 
 if [ "$current_script_name" = "bootstrap.sh" ]; then
   dots_repo_default="$DEV_REPOS/dots"

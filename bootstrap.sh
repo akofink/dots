@@ -18,6 +18,7 @@ fi
 export DEV_REPOS="${DEV_REPOS:-"$HOME/dev/repos"}"
 export NOTES_REPO="${NOTES_REPO:-"$DEV_REPOS/notes"}"
 export NOTES_REPO_URL="${NOTES_REPO_URL:-"https://github.com/akofink/notes.git"}"
+export DOTS_PRIMARY_REPO="${DOTS_PRIMARY_REPO:-"$DEV_REPOS/dots"}"
 
 if [ "$current_script_name" = "bootstrap.sh" ]; then
   dots_repo_default="$DEV_REPOS/dots"
@@ -481,6 +482,22 @@ fi
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
+primary_repo="${DOTS_PRIMARY_REPO:-$DEV_REPOS/dots}"
+if [[ ! -d "$primary_repo/.git" ]]; then
+  echo "Refusing to render machine config: primary dots clone not found at $primary_repo" >&2
+  exit 1
+fi
+actual_repo=$(git -C "$DOTS_REPO" rev-parse --show-toplevel 2>/dev/null) || {
+  echo "Refusing to render machine config: $DOTS_REPO is not a Git checkout" >&2
+  exit 1
+}
+primary_repo=$(cd -- "$primary_repo" && pwd -P)
+actual_repo=$(cd -- "$actual_repo" && pwd -P)
+if [[ "$actual_repo" != "$primary_repo" ]]; then
+  echo "Refusing to render machine config from $actual_repo; use the primary dots clone at $primary_repo" >&2
+  exit 1
+fi
+
 if [[ -z "${GIT_SETUP_COMPLETE:-}" ]]; then
   # shellcheck source=setup/git.sh
   source "$script_dir/git.sh"
@@ -500,6 +517,8 @@ fi
 
 eval_template "$DOTS_REPO/templates/gitignore.template" "$HOME/.gitignore" ''
 eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
+# shellcheck source=setup/ssh.sh
+source "$DOTS_REPO/setup/ssh.sh"
 
 export REPOS_SETUP_COMPLETE=1
 (cd "$DOTS_REPO" && ./setup.sh)
