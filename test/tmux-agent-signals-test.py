@@ -3,7 +3,6 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import shlex
 import subprocess
 import sys
 import tempfile
@@ -21,44 +20,12 @@ def load(name):
 
 
 class SignalsTest(unittest.TestCase):
-    def test_macos_notification_command_uses_stable_tmux_targets(self):
+    def test_macos_notification_is_disabled_without_activating_ghostty(self):
         module = load("state")
-        command = module.macos_notification_command(
-            "done", "agent window", "/Users/me/.local/bin/tmux", "/tmp/tmux.sock", "$0", "%7")
-        self.assertEqual(command[:6], ["terminal-notifier", "-title", "agent window", "-message", "done", "-activate"])
-        self.assertEqual(command[6:8], ["com.mitchellh.ghostty", "-execute"])
-        self.assertIn("/Users/me/.local/bin/tmux", command[8])
-        self.assertIn("-S /tmp/tmux.sock", command[8])
-        self.assertIn("list-clients", command[8])
-        self.assertIn("#{client_activity}", command[8])
-        self.assertIn("switch-client -c", command[8])
-        self.assertIn("select-pane -t \"$pane\"", command[8])
-        self.assertIn("/usr/bin/open -na /Applications/Ghostty.app", command[8])
-        self.assertIn("attach-session", command[8])
-        self.assertIn("select-pane -t %7", command[8])
-
-    def test_macos_notification_detached_branch_opens_ghostty_to_stable_pane(self):
-        module = load("state")
-        tmux = str(Path.home() / ".local/bin/tmux")
-        with tempfile.TemporaryDirectory() as folder:
-            socket = str(Path(folder) / "tmux.sock")
-            log = str(Path(folder) / "open-args.log")
-            open_stub = Path(folder) / "open"
-            open_stub.write_text("#!/bin/sh\nprintf '%s\\n' \"$@\" > " + shlex.quote(log) + "\n")
-            open_stub.chmod(0o755)
-            subprocess.run([tmux, "-S", socket, "new-session", "-d", "-s", "click-test"], check=True)
-            try:
-                session = subprocess.run([tmux, "-S", socket, "display-message", "-p", "-t", "click-test", "#{session_id}"], check=True, capture_output=True, text=True).stdout.strip()
-                pane = subprocess.run([tmux, "-S", socket, "list-panes", "-t", session, "-F", "#{pane_id}"], check=True, capture_output=True, text=True).stdout.strip()
-                command = module.macos_notification_command("done", "test", tmux, socket, session, pane, str(open_stub))[-1]
-                subprocess.run(["/usr/bin/env", "-i", "PATH=/usr/bin:/bin:/usr/sbin:/sbin", "/bin/sh", "-c", command], check=True)
-                args = Path(log).read_text()
-                self.assertIn("/Applications/Ghostty.app", args)
-                self.assertIn(session, args)
-                self.assertIn(pane, args)
-                self.assertIn("attach-session", args)
-            finally:
-                subprocess.run([tmux, "-S", socket, "kill-server"], check=False, capture_output=True)
+        with patch.object(module, "subprocess") as process:
+            with patch.object(module.sys, "platform", "darwin"):
+                module.notify("waiting", "agent window")
+        process.Popen.assert_not_called()
 
     def test_state_transitions_and_no_tmux_guard(self):
         module = load("state")
@@ -66,19 +33,15 @@ class SignalsTest(unittest.TestCase):
         def fake(*args):
             calls.append(args)
             if args[1] == "display-message":
-                return {"#{window_id}": "@1", "#{window_name}": "task",
-                        "#{socket_path}": "/tmp/tmux.sock", "#{session_id}": "$1",
-                        "#{pane_id}": "%1"}.get(args[-1], "")
+                return {"#{window_id}": "@1", "#{window_name}": "task"}.get(args[-1], "")
             return ""  # no prior state
         with patch.dict(os.environ, {"TMUX_PANE": "%1"}, clear=True), \
              patch.object(module, "run", side_effect=fake), \
              patch.object(module, "notify") as notification, \
-             patch.object(module, "tmux_server_binary", return_value="/Users/me/.local/bin/tmux"), \
              patch.object(sys, "argv", ["state", "done"]):
             self.assertEqual(module.main(), 0)
             self.assertIn(("tmux", "set-option", "-w", "-t", "@1", "@agent_state", "done"), calls)
-            notification.assert_called_once_with(
-                "done", "task", "/Users/me/.local/bin/tmux", "/tmp/tmux.sock", "$1", "%1")
+            notification.assert_called_once_with("done", "task")
         calls.clear()
         with patch.dict(os.environ, {}, clear=True):
             module.main()

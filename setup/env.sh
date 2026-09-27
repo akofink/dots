@@ -95,7 +95,7 @@ then
   TMUX_BUILD_DEPS=(autoconf automake bison gcc jemalloc libevent ncurses pkgconf utf8proc)
   # shellcheck disable=SC2034
   RUBY_BUILD_DEPS=()
-  PKG_LIST=(make ripgrep terminal-notifier)
+  PKG_LIST=(make ripgrep)
   if [[ -n "$ENVSUBST_PKG" ]]; then
     PKG_LIST+=("$ENVSUBST_PKG")
   fi
