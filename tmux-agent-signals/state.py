@@ -13,23 +13,24 @@ def run(*args):
     return subprocess.run(args, capture_output=True, text=True, timeout=2, check=True).stdout.strip()
 
 
-def macos_notification_command(state, label, session, window, pane):
+def macos_notification_command(state, label, session, window, pane, client=None):
+    target_client = ["-c", client] if client else []
     jump = " ".join(shlex.quote(value) for value in (
-        "tmux", "switch-client", "-t", f"{session}:{window}"))
+        "tmux", "switch-client", *target_client, "-t", f"{session}:{window}"))
     select = " ".join(shlex.quote(value) for value in (
         "tmux", "select-pane", "-t", pane))
     return ["terminal-notifier", "-title", label, "-message", state,
             "-activate", "com.mitchellh.ghostty", "-execute", f"{jump} && {select}"]
 
 
-def notify(state, label, session=None, window=None, pane=None):
+def notify(state, label, session=None, window=None, pane=None, client=None):
     if sys.platform == "darwin":
-        if not all((session, window, pane)) or not shutil.which("terminal-notifier"):
+        if not all((session, window, pane, client)) or not shutil.which("terminal-notifier"):
             subprocess.Popen(["open", "-a", "com.mitchellh.ghostty"],
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
             return
-        subprocess.Popen(macos_notification_command(state, label, session, window, pane),
+        subprocess.Popen(macos_notification_command(state, label, session, window, pane, client),
                          stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL, start_new_session=True)
     elif sys.platform == "win32" or shutil.which("powershell.exe"):
@@ -73,7 +74,11 @@ def main():
             label = run(tmux, "display-message", "-p", "-t", pane, "#{window_name}")
             session = run(tmux, "display-message", "-p", "-t", pane, "#{session_name}")
             window_index = run(tmux, "display-message", "-p", "-t", pane, "#{window_index}")
-            notify(after, label or "Agent", session, window_index, pane)
+            client = run(tmux, "display-message", "-p", "-t", pane, "#{client_name}")
+            if client:
+                notify(after, label or "Agent", session, window_index, pane, client)
+            else:
+                notify(after, label or "Agent", session, window_index, pane)
     except (OSError, subprocess.SubprocessError):
         pass  # Hooks must not interrupt the provider if tmux is gone.
     return 0

@@ -22,10 +22,10 @@ def load(name):
 class SignalsTest(unittest.TestCase):
     def test_macos_notification_command_targets_ghostty_and_pane(self):
         module = load("state")
-        command = module.macos_notification_command("done", "agent window", "work", "2", "%7")
+        command = module.macos_notification_command("done", "agent window", "work", "2", "%7", "/dev/ttys005")
         self.assertEqual(command[:6], ["terminal-notifier", "-title", "agent window", "-message", "done", "-activate"])
         self.assertEqual(command[6:8], ["com.mitchellh.ghostty", "-execute"])
-        self.assertEqual(command[8], "tmux switch-client -t work:2 && tmux select-pane -t %7")
+        self.assertEqual(command[8], "tmux switch-client -c /dev/ttys005 -t work:2 && tmux select-pane -t %7")
 
     def test_state_transitions_and_herdr_guard(self):
         module = load("state")
