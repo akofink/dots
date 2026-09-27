@@ -20,13 +20,21 @@ def load(name):
 
 
 class SignalsTest(unittest.TestCase):
+    def test_macos_notification_command_targets_ghostty_and_pane(self):
+        module = load("state")
+        command = module.macos_notification_command("done", "agent window", "work", "2", "%7")
+        self.assertEqual(command[:6], ["terminal-notifier", "-title", "agent window", "-message", "done", "-activate"])
+        self.assertEqual(command[6:8], ["com.mitchellh.ghostty", "-execute"])
+        self.assertEqual(command[8], "tmux switch-client -t work:2 && tmux select-pane -t %7")
+
     def test_state_transitions_and_herdr_guard(self):
         module = load("state")
         calls = []
         def fake(*args):
             calls.append(args)
             if args[1] == "display-message":
-                return "@1" if args[-1] == "#{window_id}" else "task"
+                return {"#{window_id}": "@1", "#{window_name}": "task",
+                        "#{session_name}": "work", "#{window_index}": "2"}.get(args[-1], "")
             return ""  # no prior state
         with patch.dict(os.environ, {"TMUX_PANE": "%1", "HERDR_ENV": "0"}), \
              patch.object(module, "run", side_effect=fake), \
@@ -34,7 +42,7 @@ class SignalsTest(unittest.TestCase):
              patch.object(sys, "argv", ["state", "done"]):
             self.assertEqual(module.main(), 0)
             self.assertIn(("tmux", "set-option", "-w", "-t", "@1", "@agent_state", "done"), calls)
-            notification.assert_called_once_with("done", "task")
+            notification.assert_called_once_with("done", "task", "work", "2", "%1")
             calls.clear()
             os.environ["HERDR_ENV"] = "1"
             module.main()
