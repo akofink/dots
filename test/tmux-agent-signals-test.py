@@ -27,26 +27,27 @@ class SignalsTest(unittest.TestCase):
         self.assertEqual(command[6:8], ["com.mitchellh.ghostty", "-execute"])
         self.assertEqual(command[8], "tmux switch-client -c /dev/ttys005 -t work:2 && tmux select-pane -t %7")
 
-    def test_state_transitions_and_herdr_guard(self):
+    def test_state_transitions_and_no_tmux_guard(self):
         module = load("state")
         calls = []
         def fake(*args):
             calls.append(args)
             if args[1] == "display-message":
                 return {"#{window_id}": "@1", "#{window_name}": "task",
-                        "#{session_name}": "work", "#{window_index}": "2"}.get(args[-1], "")
+                        "#{session_name}": "work", "#{window_index}": "2",
+                        "#{client_name}": "/dev/ttys005"}.get(args[-1], "")
             return ""  # no prior state
-        with patch.dict(os.environ, {"TMUX_PANE": "%1", "HERDR_ENV": "0"}), \
+        with patch.dict(os.environ, {"TMUX_PANE": "%1"}, clear=True), \
              patch.object(module, "run", side_effect=fake), \
              patch.object(module, "notify") as notification, \
              patch.object(sys, "argv", ["state", "done"]):
             self.assertEqual(module.main(), 0)
             self.assertIn(("tmux", "set-option", "-w", "-t", "@1", "@agent_state", "done"), calls)
-            notification.assert_called_once_with("done", "task", "work", "2", "%1")
-            calls.clear()
-            os.environ["HERDR_ENV"] = "1"
+            notification.assert_called_once_with("done", "task", "work", "2", "%1", "/dev/ttys005")
+        calls.clear()
+        with patch.dict(os.environ, {}, clear=True):
             module.main()
-            self.assertEqual(calls, [])
+        self.assertEqual(calls, [])
 
     def test_claude_event_mapping_and_subagent_guard(self):
         module = load("claude")
@@ -55,13 +56,13 @@ class SignalsTest(unittest.TestCase):
                                 ("PostToolUse", "working"), ("Stop", "done"), ("Notification", "blocked"),
                                 ("SessionEnd", "idle")):
             payload = {"hook_event_name": event, "notification_type": "permission_prompt"}
-            with patch.dict(os.environ, {"TMUX_PANE": "%1", "HERDR_ENV": "0"}), \
+            with patch.dict(os.environ, {"TMUX_PANE": "%1"}, clear=True), \
                  patch.object(sys, "stdin", StringIO(json.dumps(payload))), \
                  patch.object(module.subprocess, "run") as run:
                 module.main()
                 self.assertEqual(run.call_args.args[0][-1], expected)
             payload["agent_id"] = "child"
-            with patch.dict(os.environ, {"TMUX_PANE": "%1", "HERDR_ENV": "0"}), \
+            with patch.dict(os.environ, {"TMUX_PANE": "%1"}, clear=True), \
                  patch.object(sys, "stdin", StringIO(json.dumps(payload))), \
                  patch.object(module.subprocess, "run") as run:
                 module.main()

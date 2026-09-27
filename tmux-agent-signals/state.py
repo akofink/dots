@@ -54,7 +54,7 @@ def main():
     if len(sys.argv) != 2 or sys.argv[1] not in STATES:
         return 2
     pane = os.environ.get("TMUX_PANE")
-    if os.environ.get("HERDR_ENV") == "1" or not pane:
+    if not pane:
         return 0
     try:
         tmux = os.environ.get("TMUX_AGENT_SIGNALS_TMUX", "tmux")
