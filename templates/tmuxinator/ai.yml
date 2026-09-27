@@ -28,5 +28,11 @@ windows:
             - cd ~/dev/repos/dots
         - sandbox:
             - cd ~/dev/repos/sandbox
-  - vim: vim
+  - vim:
+      layout: even-vertical
+      panes:
+        - quota:
+            - npx -y quota-axi --tui --provider claude,codex,grok,copilot
+        - vim:
+            - vim
   - orch:
