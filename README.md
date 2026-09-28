@@ -98,6 +98,9 @@ repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/d
 #### Repository sync
 
 `syncdots` pulls with rebase and pushes the dots and notes repositories.
+With tracked edits, it rebases committed history in an isolated temporary worktree, signs and verifies outgoing commits, and preserves unrelated staged, unstaged, and untracked files.
+The shared index and branch are locked during the final checks, push, and checkout advance; concurrent commits, overlapping edits, conflicts, and signing/push failures defer synchronization rather than stash or discard work.
+This dirty-checkout path requires Python 3. A deferred sync returns nonzero but still tries the other repository and reapplies skill links.
 After synchronization, it reapplies the configured notes-backed agent skill links without rerunning CLI installers.
 It is also launched asynchronously at most once every six hours when a managed zsh shell starts, so it never delays shell startup.
 Missing repositories remain harmless no-ops, but Git, lock, and skill-link failures are reported.

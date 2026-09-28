@@ -69,15 +69,23 @@ sync_repo() {
     return "$status"
   fi
   if [[ -n "$dirty_paths" ]]; then
-    printf 'Skipping %s because tracked paths have uncommitted changes:\n%s\n' "$repo" "$dirty_paths" >&2
-    return 1
+    [[ $quiet -eq 1 ]] || printf 'Syncing committed changes in dirty checkout %s\n' "$repo"
+    local helper
+    if ! command -v python3 >/dev/null 2>&1; then
+      printf 'Deferred sync of dirty checkout %s: python3 is required\n' "$repo" >&2
+      return 1
+    fi
+    # syncdots is normally invoked through a symlink in ~/.local/bin.
+    helper=$(python3 -c 'import os, sys; print(os.path.join(os.path.dirname(os.path.realpath(sys.argv[1])), "dots-sync-dirty.py"))' "${BASH_SOURCE[0]}") || return 1
+    python3 "$helper" "$repo" "$notes_repo/tmp/dots-sync"
+    return $?
   fi
 
   if [[ $quiet -eq 1 ]]; then
-    git -C "$repo" pull --rebase >/dev/null
+    git -C "$repo" -c rebase.autoStash=false pull --rebase >/dev/null
   else
     printf 'Syncing %s\n' "$repo"
-    git -C "$repo" pull --rebase
+    git -C "$repo" -c rebase.autoStash=false pull --rebase
   fi
   status=$?
   if (( status != 0 )); then

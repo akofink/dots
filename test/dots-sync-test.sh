@@ -6,6 +6,8 @@ repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 script="$repo_root/bin/dots-sync.sh"
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
+ln -s "$script" "$tmpdir/syncdots"
+script="$tmpdir/syncdots"
 
 setup_repo() {
   local name=$1
@@ -76,7 +78,7 @@ PATH="$git_wrapper_dir:$PATH" \
   XDG_STATE_HOME="$tmpdir/untracked-state" DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" \
   "$script" --quiet
 
-# Tracked dirt skips that repository but still syncs the other and reapplies links.
+# Unrelated tracked dirt is preserved while committed history and links sync.
 printf 'uncommitted notes edit\n' >> "$notes_repo/README"
 : > "$git_log"
 set +e
@@ -86,14 +88,17 @@ failure_output=$(PATH="$git_wrapper_dir:$PATH" \
   "$script" 2>&1)
 failure_status=$?
 set -e
-[[ $failure_status -ne 0 ]]
-[[ $failure_output == *'Skipping '* ]] || { printf '%s\n' "$failure_output" >&2; exit 1; }
-[[ $failure_output == *README* ]]
+[[ $failure_status -eq 0 ]] || { printf '%s\n' "$failure_output" >&2; exit 1; }
+[[ $failure_output == *'Syncing committed changes in dirty checkout'* ]]
+[[ $(git -C "$notes_repo" diff -- README) == *'uncommitted notes edit'* ]]
 [[ $failure_output == *'Reapplying configured agent skill links'* ]]
 [[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ -f "$notes_repo/.sync-linked" ]]
 [[ $(rg -c 'pull --rebase$' "$git_log") -eq 1 ]]
-! rg '^pull --rebase --autostash$' "$git_log"
+if rg -- '--autostash| stash ' "$git_log"; then
+  printf 'Synchronization must not stash local edits\n' >&2
+  exit 1
+fi
 
 # Git failures are reported instead of being mistaken for a successful sync.
 git -C "$notes_repo" remote set-url origin "$tmpdir/missing-remote.git"
@@ -102,7 +107,7 @@ failure_output=$(XDG_STATE_HOME="$tmpdir/failure-state" DOTS_REPO="$dots_repo" N
 failure_status=$?
 set -e
 [[ $failure_status -ne 0 ]]
-[[ $failure_output == *'Failed to sync '* ]]
+[[ $failure_output == *'Deferred dirty-checkout synchronization'* ]]
 
 # Missing repositories are intentionally harmless for a portable shell setup.
 DOTS_REPO="$tmpdir/missing-dots" NOTES_REPO="$tmpdir/missing-notes" "$script" --quiet
