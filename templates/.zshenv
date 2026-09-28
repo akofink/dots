@@ -64,11 +64,14 @@ if [[ -d "$NVM_DIR/versions/node" ]]; then
   if [[ -d "$NVM_DIR/versions/node/$nvm_alias_name/bin" ]]; then
     export PATH="$NVM_DIR/versions/node/$nvm_alias_name/bin:$PATH"
   else
-    nvm_node_bins=("$NVM_DIR"/versions/node/*/bin(N[1]))
-    if (( ${#nvm_node_bins[@]} > 0 )); then
-      export PATH="${nvm_node_bins[1]}:$PATH"
+    nvm_node_versions=("$NVM_DIR"/versions/node/v<->.<->.<->(N/:t))
+    if (( ${#nvm_node_versions[@]} > 0 )); then
+      nvm_default_node=$(printf '%s\n' "${nvm_node_versions[@]#v}" | sort -t. -k1,1n -k2,2n -k3,3n | tail -n 1)
+      if [[ -n "$nvm_default_node" ]]; then
+        export PATH="$NVM_DIR/versions/node/v$nvm_default_node/bin:$PATH"
+      fi
     fi
-    unset nvm_node_bins
+    unset nvm_node_versions nvm_default_node
   fi
   unset nvm_alias_name nvm_alias_target
 fi
