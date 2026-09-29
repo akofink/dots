@@ -262,6 +262,20 @@ unlink_skill_set() {
   done
 }
 
+unlink_retired_agent_skills() {
+  local destination_root
+  for destination_root in \
+    "$HOME/.agents/skills" \
+    "$HOME/.claude/skills" \
+    "$HOME/.codex/skills" \
+    "$HOME/.config/opencode/skills" \
+    "$HOME/.pi/agent/skills" \
+    "$HOME/.rovodev/skills" \
+    "$HOME/dev/.rovodev/skills"; do
+    unlink_skill_set "$destination_root" managing-1password-cli
+  done
+}
+
 # Remove the obsolete skill and backups left by older skill-link migrations.
 remove_obsolete_skill_set() {
   local destination_root="$1"
@@ -383,6 +397,7 @@ unlink_notes_symlinks() {
   unlink_skill_set "$HOME/.codex/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.pi/agent/skills" "${common_skills[@]}" "${work_skills[@]}"
+  unlink_retired_agent_skills
   unlink_pi_extensions
   unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
@@ -401,7 +416,7 @@ unlink_notes_symlinks() {
   done
 }
 
-common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes managing-1password-cli pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 notes_skill_dests=(
   "$HOME/.agents/skills"
@@ -462,6 +477,7 @@ link_notes_skill_set() {
   local failed=0
   local destination_root
   remove_obsolete_agent_skills
+  unlink_retired_agent_skills
   for destination_root in "${notes_skill_dests[@]}"; do
     remove_symlink_if_points_to "$destination_root/working-state-cleanup" "$notes_repo/agents/skills/working-state-cleanup"
     link_skill_set "$destination_root" "${common_skills[@]}" || failed=1
