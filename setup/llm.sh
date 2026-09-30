@@ -209,6 +209,8 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   remove_pi_extension "legacy npm Pi MCP Adapter" "npm:pi-mcp-adapter" || true
   echo "→ Installing Pi MCP Adapter..."
   install_pi_extension "Pi MCP Adapter" "git:github.com/nicobailon/pi-mcp-adapter@v2.29.0" || true
+  echo "→ Installing Pi web search..."
+  install_pi_extension "Pi web search" "npm:pi-web-search@1.6.0" || true
   echo "→ Installing gh-axi skill..."
   install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
 

@@ -13,6 +13,7 @@ with open(sys.argv[1], encoding="utf-8") as settings_file:
 assert settings["defaultProvider"] == "openai-codex"
 assert settings["defaultModel"] == "gpt-5.6-luna"
 assert settings["defaultThinkingLevel"] == "high"
+assert "npm:pi-web-search@1.6.0" in settings["packages"]
 assert settings["retry"] == {
     "enabled": True,
     "maxRetries": 8,

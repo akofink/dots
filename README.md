@@ -134,6 +134,7 @@ through the bundled `aws_completer` executable when it is available.
 - Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
 - ACPX and the Pi ACP adapter from npm (`acpx` and `pi-acp`)
 - Pi MCP Adapter from GitHub (`git:github.com/nicobailon/pi-mcp-adapter@v2.29.0`)
+- Pi web search from npm (`npm:pi-web-search@1.6.0`), using native search support for the selected provider when available
 - opencode via `setup/opencode.sh`
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.
