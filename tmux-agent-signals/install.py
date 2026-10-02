@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Install tmux-only provider hooks without replacing other integrations."""
 import json
+import os
 from pathlib import Path
 import shlex
 import sys
@@ -14,6 +15,18 @@ def link(source, target):
         print(f"Keeping existing provider hook: {target}", file=sys.stderr)
         return
     target.symlink_to(source)
+
+
+def unsandboxed_agent_commands(home):
+    """Commands Claude may run outside its sandbox without a prompt."""
+    skills = [("agent-orchestrator", "checkin"), ("agent-orchestrator", "wake-orchestrator")]
+    if os.environ.get("MACHINE_CLASS") == "work":
+        skills.append(("work-agent-orchestrator", "checkin"))
+    commands = []
+    for skill, script in skills:
+        relative = f".claude/skills/{skill}/scripts/{script}"
+        commands += [str(home / relative), f"~/{relative}"]
+    return commands + ["wake-orchestrator", "akagent", str(home / ".local/bin/akagent")]
 
 
 def main():
@@ -38,6 +51,26 @@ def main():
                 continue
             entries.append({"hooks": [{"type": "command", "command": command, "timeout": 5}]})
             changed = True
+        # Agent tooling needs the tmux socket and ~/.local/state, which the Bash
+        # sandbox blocks. Rules match command text, so list each spelling.
+        permissions = data.setdefault("permissions", {})
+        if not isinstance(permissions, dict):
+            raise ValueError("permissions is not an object")
+        allow = permissions.setdefault("allow", [])
+        if not isinstance(allow, list):
+            raise ValueError("permissions.allow is not an array")
+        sandbox = data.setdefault("sandbox", {})
+        if not isinstance(sandbox, dict):
+            raise ValueError("sandbox is not an object")
+        excluded = sandbox.setdefault("excludedCommands", [])
+        if not isinstance(excluded, list):
+            raise ValueError("sandbox.excludedCommands is not an array")
+        for command in unsandboxed_agent_commands(home):
+            for rules, rule in ((allow, f"Bash({command} *)"), (excluded, f"{command} *")):
+                if rule not in rules:
+                    rules.append(rule)
+                    changed = True
+
         if changed:
             settings.parent.mkdir(parents=True, exist_ok=True)
             settings.write_text(json.dumps(data, indent=2) + "\n")

@@ -88,6 +88,35 @@ class SignalsTest(unittest.TestCase):
             self.assertEqual(len(claude_hooks["PostToolUse"]), 1)
             self.assertTrue((home / ".pi/agent/extensions/tmux-agent-state.ts").is_symlink())
 
+    def test_install_merges_scoped_agent_command_rules(self):
+        work_checkin = ".claude/skills/work-agent-orchestrator/scripts/checkin"
+        for machine_class, count in (("work", 9), ("personal", 7)):
+            with self.subTest(machine_class=machine_class), tempfile.TemporaryDirectory() as folder:
+                home = Path(folder)
+                settings = home / ".claude/settings.json"
+                settings.parent.mkdir()
+                settings.write_text(json.dumps({
+                    "permissions": {"defaultMode": "auto", "allow": ["Bash(other *)"]},
+                    "sandbox": {"excludedCommands": ["other *"]},
+                }))
+                env = {**os.environ, "HOME": folder, "MACHINE_CLASS": machine_class}
+                for _ in range(2):
+                    subprocess.run([sys.executable, str(ROOT / "install.py")], env=env, check=True, capture_output=True)
+                data = json.loads(settings.read_text())
+                allow = data["permissions"]["allow"]
+                excluded = data["sandbox"]["excludedCommands"]
+                self.assertEqual(data["permissions"]["defaultMode"], "auto")
+                self.assertEqual(allow[0], "Bash(other *)")
+                self.assertEqual(excluded[0], "other *")
+                self.assertEqual(len(allow), len(set(allow)))
+                self.assertEqual(len(allow), count + 1)
+                self.assertEqual(excluded[1:], [rule[5:-1] for rule in allow[1:]])
+                for command in (f"{folder}/.claude/skills/agent-orchestrator/scripts/checkin",
+                                "~/.claude/skills/agent-orchestrator/scripts/wake-orchestrator",
+                                "wake-orchestrator", "akagent", f"{folder}/.local/bin/akagent"):
+                    self.assertIn(f"Bash({command} *)", allow)
+                self.assertEqual(f"~/{work_checkin} *" in excluded, machine_class == "work")
+
 
 if __name__ == "__main__":
     unittest.main()
