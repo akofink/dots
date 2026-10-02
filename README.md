@@ -133,7 +133,6 @@ through the bundled `aws_completer` executable when it is available.
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
 - Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
 - ACPX and the Pi ACP adapter from npm (`acpx` and `pi-acp`)
-- Pi MCP Adapter from GitHub (`git:github.com/nicobailon/pi-mcp-adapter@v2.29.0`)
 - Pi web search from npm (`npm:pi-web-search@1.6.0`), using native search support for the selected provider when available
 - opencode via `setup/opencode.sh`
 
@@ -275,7 +274,9 @@ The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and on-call support are linked only when `MACHINE_CLASS=work`.
 
-Pi's MCP adapter is installed as a global Pi package.
+Pi 1.0 or newer is required for the built-in MCP configuration; update the active executable with `pi update` before using it with an older installation. No third-party MCP adapter package is installed.
+Use `/mcp` for session connections and `pi mcp list` to check the configured servers from a shell. Servers use Pi's default codemode exposure; scripts discover tools with `searchTools()` and `describeTool()` and call their exact discovered identifiers through `tools`. Long MCP identifiers may have hash suffixes.
+The template keeps `tuiMode: "regular"` for terminal scrollback even though Pi 1.0 defaults to fullscreen.
 Its work profile receives the same Atlassian MCP servers as OpenCode, while personal setup removes the dots-managed Pi MCP config.
 
 The rovo-managed twg (Teamwork Graph) skill bundle at `~/.local/share/rovo/current/twg/skills/` is also

@@ -16,7 +16,6 @@
   "tuiMode": "regular",
   "steeringMode": "all",
   "packages": [
-    "git:github.com/nicobailon/pi-mcp-adapter@v2.29.0",
     "npm:pi-web-search@1.6.0"
   ]
 }

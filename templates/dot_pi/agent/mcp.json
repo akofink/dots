@@ -1,7 +1,4 @@
 {
-  "settings": {
-    "strictDirectToolArguments": true
-  },
   "mcpServers": {
     "ops-sherpa": {
       "command": "npx",
@@ -18,15 +15,10 @@
       }
     },
     "code-navigator-mcp": {
-      "command": "uvx",
+      "command": "sh",
       "args": [
-        "--from",
-        "atlassian-code-navigator-mcp",
-        "code-navigator-mcp",
-        "--email",
-        "${ATLASSIAN_EMAIL}",
-        "--api-key",
-        "${CODE_NAVIGATOR_API_KEY}"
+        "-c",
+        "exec uvx --from atlassian-code-navigator-mcp code-navigator-mcp --email \"${ATLASSIAN_EMAIL:?ATLASSIAN_EMAIL is required}\" --api-key \"${CODE_NAVIGATOR_API_KEY:?CODE_NAVIGATOR_API_KEY is required}\""
       ]
     },
     "atlassian-remote": {

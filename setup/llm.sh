@@ -105,31 +105,6 @@ install_acpx() {
   return "$status"
 }
 
-# remove_pi_extension <name> <source>
-#
-# Removes a Pi extension package and keeps setup best-effort. This lets setup
-# migrate obsolete package sources that register the same extension resources.
-remove_pi_extension() {
-  local name="$1"
-  local source="$2"
-
-  if ! command -v pi >/dev/null 2>&1; then
-    warn "pi not found; skipping $name removal"
-    return 1
-  fi
-
-  if ! pi list 2>/dev/null | grep -Fq -- "$source"; then
-    return 0
-  fi
-
-  echo "Removing Pi extension: $name ..."
-
-  if ! pi remove "$source"; then
-    warn "Failed to remove $name; skipping"
-    return 1
-  fi
-}
-
 # install_pi_extension <name> <source>
 #
 # Installs a Pi extension package and keeps setup best-effort. Skips when the
@@ -204,11 +179,6 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   install_pi_coding_agent || true
   echo "→ Installing ACPX and Pi ACP adapter..."
   install_acpx || true
-  # Older dots setups installed this package from npm. Pi loads packages from
-  # both sources, and the duplicate adapter registers conflicting MCP tools.
-  remove_pi_extension "legacy npm Pi MCP Adapter" "npm:pi-mcp-adapter" || true
-  echo "→ Installing Pi MCP Adapter..."
-  install_pi_extension "Pi MCP Adapter" "git:github.com/nicobailon/pi-mcp-adapter@v2.29.0" || true
   echo "→ Installing Pi web search..."
   install_pi_extension "Pi web search" "npm:pi-web-search@1.6.0" || true
   echo "→ Installing gh-axi skill..."

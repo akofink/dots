@@ -20,6 +20,7 @@ check:
 test:
 	bash test/akagent-test.sh
 	bash test/pi-settings-test.sh
+	python3 test/pi-mcp-config-test.py
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
 	bash test/llm-skills-test.sh
