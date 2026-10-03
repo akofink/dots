@@ -18,6 +18,7 @@ check:
 
 .PHONY: test
 test:
+	bash test/akupdate-test.sh
 	bash test/akagent-test.sh
 	bash test/pi-settings-test.sh
 	python3 test/pi-mcp-config-test.py

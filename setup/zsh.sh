@@ -41,6 +41,7 @@ eval_template "$DOTS_REPO/templates/akofink.zsh-theme" "$HOME/.oh-my-zsh/custom/
 # into it or PATH/FPATH can retain stale Homebrew Cellar paths after upgrades.
 eval_template "$DOTS_REPO/templates/.zshenv" "$HOME/.zshenv" ''
 install_symlink "$DOTS_REPO/bin/dots-sync.sh" "$HOME/.local/bin/syncdots"
+install_symlink "$DOTS_REPO/bin/akupdate.sh" "$HOME/.local/bin/akupdate"
 # Only $GIT_EMAIL is a setup-time variable; all other $VAR references in
 # .zshrc (e.g. $HOME, $PATH, $NVM_DIR) are runtime shell variables and must
 # be passed through verbatim.

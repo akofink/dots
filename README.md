@@ -95,6 +95,12 @@ bash setup/<module>.sh
 Standalone module scripts resolve the checked-out repo automatically, so they can be run from inside the
 repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/dots`.
 
+#### Updating tools
+
+`akupdate` upgrades Homebrew packages, Pi and its installed extensions, Claude Code, and Codex. On
+`MACHINE_CLASS=work` machines it also runs the Atlas CLI and plugin update commands. Each updater is
+reported separately, and the command returns nonzero if any step fails.
+
 #### Repository sync
 
 `syncdots` pulls with rebase and pushes the dots and notes repositories.
