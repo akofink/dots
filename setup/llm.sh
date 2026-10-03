@@ -131,18 +131,19 @@ install_pi_extension() {
   fi
 }
 
-# install_agent_skill <name> <skill_dir> <skills-add-args...>
+# install_agent_skill <name> <installed_dir> <skills-add-args...>
 #
 # Installs a global agent skill via `npx -y skills add`, or the Atlassian-internal
-# `@atlassian/skills` CLI on work machines. Skips when the skill is
-# already present under ~/.agents/skills/<skill_dir>, and warns (without
-# aborting) when npx is missing or the install fails.
+# `@atlassian/skills` CLI on work machines. Skips when <installed_dir> already
+# exists (~/.agents/skills/<skill> by default, or the agent directory that an
+# `--agent` install copies into), and warns (without aborting) when npx is
+# missing or the install fails.
 install_agent_skill() {
   local name="$1"
-  local skill_dir="$2"
+  local installed_dir="$2"
   shift 2
 
-  if [[ -d "$HOME/.agents/skills/$skill_dir" ]]; then
+  if [[ -d "$installed_dir" ]]; then
     echo "Agent skill $name already installed; skipping."
     return 0
   fi
@@ -165,6 +166,40 @@ install_agent_skill() {
   fi
 }
 
+# install_claude_plugin <plugin@marketplace> <marketplace-source>
+#
+# Installs a user-scoped Claude Code plugin, adding its marketplace first when
+# absent. Skips when the plugin is already installed and warns (without
+# aborting) when claude is missing or a step fails.
+install_claude_plugin() {
+  local plugin="$1"
+  local marketplace_source="$2"
+  local marketplace="${plugin#*@}"
+
+  if ! command -v claude >/dev/null 2>&1; then
+    warn "claude not found; skipping $plugin plugin install"
+    return 1
+  fi
+
+  if claude plugin list --json 2>/dev/null | jq -e --arg id "$plugin" 'any(.[]; .id == $id)' >/dev/null; then
+    echo "Claude plugin $plugin already installed; skipping."
+    return 0
+  fi
+
+  echo "Installing Claude plugin: $plugin ..."
+
+  if ! claude plugin marketplace list --json 2>/dev/null | jq -e --arg name "$marketplace" 'any(.[]; .name == $name)' >/dev/null \
+    && ! claude plugin marketplace add "$marketplace_source"; then
+    warn "Failed to add Claude marketplace $marketplace; skipping"
+    return 1
+  fi
+
+  if ! claude plugin install "$plugin"; then
+    warn "Failed to install Claude plugin $plugin; skipping"
+    return 1
+  fi
+}
+
 # Tool installs are best-effort: each helper skips work that is already present
 # and warns instead of aborting on failure. The `|| true` guards keep a single
 # failed install from tripping `set -e` and skipping the config setup below.
@@ -182,7 +217,12 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   echo "→ Installing Pi web search..."
   install_pi_extension "Pi web search" "npm:pi-web-search@1.6.0" || true
   echo "→ Installing gh-axi skill..."
-  install_agent_skill "gh-axi" gh-axi kunchenguid/gh-axi --skill gh-axi || true
+  install_agent_skill "gh-axi" "$HOME/.agents/skills/gh-axi" kunchenguid/gh-axi --skill gh-axi || true
+  # TypeSafe uses one install method per agent: the vendor plugin for Claude
+  # and a Pi-only skills.sh copy, so neither agent loads a duplicate.
+  echo "→ Installing TypeSafe skill..."
+  install_claude_plugin typesafe@typesafe-ai typesafe-ai/skills || true
+  install_agent_skill "TypeSafe" "$HOME/.pi/agent/skills/typesafe-ai" typesafe-ai/skills --skill typesafe-ai --agent pi || true
 
   if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
     # opencode.sh returns non-zero (without setting its guard) when the install is
