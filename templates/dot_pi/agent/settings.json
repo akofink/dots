@@ -16,6 +16,7 @@
   "tuiMode": "regular",
   "steeringMode": "all",
   "packages": [
-    "npm:pi-web-search@1.6.0"
+    "npm:pi-web-search@1.6.0",
+    "git:github.com/Helmi/pi-event-monitor@v0.1.0"
   ]
 }

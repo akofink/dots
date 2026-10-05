@@ -216,6 +216,8 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   install_acpx || true
   echo "→ Installing Pi web search..."
   install_pi_extension "Pi web search" "npm:pi-web-search@1.6.0" || true
+  echo "→ Installing Pi event monitor..."
+  install_pi_extension "Pi event monitor" "git:github.com/Helmi/pi-event-monitor@v0.1.0" || true
   echo "→ Installing gh-axi skill..."
   install_agent_skill "gh-axi" "$HOME/.agents/skills/gh-axi" kunchenguid/gh-axi --skill gh-axi || true
   # TypeSafe uses one install method per agent: the vendor plugin for Claude
