@@ -678,6 +678,11 @@ eval_template \
   "$DOTS_REPO/templates/dot_pi/agent/settings.json" \
   "$HOME/.pi/agent/settings.json" \
   ''
+mkdir -p "$HOME/.pi/agent/extensions"
+eval_template \
+  "$DOTS_REPO/templates/dot_pi/agent/extensions/hide-cost-footer.ts" \
+  "$HOME/.pi/agent/extensions/hide-cost-footer.ts" \
+  ''
 
 pi_mcp_config_template="$DOTS_REPO/templates/dot_pi/agent/mcp.json"
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then

@@ -18,6 +18,7 @@ assert settings["tuiMode"] == "regular"
 assert "-builtin:mcp" not in settings.get("extensions", [])
 assert not any("pi-mcp-adapter" in str(package) for package in settings["packages"])
 assert "npm:pi-web-search@1.6.0" in settings["packages"]
+assert "./extensions/hide-cost-footer.ts" in settings["extensions"]
 assert settings["retry"] == {
     "enabled": True,
     "maxRetries": 8,
@@ -25,5 +26,9 @@ assert settings["retry"] == {
     "provider": {"maxRetries": 0},
 }
 PY
+
+rg -q 'MACHINE_CLASS.*personal' "$repo_root/templates/dot_pi/agent/extensions/hide-cost-footer.ts"
+rg -q 'catalog-price dollars misleading' "$repo_root/templates/dot_pi/agent/extensions/hide-cost-footer.ts"
+rg -q 'hide-cost-footer.ts' "$repo_root/setup/llm.sh"
 
 printf 'pi-settings-test: ok\n'
