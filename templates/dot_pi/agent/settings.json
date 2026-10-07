@@ -15,9 +15,15 @@
   },
   "tuiMode": "regular",
   "steeringMode": "all",
-  "extensions": ["./extensions/hide-cost-footer.ts"],
+  "extensions": [
+    "./extensions/hide-cost-footer.ts",
+    "./extensions/pi-event-monitor.ts"
+  ],
   "packages": [
     "npm:pi-web-search@1.6.0",
-    "git:github.com/Helmi/pi-event-monitor@v0.1.0"
+    {
+      "source": "git:github.com/Helmi/pi-event-monitor@v0.1.0",
+      "extensions": []
+    }
   ]
 }

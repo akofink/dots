@@ -19,6 +19,12 @@ assert "-builtin:mcp" not in settings.get("extensions", [])
 assert not any("pi-mcp-adapter" in str(package) for package in settings["packages"])
 assert "npm:pi-web-search@1.6.0" in settings["packages"]
 assert "./extensions/hide-cost-footer.ts" in settings["extensions"]
+assert "./extensions/pi-event-monitor.ts" in settings["extensions"]
+monitor_package = next(
+    package for package in settings["packages"]
+    if isinstance(package, dict) and package["source"] == "git:github.com/Helmi/pi-event-monitor@v0.1.0"
+)
+assert monitor_package["extensions"] == []
 assert settings["retry"] == {
     "enabled": True,
     "maxRetries": 8,

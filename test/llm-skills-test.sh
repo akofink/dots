@@ -17,6 +17,7 @@ printf 'work development guidance\n' > "$notes_repo/agents/guidance/dev-root-wor
 printf 'Bitbucket Cloud core guidance\n' > "$notes_repo/agents/guidance/bitbucket-core.md"
 printf 'DSS guidance\n' > "$notes_repo/agents/guidance/dss.md"
 printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/disable-animations.ts"
+printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
 
 common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
@@ -84,6 +85,7 @@ test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
+test "$(readlink "$home/.pi/agent/extensions/pi-event-monitor.ts")" = "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
 
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
@@ -139,6 +141,7 @@ for root in .agents/skills .claude/skills .codex/skills .config/opencode/skills 
 done
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
+test "$(readlink "$home/.pi/agent/extensions/pi-event-monitor.ts")" = "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
 
 echo 'role switch cleanup passed'
 
