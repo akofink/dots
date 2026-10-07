@@ -97,9 +97,11 @@ repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/d
 
 #### Updating tools
 
-`akupdate` upgrades Homebrew packages, Pi and its installed extensions, Claude Code, and Codex. On
-`MACHINE_CLASS=work` machines it also runs the Atlas CLI and plugin update commands. Each updater is
-reported separately, and the command returns nonzero if any step fails.
+`akupdate` upgrades Homebrew packages, Pi and its installed extensions, Claude Code, and Codex. Pi's
+managed installation uses `pi update --all` to update Pi and its packages; this differs from bare
+`pi update`, which updates Pi only. Claude Code and Codex use their own `update` commands. On
+`MACHINE_CLASS=work` machines `akupdate` also runs the Atlas CLI and plugin update commands. Each
+updater is reported separately, and the command returns nonzero if any step fails.
 
 #### Repository sync
 
@@ -137,7 +139,7 @@ through the bundled `aws_completer` executable when it is available.
 
 - Claude Code from `https://claude.ai/install.sh`
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
-- Pi Coding Agent from npm (`@earendil-works/pi-coding-agent`)
+- Pi Coding Agent from the managed installer at `https://pi.dev/install.sh`, which pins its dependencies and updates Pi with `pi update`
 - ACPX and the Pi ACP adapter from npm (`acpx` and `pi-acp`)
 - Pi web search from npm (`npm:pi-web-search@1.6.0`), using native search support for the selected provider when available
 - opencode via `setup/opencode.sh`
@@ -281,7 +283,7 @@ The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and on-call support are linked only when `MACHINE_CLASS=work`.
 
-Pi 1.0 or newer is required for the built-in MCP configuration; update the active executable with `pi update` before using it with an older installation. No third-party MCP adapter package is installed.
+Pi 1.0 or newer is required for the built-in MCP configuration; update the active executable with `pi update` before using it with an older installation. The managed installer stores Pi under `~/.pi/agent/install` and links its launcher into `~/.local/bin`; setup leaves older npm/NVM executables and caches in place so running sessions are not disrupted, while fresh zsh launches prioritize the managed launcher over NVM bins. The installer uses a release-specific package lock and `npm ci`, pinning the full dependency tree. Dots seeds `~/.pi/agent/settings.json` from its template only when it does not exist, preserving existing provider, model, and UI preferences. Pi auth, sessions, packages, extensions, skills, and MCP configuration remain in their normal user-data locations. No third-party MCP adapter package is installed.
 Use `/mcp` for session connections and `pi mcp list` to check the configured servers from a shell. Servers use Pi's default codemode exposure; scripts discover tools with `searchTools()` and `describeTool()` and call their exact discovered identifiers through `tools`. Long MCP identifiers may have hash suffixes.
 The template keeps `tuiMode: "regular"` for terminal scrollback even though Pi 1.0 defaults to fullscreen.
 Its work profile receives the same Atlassian MCP servers as OpenCode, while personal setup removes the dots-managed Pi MCP config.

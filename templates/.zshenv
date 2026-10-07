@@ -76,6 +76,10 @@ if [[ -d "$NVM_DIR/versions/node" ]]; then
   unset nvm_alias_name nvm_alias_target
 fi
 
+# Keep dots-managed commands ahead of NVM bins, which may contain stale CLIs.
+typeset -U path
+path=("$HOME/.local/bin" $path)
+
 # Ubuntu runs compinit from /etc/zsh/zshrc before ~/.zshrc unless this is set.
 # Only disable the global invocation under WSL, where Docker Desktop can
 # leave a broken vendor completion symlink behind.

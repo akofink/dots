@@ -93,7 +93,53 @@ install_npm_cli() {
 }
 
 install_pi_coding_agent() {
-  install_npm_cli "Pi Coding Agent" pi @earendil-works/pi-coding-agent
+  local managed_marker="$HOME/.pi/agent/install/managed-install.json"
+  local node_path npm_path install_script installer_bin
+
+  if [[ -f "$managed_marker" && -x "$HOME/.local/bin/pi" ]]; then
+    echo "Pi Coding Agent managed install already present; skipping."
+    return 0
+  fi
+
+  if ! command -v curl >/dev/null 2>&1; then
+    warn "curl not found; skipping Pi Coding Agent install"
+    return 1
+  fi
+  node_path=$(command -v node) || {
+    warn "Node.js not found; skipping Pi Coding Agent install"
+    return 1
+  }
+  npm_path=$(command -v npm) || {
+    warn "npm not found; skipping Pi Coding Agent install"
+    return 1
+  }
+
+  install_script=$(mktemp) || {
+    warn "Failed to create temp file for Pi Coding Agent installer; skipping"
+    return 1
+  }
+  installer_bin=$(mktemp -d) || {
+    rm -f "$install_script"
+    warn "Failed to create temporary PATH for Pi Coding Agent installer; skipping"
+    return 1
+  }
+  if ! curl -fsSL https://pi.dev/install.sh -o "$install_script"; then
+    rm -rf "$installer_bin" "$install_script"
+    warn "Failed to download Pi Coding Agent installer; skipping"
+    return 1
+  fi
+
+  # Exclude other global Pi executables while invoking the official installer.
+  # That installs the managed copy without deleting npm/NVM installs that a
+  # running session may still have loaded.
+  ln -s "$node_path" "$installer_bin/node"
+  ln -s "$npm_path" "$installer_bin/npm"
+  if ! PATH="$installer_bin:/usr/bin:/bin:/usr/sbin:/sbin" sh "$install_script"; then
+    rm -rf "$installer_bin" "$install_script"
+    warn "Failed to install Pi Coding Agent; skipping"
+    return 1
+  fi
+  rm -rf "$installer_bin" "$install_script"
 }
 
 install_acpx() {
@@ -671,13 +717,15 @@ eval_template \
   '$OPENCODE_WORK_CONFIG'
 unset OPENCODE_WORK_CONFIG
 
-# Pi settings are captured live state, re-asserted like other CLI configs so
-# drift from the canonical defaults is archived rather than silently kept.
+# Pi settings contain user-managed providers, model lists, and UI preferences.
+# Seed defaults only for a new installation; never overwrite an existing file.
 # Empty substitution list: settings.json must never expand shell variables.
-eval_template \
-  "$DOTS_REPO/templates/dot_pi/agent/settings.json" \
-  "$HOME/.pi/agent/settings.json" \
-  ''
+if [[ ! -e "$HOME/.pi/agent/settings.json" ]]; then
+  eval_template \
+    "$DOTS_REPO/templates/dot_pi/agent/settings.json" \
+    "$HOME/.pi/agent/settings.json" \
+    ''
+fi
 mkdir -p "$HOME/.pi/agent/extensions"
 eval_template \
   "$DOTS_REPO/templates/dot_pi/agent/extensions/hide-cost-footer.ts" \

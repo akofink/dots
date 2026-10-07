@@ -21,6 +21,8 @@ test:
 	bash test/akupdate-test.sh
 	bash test/akagent-test.sh
 	bash test/pi-settings-test.sh
+	bash test/pi-managed-install-test.sh
+	bash test/zshenv-nvm-default-test.sh
 	python3 test/pi-mcp-config-test.py
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh

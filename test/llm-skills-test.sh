@@ -8,8 +8,9 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 notes_repo="$tmpdir/notes"
 home="$tmpdir/home"
-mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev" "$home/.claude"
+mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev" "$home/.claude" "$home/.pi/agent"
 printf '{"theme":"light"}\n' > "$home/.claude/settings.json"
+printf '{"customPiSetting":"preserve-me"}\n' > "$home/.pi/agent/settings.json"
 printf 'global instructions\n' > "$notes_repo/agents/global-personal.md"
 printf 'work instructions\n' > "$notes_repo/agents/global-work.md"
 printf 'personal development guidance\n' > "$notes_repo/agents/guidance/dev-root-personal.md"
@@ -83,6 +84,7 @@ test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root
 test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
+test "$(jq -r .customPiSetting "$home/.pi/agent/settings.json")" = preserve-me
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
 test "$(readlink "$home/.pi/agent/extensions/pi-event-monitor.ts")" = "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
