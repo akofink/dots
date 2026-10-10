@@ -4,7 +4,7 @@ if [[ -n "${TMUX_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
-TMUX_VERSION=${TMUX_VERSION:-3.7c}
+TMUX_VERSION=${TMUX_VERSION:-3.8}
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
