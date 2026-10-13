@@ -100,6 +100,17 @@ for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/s
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
 done
 
+mkdir -p "$home/.agents/skills/twg" "$home/.agents/skills/twg-jira" "$home/.agents/skills/unrelated-skill"
+printf 'current TWG root skill\n' > "$home/.agents/skills/twg/SKILL.md"
+printf '{"installedVersion":"1.3.5","binaryPath":"/usr/local/bin/twg"}\n' > "$home/.agents/skills/twg/.twg-install.json"
+printf 'current TWG Jira skill\n' > "$home/.agents/skills/twg-jira/SKILL.md"
+printf '{"installedVersion":"1.3.5","binaryPath":"/usr/local/bin/twg"}\n' > "$home/.agents/skills/twg-jira/.twg-install.json"
+printf 'unrelated global skill\n' > "$home/.agents/skills/unrelated-skill/SKILL.md"
+mkdir -p "$home/.local/share/rovo/current/twg/skills/twg"
+printf 'preserved legacy vendor source\n' > "$home/.local/share/rovo/current/twg/skills/twg/SKILL.md"
+ln -s "$home/.local/share/rovo/current/twg/skills/twg" "$home/.codex/skills/twg"
+ln -s "$home/.local/share/rovo/current/twg/skills/twg" "$home/.pi/agent/skills/twg-old"
+
 env \
   HOME="$home" \
   DOTS_REPO="$repo_root" \
@@ -114,6 +125,16 @@ test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
 test "$(readlink "$home/dev/AGENTS.dss.md")" = "$notes_repo/agents/guidance/dss.md"
 test "$(readlink "$home/.pi/agent/skills/work-identity")" = "$notes_repo/agents/skills/work-identity"
+for skill_root in .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills; do
+  test "$(readlink "$home/$skill_root/twg")" = "$home/.agents/skills/twg"
+  test "$(readlink "$home/$skill_root/twg-jira")" = "$home/.agents/skills/twg-jira"
+  cmp -s "$home/.agents/skills/twg/SKILL.md" "$home/$skill_root/twg/SKILL.md"
+  cmp -s "$home/.agents/skills/twg/.twg-install.json" "$home/$skill_root/twg/.twg-install.json"
+  cmp -s "$home/.agents/skills/twg-jira/.twg-install.json" "$home/$skill_root/twg-jira/.twg-install.json"
+  test ! -e "$home/$skill_root/unrelated-skill"
+done
+test ! -L "$home/.pi/agent/skills/twg-old"
+test "$(cat "$home/.local/share/rovo/current/twg/skills/twg/SKILL.md")" = 'preserved legacy vendor source'
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -e "$home/$skill_root/managing-1password-cli"
 done
@@ -143,6 +164,11 @@ test ! -e "$home/.rovodev/AGENTS.md"
 test ! -e "$home/.rovodev/config.yml"
 test ! -e "$home/.agents/skills/atlas-updates"
 test ! -e "$home/.pi/agent/skills/work-identity"
+for skill_root in .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills; do
+  test ! -e "$home/$skill_root/twg"
+  test ! -e "$home/$skill_root/twg-jira"
+done
+test ! -L "$home/.pi/agent/skills/twg-old"
 for root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   for skill in sfx-token-refresh work-investigation-tools work-agent-orchestrator work-coding-workflow work-pr-review; do
     test ! -e "$home/$root/$skill"

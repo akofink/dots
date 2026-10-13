@@ -420,23 +420,25 @@ unlink_pi_extensions() {
   done
 }
 
-# Rovo installs the twg (Teamwork Graph) skill bundle under a stable,
-# rovo-managed path. These skills are Atlassian-work-graph specific, so they are
-# linked into the other LLM CLIs on work machines only. Rovo/RovoDev discover
-# them natively, so they are intentionally not linked back into the rovo dirs.
-twg_skills_source="$HOME/.local/share/rovo/current/twg/skills"
+# TWG owns its canonical global install under ~/.agents/skills. Link only its
+# named skills into the additional work-machine LLM paths; sourcing Rovo's bundled
+# snapshot can leave those consumers on stale binary metadata after a CLI update.
+# Rovo/RovoDev discover their own skills and are intentionally not linked here.
+twg_skills_source="$HOME/.agents/skills"
+twg_legacy_skills_source="$HOME/.local/share/rovo/current/twg/skills"
 
-# discover_twg_skills populates the global twg_skills array with the skill
-# directory names currently present in twg_skills_source. Discovering at runtime
-# keeps the set in sync with rovo upgrades without a hardcoded list.
+# discover_twg_skills selects only TWG-named directories from the canonical
+# install root, which also contains unrelated agent skills.
 twg_skills=()
 discover_twg_skills() {
   twg_skills=()
   [[ -d "$twg_skills_source" ]] || return 0
-  local entry
+  local entry skill_name
   for entry in "$twg_skills_source"/*/; do
     [[ -d "$entry" ]] || continue
-    twg_skills+=("$(basename -- "${entry%/}")")
+    skill_name=$(basename -- "${entry%/}")
+    [[ "$skill_name" == twg || "$skill_name" == twg-* ]] || continue
+    twg_skills+=("$skill_name")
   done
 }
 
@@ -445,6 +447,7 @@ link_twg_skill_set() {
 
   [[ -d "$twg_skills_source" ]] || return 0
   mkdir -p "$destination_root"
+  unlink_twg_skill_set "$destination_root"
   local skill_name
   for skill_name in "${twg_skills[@]}"; do
     local skill_source="$twg_skills_source/$skill_name"
@@ -454,18 +457,20 @@ link_twg_skill_set() {
   done
 }
 
-# unlink_twg_skill_set removes every symlink in destination_root that points into
-# twg_skills_source. It scans the destination rather than the current twg_skills
-# set so stale links are cleaned up even after rovo is upgraded/removed or the
-# machine switches to a personal class (where the source is not discovered).
+# unlink_twg_skill_set removes only TWG-named links that point into the current
+# canonical source or the retired Rovo snapshot. It scans the destination rather
+# than the discovered set to clean renamed/removed skills and migration leftovers.
 unlink_twg_skill_set() {
   local destination_root="$1"
 
   [[ -d "$destination_root" ]] || return 0
-  local entry
+  local entry skill_name
   for entry in "$destination_root"/*; do
     [[ -L "$entry" ]] || continue
+    skill_name=$(basename -- "$entry")
+    [[ "$skill_name" == twg || "$skill_name" == twg-* ]] || continue
     remove_symlink_if_points_to "$entry" "$twg_skills_source"
+    remove_symlink_if_points_to "$entry" "$twg_legacy_skills_source"
   done
 }
 
@@ -639,7 +644,6 @@ remove_managed_rovodev_config() {
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
 twg_skill_dests=(
-  "$HOME/.agents/skills"
   "$HOME/.claude/skills"
   "$HOME/.codex/skills"
   "$HOME/.config/opencode/skills"
@@ -808,9 +812,9 @@ if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
     unlink_notes_symlinks
   fi
 
-  # twg skills are rovo-managed (not notes-backed), so link them regardless of
-  # notes repo availability. When rovo is not installed the link helper is a
-  # no-op and the unlink pass below clears any stale links.
+  # TWG's canonical install owns these skills independently of notes. Link its
+  # current copies even when the notes repo is unavailable; unlink stale copies
+  # from other agent roots if TWG is not installed.
   if [[ -d "$twg_skills_source" ]]; then
     for twg_dest in "${twg_skill_dests[@]}"; do
       link_twg_skill_set "$twg_dest"

@@ -288,11 +288,12 @@ Use `/mcp` for session connections and `pi mcp list` to check the configured ser
 The template keeps `tuiMode: "regular"` for terminal scrollback even though Pi 1.0 defaults to fullscreen.
 Its work profile receives the same Atlassian MCP servers as OpenCode, while personal setup removes the dots-managed Pi MCP config.
 
-The rovo-managed twg (Teamwork Graph) skill bundle at `~/.local/share/rovo/current/twg/skills/` is also
-symlinked into the non-rovo LLM CLIs (`~/.agents`, `~/.claude`, `~/.codex`, `~/.config/opencode`, `~/.pi`) on
-`MACHINE_CLASS=work` machines only, so those tools surface the same twg skills that Rovo/RovoDev load natively.
-The skill set is discovered at runtime, so it tracks rovo upgrades without a hardcoded list, and the links are
-removed on personal machines or when rovo is not installed.
+TWG installs its canonical global skill bundle under `~/.agents/skills/`. On
+`MACHINE_CLASS=work` machines, Dots symlinks only the `twg` and `twg-*` skills
+from that install into Claude, Codex, OpenCode, and Pi's agent skill roots, so
+these tools use the same current bundle. Rovo/RovoDev load their skills natively.
+The names are discovered at runtime, and links are removed on personal machines
+or when the canonical TWG install is absent.
 
 Rovo/RovoDev setup is work-only because those tools and instructions assume Atlassian-specific workflows.
 
