@@ -264,6 +264,8 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   install_pi_extension "Pi web search" "npm:pi-web-search@1.6.0" || true
   echo "→ Installing Pi event monitor..."
   install_pi_extension "Pi event monitor" "git:github.com/Helmi/pi-event-monitor@v0.1.0" || true
+  echo "→ Installing Pi subagents..."
+  install_pi_extension "Pi subagents" "npm:@gotgenes/pi-subagents@23.4.0" || true
   echo "→ Installing gh-axi skill..."
   install_agent_skill "gh-axi" "$HOME/.agents/skills/gh-axi" kunchenguid/gh-axi --skill gh-axi || true
   # TypeSafe uses one install method per agent: the vendor plugin for Claude
@@ -366,7 +368,36 @@ remove_obsolete_agent_skills() {
 # link_pi_extensions symlinks canonical pi extensions from the notes repo into
 # ~/.pi/agent/extensions where pi auto-discovers them. unlink_pi_extensions
 # reverses that when the notes repo is unavailable.
+link_pi_agents() {
+  local source="$notes_repo/agents/pi-agents"
+  [[ -d "$source" ]] || return 0
+  mkdir -p "$HOME/.pi/agent/agents"
+  local agent_file
+  for agent_file in "$source"/*.md; do
+    [[ -f "$agent_file" ]] || continue
+    install_symlink "$agent_file" "$HOME/.pi/agent/agents/$(basename -- "$agent_file")"
+  done
+}
+
+unlink_pi_agents() {
+  local source="$notes_repo/agents/pi-agents"
+  local agent_file
+  for agent_file in "$source"/*.md; do
+    [[ -f "$agent_file" ]] || continue
+    remove_symlink_if_points_to "$HOME/.pi/agent/agents/$(basename -- "$agent_file")" "$agent_file"
+  done
+}
+
+seed_pi_subagent_settings() {
+  # Seed only: preserve operator/project configuration on subsequent setup runs.
+  if [[ ! -e "$HOME/.pi/agent/subagents.json" ]]; then
+    eval_template "$DOTS_REPO/templates/dot_pi/agent/subagents.json" "$HOME/.pi/agent/subagents.json" ''
+  fi
+}
+
 link_pi_extensions() {
+  link_pi_agents
+  seed_pi_subagent_settings
   local pi_extensions_source="$notes_repo/agents/pi-extensions"
 
   [[ -d "$pi_extensions_source" ]] || return 0
@@ -379,6 +410,7 @@ link_pi_extensions() {
 }
 
 unlink_pi_extensions() {
+  unlink_pi_agents
   local pi_extensions_source="$notes_repo/agents/pi-extensions"
 
   [[ -d "$pi_extensions_source" ]] || return 0
@@ -727,6 +759,7 @@ if [[ ! -e "$HOME/.pi/agent/settings.json" ]]; then
     ''
 fi
 mkdir -p "$HOME/.pi/agent/extensions"
+seed_pi_subagent_settings
 eval_template \
   "$DOTS_REPO/templates/dot_pi/agent/extensions/hide-cost-footer.ts" \
   "$HOME/.pi/agent/extensions/hide-cost-footer.ts" \

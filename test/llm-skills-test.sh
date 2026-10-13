@@ -19,6 +19,8 @@ printf 'Bitbucket Cloud core guidance\n' > "$notes_repo/agents/guidance/bitbucke
 printf 'DSS guidance\n' > "$notes_repo/agents/guidance/dss.md"
 printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/disable-animations.ts"
 printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
+mkdir -p "$notes_repo/agents/pi-agents"
+printf 'bounded profile\n' > "$notes_repo/agents/pi-agents/bounded-investigator.md"
 
 common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
@@ -88,6 +90,11 @@ test "$(jq -r .customPiSetting "$home/.pi/agent/settings.json")" = preserve-me
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
 test "$(readlink "$home/.pi/agent/extensions/pi-event-monitor.ts")" = "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
+test "$(readlink "$home/.pi/agent/agents/bounded-investigator.md")" = "$notes_repo/agents/pi-agents/bounded-investigator.md"
+test "$(jq -r .maxConcurrent "$home/.pi/agent/subagents.json")" = 2
+test "$(jq -r .midRunUpdates "$home/.pi/agent/subagents.json")" = false
+jq -e '.excludedExtensionPackages | index("npm:@gotgenes/pi-subagents@23.4.0")' "$home/.pi/agent/subagents.json" >/dev/null
+printf '{"maxConcurrent":7,"customSetting":"preserve-me"}\n' > "$home/.pi/agent/subagents.json"
 
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
@@ -145,7 +152,11 @@ test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-pers
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
 test "$(readlink "$home/.pi/agent/extensions/pi-event-monitor.ts")" = "$notes_repo/agents/pi-extensions/pi-event-monitor.ts"
 
-echo 'role switch cleanup passed'
+test "$(readlink "$home/.pi/agent/agents/bounded-investigator.md")" = "$notes_repo/agents/pi-agents/bounded-investigator.md"
+test "$(jq -r .maxConcurrent "$home/.pi/agent/subagents.json")" = 7
+test "$(jq -r .customSetting "$home/.pi/agent/subagents.json")" = preserve-me
+
+echo 'role switch cleanup and Pi profile/settings preservation passed'
 
 rm "$home/.config/opencode/skills/akagent"
 if run_verify >"$tmpdir/verify-output" 2>&1; then
