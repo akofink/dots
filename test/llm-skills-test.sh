@@ -134,6 +134,8 @@ for skill_root in .claude/skills .codex/skills .config/opencode/skills .pi/agent
   test ! -e "$home/$skill_root/unrelated-skill"
 done
 test ! -L "$home/.pi/agent/skills/twg-old"
+test ! -L "$home/.agents/skills/twg"
+test -f "$home/.agents/skills/twg/SKILL.md"
 test "$(cat "$home/.local/share/rovo/current/twg/skills/twg/SKILL.md")" = 'preserved legacy vendor source'
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -e "$home/$skill_root/managing-1password-cli"
