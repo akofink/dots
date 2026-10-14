@@ -111,6 +111,23 @@ run_with_lock "$lock_state" || { printf '%s\n' "$lock_output" >&2; exit 1; }
 [[ "$lock_output" == *'Reclaimed stale dots sync lock'* ]]
 [[ ! -e "$lock_dir" ]]
 
+# A stale reclaim marker is abandoned and can be recovered.
+mkdir -p "$lock_dir/reclaim"
+touch -t 200001010000 "$lock_dir/reclaim" "$lock_dir"
+run_with_lock "$lock_state" || { printf '%s\n' "$lock_output" >&2; exit 1; }
+[[ "$lock_output" == *'Reclaimed stale dots sync lock'* ]]
+[[ ! -e "$lock_dir" ]]
+
+# A fresh reclaim marker still serializes active reclaimers.
+mkdir -p "$lock_dir/reclaim"
+if run_with_lock "$lock_state"; then
+  printf 'sync unexpectedly acquired a fresh reclaim-marker lock\n' >&2
+  exit 1
+fi
+[[ "$lock_output" == *'dots sync is already running'* ]]
+[[ -d "$lock_dir/reclaim" ]]
+rm -rf "$lock_dir"
+
 # A fresh ownerless lock remains protected by the startup grace period.
 mkdir -p "$lock_dir"
 if run_with_lock "$lock_state"; then

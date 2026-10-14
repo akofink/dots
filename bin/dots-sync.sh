@@ -23,18 +23,32 @@ process_start_time() {
   ps -p "$1" -o lstart= 2>/dev/null | awk '{$1 = $1; print}'
 }
 
-lock_identity() {
+path_identity() {
   if [[ $(uname -s) == Darwin ]]; then
-    stat -f '%d:%i' "$lock_dir" 2>/dev/null
+    stat -f '%d:%i' "$1" 2>/dev/null
   else
-    stat -c '%d:%i' "$lock_dir" 2>/dev/null
+    stat -c '%d:%i' "$1" 2>/dev/null
   fi
 }
 
-lock_is_stale() {
-  local owner_pid owner_host owner_start current_start lock_mtime now
+path_is_older_than_grace() {
+  local path=$1 path_mtime now
+  if [[ $(uname -s) == Darwin ]]; then
+    path_mtime=$(stat -f %m "$path" 2>/dev/null) || return 1
+  else
+    path_mtime=$(stat -c %Y "$path" 2>/dev/null) || return 1
+  fi
+  now=$(date +%s) || return 1
+  [[ "$path_mtime" =~ ^[0-9]+$ && "$now" =~ ^[0-9]+$ ]] || return 1
+  (( now - path_mtime >= lock_ownerless_grace_seconds ))
+}
 
-  [[ ! -d "$lock_dir/reclaim" ]] || return 1
+lock_is_stale() {
+  local owner_pid owner_host owner_start current_start
+
+  if [[ -d "$lock_dir/reclaim" ]] && ! path_is_older_than_grace "$lock_dir/reclaim"; then
+    return 1
+  fi
   if [[ -r "$lock_dir/owner" ]]; then
     IFS=$'\t' read -r owner_pid owner_host owner_start < "$lock_dir/owner" || :
     [[ "$owner_pid" =~ ^[0-9]+$ && -n "$owner_host" && -n "$owner_start" ]] || return 1
@@ -48,14 +62,7 @@ lock_is_stale() {
     return 0
   fi
 
-  if [[ $(uname -s) == Darwin ]]; then
-    lock_mtime=$(stat -f %m "$lock_dir" 2>/dev/null) || return 1
-  else
-    lock_mtime=$(stat -c %Y "$lock_dir" 2>/dev/null) || return 1
-  fi
-  now=$(date +%s) || return 1
-  [[ "$lock_mtime" =~ ^[0-9]+$ && "$now" =~ ^[0-9]+$ ]] || return 1
-  (( now - lock_mtime >= lock_ownerless_grace_seconds ))
+  path_is_older_than_grace "$lock_dir"
 }
 
 write_lock_owner() {
@@ -70,7 +77,7 @@ write_lock_owner() {
 }
 
 acquire_lock() {
-  local retries=0 stale_lock observed_identity
+  local retries=0 stale_lock observed_identity reclaim_identity reclaim_claim
 
   while ! mkdir "$lock_dir" 2>/dev/null; do
     if [[ ! -d "$lock_dir" ]]; then
@@ -78,21 +85,40 @@ acquire_lock() {
       return 1
     fi
 
-    observed_identity=$(lock_identity)
-    if [[ -n "$observed_identity" ]] && lock_is_stale && mkdir "$lock_dir/reclaim" 2>/dev/null; then
-      # The in-lock marker serializes reclaimers. Check the directory identity
-      # again so a contender cannot move a replacement lock it did not inspect.
-      if [[ $(lock_identity) == "$observed_identity" ]]; then
-        stale_lock="$state_dir/lock.stale.$$.${RANDOM}.$(date +%s)"
-        if mv "$lock_dir" "$stale_lock" 2>/dev/null; then
-          rm -rf "$stale_lock"
-          printf 'Reclaimed stale dots sync lock: %s\n' "$lock_dir" >&2
-          continue
+    observed_identity=$(path_identity "$lock_dir")
+    if [[ -n "$observed_identity" ]] && lock_is_stale; then
+      if [[ -d "$lock_dir/reclaim" ]]; then
+        # An old marker is abandoned. The nested claim refreshes its age
+        # atomically so only one contender can recover this marker at a time.
+        reclaim_identity=$(path_identity "$lock_dir/reclaim")
+        reclaim_claim="$lock_dir/reclaim/recovering"
+        if [[ -n "$reclaim_identity" ]] && mkdir "$reclaim_claim" 2>/dev/null; then
+          if [[ $(path_identity "$lock_dir") == "$observed_identity" && $(path_identity "$lock_dir/reclaim") == "$reclaim_identity" ]]; then
+            stale_lock="$state_dir/lock.stale.$$.${RANDOM}.$(date +%s)"
+            if mv "$lock_dir" "$stale_lock" 2>/dev/null; then
+              rm -rf "$stale_lock"
+              printf 'Reclaimed stale dots sync lock: %s\n' "$lock_dir" >&2
+              continue
+            fi
+          else
+            rmdir "$reclaim_claim" 2>/dev/null || :
+          fi
+        fi
+      elif mkdir "$lock_dir/reclaim" 2>/dev/null; then
+        # The in-lock marker serializes reclaimers. Check the directory identity
+        # again so a contender cannot move a replacement lock it did not inspect.
+        if [[ $(path_identity "$lock_dir") == "$observed_identity" ]]; then
+          stale_lock="$state_dir/lock.stale.$$.${RANDOM}.$(date +%s)"
+          if mv "$lock_dir" "$stale_lock" 2>/dev/null; then
+            rm -rf "$stale_lock"
+            printf 'Reclaimed stale dots sync lock: %s\n' "$lock_dir" >&2
+            continue
+          else
+            rmdir "$lock_dir/reclaim" 2>/dev/null || :
+          fi
         else
           rmdir "$lock_dir/reclaim" 2>/dev/null || :
         fi
-      else
-        rmdir "$lock_dir/reclaim" 2>/dev/null || :
       fi
     fi
 
