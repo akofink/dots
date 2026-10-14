@@ -1,0 +1,77 @@
+# Work-machine command permissions. These rules only relax approvals for named
+# commands; the workspace-write sandbox and on-request approval policy remain
+# active. Shells and interpreters stay prompt-gated because their arguments can
+# encode arbitrary commands.
+
+prefix_rule(pattern=["bash"], decision="prompt", justification="Review shell invocations because they can encode arbitrary commands.")
+prefix_rule(pattern=["sh"], decision="prompt", justification="Review shell invocations because they can encode arbitrary commands.")
+prefix_rule(pattern=["zsh"], decision="prompt", justification="Review shell invocations because they can encode arbitrary commands.")
+prefix_rule(pattern=["python"], decision="prompt", justification="Review interpreter invocations because they can execute arbitrary code.")
+prefix_rule(pattern=["python3"], decision="prompt", justification="Review interpreter invocations because they can execute arbitrary code.")
+prefix_rule(pattern=["ruby"], decision="prompt", justification="Review interpreter invocations because they can execute arbitrary code.")
+prefix_rule(pattern=["node"], decision="prompt", justification="Review interpreter invocations because they can execute arbitrary code.")
+prefix_rule(pattern=["perl"], decision="prompt", justification="Review interpreter invocations because they can execute arbitrary code.")
+
+# Routine repository work.
+prefix_rule(pattern=["git", ["status", "diff", "log", "show", "branch", "worktree", "checkout", "switch", "add", "commit", "merge", "rebase", "restore", "stash", "fetch", "pull", "tag"]], decision="allow")
+prefix_rule(pattern=["rg"], decision="allow")
+prefix_rule(pattern=["fd"], decision="allow")
+prefix_rule(pattern=["find"], decision="allow")
+prefix_rule(pattern=["ls"], decision="allow")
+prefix_rule(pattern=["cat"], decision="allow")
+prefix_rule(pattern=["head"], decision="allow")
+prefix_rule(pattern=["tail"], decision="allow")
+prefix_rule(pattern=["sed"], decision="allow")
+prefix_rule(pattern=["awk"], decision="allow")
+prefix_rule(pattern=["jq"], decision="allow")
+prefix_rule(pattern=["yq"], decision="allow")
+prefix_rule(pattern=["sort"], decision="allow")
+prefix_rule(pattern=["uniq"], decision="allow")
+prefix_rule(pattern=["cut"], decision="allow")
+prefix_rule(pattern=["wc"], decision="allow")
+prefix_rule(pattern=["file"], decision="allow")
+prefix_rule(pattern=["stat"], decision="allow")
+prefix_rule(pattern=["tree"], decision="allow")
+prefix_rule(pattern=["less"], decision="allow")
+prefix_rule(pattern=["make"], decision="allow")
+prefix_rule(pattern=["cmake"], decision="allow")
+prefix_rule(pattern=["ninja"], decision="allow")
+prefix_rule(pattern=["go"], decision="allow")
+prefix_rule(pattern=["cargo"], decision="allow")
+prefix_rule(pattern=["rustc"], decision="allow")
+prefix_rule(pattern=["pytest"], decision="allow")
+prefix_rule(pattern=["tox"], decision="allow")
+prefix_rule(pattern=["pre-commit"], decision="allow")
+
+# JavaScript package managers: allow common development tasks, while package
+# execution and publication remain subject to approval.
+prefix_rule(pattern=["npm", ["install", "ci", "test", "run", "build", "lint", "check", "pack"]], decision="allow")
+prefix_rule(pattern=["yarn", ["install", "test", "run", "build", "lint", "check", "pack"]], decision="allow")
+prefix_rule(pattern=["pnpm", ["install", "test", "run", "build", "lint", "check", "pack"]], decision="allow")
+
+# Self-built local tools installed by the dots and notes setup.
+prefix_rule(pattern=["akagent"], decision="allow")
+prefix_rule(pattern=["aka"], decision="allow")
+prefix_rule(pattern=["akupdate"], decision="allow")
+prefix_rule(pattern=["syncdots"], decision="allow")
+prefix_rule(pattern=["sfx-token"], decision="allow")
+prefix_rule(pattern=["tmux-agent-state"], decision="allow")
+prefix_rule(pattern=["wake-orchestrator"], decision="allow")
+
+# Preserve explicit review for publication, destructive history operations,
+# external control planes, and commands that reach outside the local toolchain.
+prefix_rule(pattern=["git", ["push", "reset", "clean"]], decision="prompt", justification="Review remote publication and destructive Git operations.")
+prefix_rule(pattern=["gh", ["pr", "issue", "release", "repo"], ["create", "edit", "close", "merge", "delete", "publish", "transfer"]], decision="prompt", justification="Review GitHub mutations before they reach a shared service.")
+prefix_rule(pattern=["curl"], decision="prompt", justification="Review direct network requests.")
+prefix_rule(pattern=["wget"], decision="prompt", justification="Review direct network requests.")
+prefix_rule(pattern=["ssh"], decision="prompt", justification="Review remote shell access.")
+prefix_rule(pattern=["scp"], decision="prompt", justification="Review remote file transfer.")
+prefix_rule(pattern=["aws"], decision="prompt", justification="Review cloud control-plane operations.")
+prefix_rule(pattern=["kubectl"], decision="prompt", justification="Review cluster control-plane operations.")
+prefix_rule(pattern=["terraform", ["apply", "destroy"]], decision="prompt", justification="Review infrastructure mutations.")
+prefix_rule(pattern=["sudo"], decision="prompt", justification="Review privileged commands.")
+prefix_rule(pattern=["go", ["run", "install"]], decision="prompt", justification="Review commands that execute or install Go programs.")
+prefix_rule(pattern=["cargo", ["run", "install", "publish"]], decision="prompt", justification="Review commands that execute, install, or publish Rust packages.")
+prefix_rule(pattern=["npm", "run", ["deploy", "publish", "release"]], decision="prompt", justification="Review deployment and publication scripts.")
+prefix_rule(pattern=["yarn", "run", ["deploy", "publish", "release"]], decision="prompt", justification="Review deployment and publication scripts.")
+prefix_rule(pattern=["pnpm", "run", ["deploy", "publish", "release"]], decision="prompt", justification="Review deployment and publication scripts.")

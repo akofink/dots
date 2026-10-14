@@ -641,6 +641,18 @@ remove_managed_rovodev_config() {
   rm -f "$rendered_config"
 }
 
+sync_codex_work_rules() {
+  local source="$DOTS_REPO/templates/dot_codex/rules/work.rules"
+  local destination="$HOME/.codex/rules/work.rules"
+
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    mkdir -p "$HOME/.codex/rules"
+    eval_template "$source" "$destination" ''
+  elif [[ -f "$destination" ]] && cmp -s "$source" "$destination"; then
+    rm -f "$destination"
+  fi
+}
+
 # Non-rovo LLM CLIs that should surface the rovo-managed twg skills on work
 # machines. Rovo/RovoDev are omitted because they load the twg bundle natively.
 twg_skill_dests=(
@@ -681,6 +693,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
       install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
       install_symlink "$agents_template" "$HOME/.pi/agent/AGENTS.md"
+      sync_codex_work_rules
       if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
         install_symlink "$notes_repo/agents/claude/test-writer.md" "$HOME/.claude/agents/test-writer.md"
       fi
@@ -738,6 +751,8 @@ mkdir -p \
   "$HOME/.config/opencode" \
   "$HOME/.pi" \
   "$HOME/.pi/agent"
+
+sync_codex_work_rules
 
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''

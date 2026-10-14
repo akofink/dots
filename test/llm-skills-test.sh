@@ -23,7 +23,7 @@ mkdir -p "$notes_repo/agents/pi-agents"
 printf 'bounded profile\n' > "$notes_repo/agents/pi-agents/bounded-investigator.md"
 
 common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
-work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
+work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring preprod-asap-testing querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
@@ -71,6 +71,7 @@ run_verify() {
 
 run_setup
 run_verify
+test ! -e "$home/.codex/rules/work.rules"
 
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -L "$home/$skill_root/herdr"
@@ -120,6 +121,7 @@ env \
   LLM_LINK_ONLY=1 \
   bash "$repo_root/setup/llm.sh"
 
+cmp -s "$repo_root/templates/dot_codex/rules/work.rules" "$home/.codex/rules/work.rules"
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
 test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
@@ -160,6 +162,7 @@ env \
   LLM_LINK_ONLY=1 \
   bash "$repo_root/setup/llm.sh"
 
+test ! -e "$home/.codex/rules/work.rules"
 test ! -e "$home/dev/AGENTS.bbc-core.md"
 test ! -e "$home/dev/AGENTS.dss.md"
 test ! -e "$home/.rovodev/AGENTS.md"

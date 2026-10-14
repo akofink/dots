@@ -24,6 +24,7 @@ test:
 	bash test/pi-managed-install-test.sh
 	bash test/zshenv-nvm-default-test.sh
 	python3 test/pi-mcp-config-test.py
+	bash test/codex-rules-test.sh
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
 	bash test/llm-skills-test.sh
