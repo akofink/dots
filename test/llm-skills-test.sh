@@ -122,6 +122,8 @@ env \
   bash "$repo_root/setup/llm.sh"
 
 cmp -s "$repo_root/templates/dot_codex/rules/work.rules" "$home/.codex/rules/work.rules"
+jq -e '.sandbox.excludedCommands | index("tmux *")' "$home/.claude/settings.json" >/dev/null
+jq -e '.sandbox.filesystem.allowWrite | index("~/dev")' "$home/.claude/settings.json" >/dev/null
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
 test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
@@ -163,6 +165,8 @@ env \
   bash "$repo_root/setup/llm.sh"
 
 test ! -e "$home/.codex/rules/work.rules"
+test "$(jq -c .sandbox "$home/.claude/settings.json")" = null
+test "$(jq -r .theme "$home/.claude/settings.json")" = light
 test ! -e "$home/dev/AGENTS.bbc-core.md"
 test ! -e "$home/dev/AGENTS.dss.md"
 test ! -e "$home/.rovodev/AGENTS.md"

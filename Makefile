@@ -25,6 +25,7 @@ test:
 	bash test/zshenv-nvm-default-test.sh
 	python3 test/pi-mcp-config-test.py
 	bash test/codex-rules-test.sh
+	python3 test/claude-work-settings-test.py
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
 	bash test/llm-skills-test.sh

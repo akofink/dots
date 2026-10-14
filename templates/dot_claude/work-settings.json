@@ -1,0 +1,32 @@
+{
+  "sandbox": {
+    "excludedCommands": [
+      "tmux *",
+      "git commit *",
+      "aka *",
+      "akupdate *",
+      "syncdots *",
+      "sfx-token *",
+      "tmux-agent-state *"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/dev",
+        "~/.local/state",
+        "~/.cache",
+        "~/Library/Caches",
+        "~/go",
+        "~/.cargo",
+        "~/.rustup",
+        "~/.npm",
+        "~/.nvm",
+        "~/.pyenv",
+        "~/.gradle",
+        "~/.m2"
+      ]
+    },
+    "network": {
+      "allowLocalBinding": true
+    }
+  }
+}

@@ -663,6 +663,15 @@ twg_skill_dests=(
 )
 discover_twg_skills
 
+# Managed work policy ignores user permission rules, so work access is widened
+# through sandbox settings; other roles drop entries that still match.
+sync_claude_work_settings() {
+  local action=remove
+  [[ "${MACHINE_CLASS:-personal}" == "work" ]] && action=apply
+  python3 "$DOTS_REPO/bin/claude-work-settings.py" "$action" \
+    "$DOTS_REPO/templates/dot_claude/work-settings.json" "$HOME/.claude/settings.json"
+}
+
 disable_claude_auto_memory() {
   local claude_settings="$HOME/.claude/settings.json"
   local claude_settings_tmp
@@ -701,6 +710,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       link_pi_extensions
       link_development_guidance
       disable_claude_auto_memory
+      sync_claude_work_settings
 
       if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
         install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
@@ -795,6 +805,7 @@ fi
 remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
 
 disable_claude_auto_memory
+sync_claude_work_settings
 
 if [[ $has_notes_agents -eq 1 ]]; then
   install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
