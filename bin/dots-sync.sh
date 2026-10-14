@@ -11,19 +11,89 @@ state_dir=${XDG_STATE_HOME:-"$HOME/.local/state"}/dots-sync
 lock_dir="$state_dir/lock"
 lock_retry_limit=5
 lock_retry_delay_seconds=1
+lock_ownerless_grace_seconds=30
+lock_hostname=$(hostname)
 
 if ! mkdir -p "$state_dir"; then
   printf 'Unable to create dots sync state directory: %s\n' "$state_dir" >&2
   exit 1
 fi
 
+process_start_time() {
+  ps -p "$1" -o lstart= 2>/dev/null | awk '{$1 = $1; print}'
+}
+
+lock_identity() {
+  if [[ $(uname -s) == Darwin ]]; then
+    stat -f '%d:%i' "$lock_dir" 2>/dev/null
+  else
+    stat -c '%d:%i' "$lock_dir" 2>/dev/null
+  fi
+}
+
+lock_is_stale() {
+  local owner_pid owner_host owner_start current_start lock_mtime now
+
+  [[ ! -d "$lock_dir/reclaim" ]] || return 1
+  if [[ -r "$lock_dir/owner" ]]; then
+    IFS=$'\t' read -r owner_pid owner_host owner_start < "$lock_dir/owner" || :
+    [[ "$owner_pid" =~ ^[0-9]+$ && -n "$owner_host" && -n "$owner_start" ]] || return 1
+    # A lock from another host cannot be validated safely; leave it alone.
+    [[ "$owner_host" == "$lock_hostname" ]] || return 1
+    if kill -0 "$owner_pid" 2>/dev/null; then
+      current_start=$(process_start_time "$owner_pid")
+      [[ -n "$current_start" ]] || return 1
+      [[ "$current_start" == "$owner_start" ]] && return 1
+    fi
+    return 0
+  fi
+
+  if [[ $(uname -s) == Darwin ]]; then
+    lock_mtime=$(stat -f %m "$lock_dir" 2>/dev/null) || return 1
+  else
+    lock_mtime=$(stat -c %Y "$lock_dir" 2>/dev/null) || return 1
+  fi
+  now=$(date +%s) || return 1
+  [[ "$lock_mtime" =~ ^[0-9]+$ && "$now" =~ ^[0-9]+$ ]] || return 1
+  (( now - lock_mtime >= lock_ownerless_grace_seconds ))
+}
+
+write_lock_owner() {
+  local start_time owner_tmp
+  start_time=$(process_start_time "$$")
+  [[ -n "$start_time" ]] || return 1
+  owner_tmp="$lock_dir/owner.tmp.$$"
+  if ! printf '%s\t%s\t%s\n' "$$" "$lock_hostname" "$start_time" > "$owner_tmp"; then
+    return 1
+  fi
+  mv "$owner_tmp" "$lock_dir/owner"
+}
+
 acquire_lock() {
-  local retries=0
+  local retries=0 stale_lock observed_identity
 
   while ! mkdir "$lock_dir" 2>/dev/null; do
     if [[ ! -d "$lock_dir" ]]; then
       printf 'Unable to acquire dots sync lock: %s\n' "$lock_dir" >&2
       return 1
+    fi
+
+    observed_identity=$(lock_identity)
+    if [[ -n "$observed_identity" ]] && lock_is_stale && mkdir "$lock_dir/reclaim" 2>/dev/null; then
+      # The in-lock marker serializes reclaimers. Check the directory identity
+      # again so a contender cannot move a replacement lock it did not inspect.
+      if [[ $(lock_identity) == "$observed_identity" ]]; then
+        stale_lock="$state_dir/lock.stale.$$.${RANDOM}.$(date +%s)"
+        if mv "$lock_dir" "$stale_lock" 2>/dev/null; then
+          rm -rf "$stale_lock"
+          printf 'Reclaimed stale dots sync lock: %s\n' "$lock_dir" >&2
+          continue
+        else
+          rmdir "$lock_dir/reclaim" 2>/dev/null || :
+        fi
+      else
+        rmdir "$lock_dir/reclaim" 2>/dev/null || :
+      fi
     fi
 
     if (( retries >= lock_retry_limit )); then
@@ -38,13 +108,29 @@ acquire_lock() {
       return 1
     fi
   done
+
+  if ! write_lock_owner; then
+    printf 'Unable to record dots sync lock owner: %s\n' "$lock_dir" >&2
+    rmdir "$lock_dir" 2>/dev/null || :
+    return 1
+  fi
 }
 
 if ! acquire_lock; then
   exit 1
 fi
+# Invoked indirectly by the EXIT trap.
+# shellcheck disable=SC2329
 cleanup_lock() {
-  rmdir "$lock_dir" 2>/dev/null || :
+  local owner_pid owner_host owner_start current_start
+  if [[ -r "$lock_dir/owner" ]]; then
+    IFS=$'\t' read -r owner_pid owner_host owner_start < "$lock_dir/owner" || :
+    current_start=$(process_start_time "$$")
+    if [[ "$owner_pid" == "$$" && "$owner_host" == "$lock_hostname" && "$owner_start" == "$current_start" ]]; then
+      rm -f "$lock_dir/owner"
+      rmdir "$lock_dir" 2>/dev/null || :
+    fi
+  fi
 }
 trap cleanup_lock EXIT
 

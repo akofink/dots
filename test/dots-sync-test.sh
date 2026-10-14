@@ -71,6 +71,56 @@ wait "$lock_holder"
 [[ $(git -C "$notes_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ -f "$notes_repo/.sync-linked" ]]
 
+lock_state="$tmpdir/lock-tests"
+lock_dir="$lock_state/dots-sync/lock"
+lock_host=$(hostname)
+process_start_time() {
+  ps -p "$1" -o lstart= 2>/dev/null | awk '{$1 = $1; print}'
+}
+run_with_lock() {
+  local state=$1 status
+  set +e
+  lock_output=$(XDG_STATE_HOME="$state" DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" "$script" --quiet 2>&1)
+  status=$?
+  set -e
+  return "$status"
+}
+
+# A lock with a dead recorded owner is reclaimed and reported.
+mkdir -p "$lock_dir"
+printf '999999999\t%s\tdead process\n' "$lock_host" > "$lock_dir/owner"
+run_with_lock "$lock_state" || { printf '%s\n' "$lock_output" >&2; exit 1; }
+[[ "$lock_output" == *'Reclaimed stale dots sync lock'* ]]
+[[ ! -e "$lock_dir" ]]
+
+# A live owner is not displaced.
+mkdir -p "$lock_dir"
+printf '%s\t%s\t%s\n' "$$" "$lock_host" "$(process_start_time "$$")" > "$lock_dir/owner"
+if run_with_lock "$lock_state"; then
+  printf 'sync unexpectedly acquired a live-owner lock\n' >&2
+  exit 1
+fi
+[[ "$lock_output" == *'dots sync is already running'* ]]
+[[ -d "$lock_dir" && -f "$lock_dir/owner" ]]
+rm -rf "$lock_dir"
+
+# An ownerless lock older than the grace period is reclaimed.
+mkdir -p "$lock_dir"
+touch -t 200001010000 "$lock_dir"
+run_with_lock "$lock_state" || { printf '%s\n' "$lock_output" >&2; exit 1; }
+[[ "$lock_output" == *'Reclaimed stale dots sync lock'* ]]
+[[ ! -e "$lock_dir" ]]
+
+# A fresh ownerless lock remains protected by the startup grace period.
+mkdir -p "$lock_dir"
+if run_with_lock "$lock_state"; then
+  printf 'sync unexpectedly acquired a fresh ownerless lock\n' >&2
+  exit 1
+fi
+[[ "$lock_output" == *'dots sync is already running'* ]]
+[[ -d "$lock_dir" ]]
+rm -rf "$lock_dir"
+
 # Untracked files do not block a sync.
 printf 'another agent report\n' > "$notes_repo/new-report.md"
 PATH="$git_wrapper_dir:$PATH" \
