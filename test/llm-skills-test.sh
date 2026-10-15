@@ -86,6 +86,7 @@ done
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-personal.md"
 test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
+test "$(jq -r .permissions.defaultMode "$home/.claude/settings.json")" = auto
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
 test "$(jq -r .customPiSetting "$home/.pi/agent/settings.json")" = preserve-me
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"

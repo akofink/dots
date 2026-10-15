@@ -672,15 +672,15 @@ sync_claude_work_settings() {
     "$DOTS_REPO/templates/dot_claude/work-settings.json" "$HOME/.claude/settings.json"
 }
 
-disable_claude_auto_memory() {
+set_claude_base_settings() {
   local claude_settings="$HOME/.claude/settings.json"
   local claude_settings_tmp
   mkdir -p "$(dirname -- "$claude_settings")"
   claude_settings_tmp=$(mktemp "${claude_settings}.XXXXXX") || fatal "Failed to create Claude settings temp file"
   if [[ -f "$claude_settings" ]]; then
-    jq '.autoMemoryEnabled = false' "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude auto-memory setting"
+    jq '.autoMemoryEnabled = false | .permissions.defaultMode = "auto"' "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude base settings"
   else
-    printf '{\n  "autoMemoryEnabled": false\n}\n' > "$claude_settings_tmp"
+    printf '{\n  "autoMemoryEnabled": false,\n  "permissions": {\n    "defaultMode": "auto"\n  }\n}\n' > "$claude_settings_tmp"
   fi
   chmod 600 "$claude_settings_tmp"
   mv -f "$claude_settings_tmp" "$claude_settings"
@@ -709,7 +709,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       link_notes_skill_set || status=$?
       link_pi_extensions
       link_development_guidance
-      disable_claude_auto_memory
+      set_claude_base_settings
       sync_claude_work_settings
 
       if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
@@ -804,7 +804,7 @@ fi
 # Claude uses CLAUDE.md as its single global instruction path.
 remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
 
-disable_claude_auto_memory
+set_claude_base_settings
 sync_claude_work_settings
 
 if [[ $has_notes_agents -eq 1 ]]; then
