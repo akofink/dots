@@ -69,13 +69,30 @@ class DirtySyncTest(unittest.TestCase):
                 self.g(self.repo, "diff", "--cached", "--binary"),
                 (self.repo / "untracked").read_bytes())
 
-    def sync(self, succeeds=True):
-        result = subprocess.run(["python3", str(HELPER), str(self.repo), str(self.root / "scratch")],
+    def sync(self, succeeds=True, mode=None):
+        extra = [mode] if mode else []
+        result = subprocess.run(["python3", str(HELPER), str(self.repo), str(self.root / "scratch"), *extra],
                                 env=self.env, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0 if succeeds else 1, result.stdout + result.stderr)
         self.assertFalse((self.repo / ".git/index.lock").exists())
         self.assertEqual(len(self.g(self.repo, "worktree", "list", "--porcelain").split(b"worktree ")), 2)
         return result
+
+    def test_merge_mode_keeps_local_task_branch_an_ancestor(self):
+        self.g(self.repo, "switch", "-c", "docs/task")
+        (self.repo / "local-only").write_text("task report\n")
+        task_tip = self.commit(self.repo, "task report").strip()
+        self.g(self.repo, "switch", "main")
+        self.g(self.repo, "merge", "--no-ff", "--no-edit", "docs/task")
+        (self.peer / "incoming").write_text("remote committed work\n")
+        self.commit(self.peer, "remote work")
+        self.g(self.peer, "push")
+        before = self.dirty()
+        self.sync(mode="merge")
+        self.assertEqual(self.snapshot(), before)
+        self.g(self.repo, "fetch", "origin")
+        self.g(self.repo, "merge-base", "--is-ancestor", task_tip, "origin/main")
+        self.g(self.repo, "merge-base", "--is-ancestor", task_tip, "main")
 
     def test_diverged_signed_rebase_preserves_staged_unstaged_untracked(self):
         self.diverge()

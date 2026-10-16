@@ -28,6 +28,7 @@ test:
 	python3 test/claude-work-settings-test.py
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
+	python3 test/notes-task-test.py
 	bash test/llm-skills-test.sh
 	bash test/tmuxinator-acli-test.sh
 	bash test/util-backups-test.sh

@@ -100,7 +100,7 @@ def advance(repo, branch, old, new, remote, remote_ref):
             lock.unlink(missing_ok=True)
 
 
-def sync(repo, scratch_root):
+def sync(repo, scratch_root, mode="rebase"):
     repo = Path(repo).resolve()
     branch = text(repo, "symbolic-ref", "HEAD")
     old = text(repo, "rev-parse", "HEAD")
@@ -121,8 +121,12 @@ def sync(repo, scratch_root):
     worktree = scratch / "checkout"
     try:
         git(repo, "worktree", "add", "--detach", str(worktree), old)
-        git(worktree, "-c", "rebase.autoStash=false", "-c", "commit.gpgSign=true",
-            "rebase", "--rebase-merges", "--gpg-sign", upstream)
+        if mode == "merge":
+            # Keep local commits (and merged task branches) as ancestors.
+            git(worktree, "-c", "commit.gpgSign=true", "merge", "--no-edit", "--gpg-sign", upstream)
+        else:
+            git(worktree, "-c", "rebase.autoStash=false", "-c", "commit.gpgSign=true",
+                "rebase", "--rebase-merges", "--gpg-sign", upstream)
         new = text(worktree, "rev-parse", "HEAD")
         # Verify every outgoing commit, including retained commits when no
         # rebase was necessary. Signing failures never reach the push.

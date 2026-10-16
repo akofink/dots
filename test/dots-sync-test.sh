@@ -70,6 +70,8 @@ wait "$lock_holder"
 [[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ $(git -C "$notes_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ -f "$notes_repo/.sync-linked" ]]
+# Notes integrates upstream by merge so published task branches stay ancestors.
+rg -q -- '/notes .*pull --no-rebase --no-edit' "$git_log"
 
 lock_state="$tmpdir/lock-tests"
 lock_dir="$lock_state/dots-sync/lock"

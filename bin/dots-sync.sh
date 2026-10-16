@@ -167,10 +167,15 @@ if [[ $quiet -eq 1 ]]; then
   fi
 fi
 
+# Notes publishes task branches through local merges; integrating upstream with
+# a merge keeps those branches ancestors of main so cleanup can prove them merged.
 sync_repo() {
   local repo=$1
+  local mode=${2:-rebase}
   local status
   local dirty_paths
+  local pull_args=(pull --rebase)
+  [[ $mode == merge ]] && pull_args=(pull --no-rebase --no-edit)
 
   [[ -d "$repo/.git" ]] || return 0
 
@@ -189,15 +194,15 @@ sync_repo() {
     fi
     # syncdots is normally invoked through a symlink in ~/.local/bin.
     helper=$(python3 -c 'import os, sys; print(os.path.join(os.path.dirname(os.path.realpath(sys.argv[1])), "dots-sync-dirty.py"))' "${BASH_SOURCE[0]}") || return 1
-    python3 "$helper" "$repo" "$notes_repo/tmp/dots-sync"
+    python3 "$helper" "$repo" "$notes_repo/tmp/dots-sync" "$mode"
     return $?
   fi
 
   if [[ $quiet -eq 1 ]]; then
-    git -C "$repo" -c rebase.autoStash=false pull --rebase >/dev/null
+    git -C "$repo" -c rebase.autoStash=false "${pull_args[@]}" >/dev/null
   else
     printf 'Syncing %s\n' "$repo"
-    git -C "$repo" -c rebase.autoStash=false pull --rebase
+    git -C "$repo" -c rebase.autoStash=false "${pull_args[@]}"
   fi
   status=$?
   if (( status != 0 )); then
@@ -238,6 +243,17 @@ sync_llm_skill_links() {
 
 sync_status=0
 sync_repo "$dots_repo" || sync_status=$?
-sync_repo "$notes_repo" || sync_status=$?
+notes_status=0
+sync_repo "$notes_repo" merge || notes_status=$?
+(( notes_status == 0 )) || sync_status=$notes_status
+# Deterministic notes task cleanup; never fails the sync itself.
+notes_task="$dots_repo/bin/notes-task.py"
+if (( notes_status == 0 )) && [[ -d "$notes_repo/.git" && -f "$notes_task" ]]; then
+  if [[ $quiet -eq 1 ]]; then
+    NOTES_REPO="$notes_repo" python3 "$notes_task" prune >/dev/null 2>&1 || :
+  else
+    NOTES_REPO="$notes_repo" python3 "$notes_task" prune || printf 'Notes task prune skipped (exit %d)\n' "$?" >&2
+  fi
+fi
 sync_llm_skill_links || sync_status=$?
 exit "$sync_status"
