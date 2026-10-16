@@ -170,7 +170,12 @@ def cmd_publish(args):
     if published(branch):
         print(f"notes-task: {branch} is already published")
     else:
-        git("merge", "--no-ff", "--no-edit", "-m", f"Merge {branch}", branch)  # signed per commit.gpgSign
+        merged = subprocess.run(["git", "-C", str(NOTES), "merge", "--no-ff", "--no-edit",
+                                 "-m", f"Merge {branch}", branch], text=True, capture_output=True)
+        if merged.returncode != 0:  # never leave canonical main mid-merge
+            subprocess.run(["git", "-C", str(NOTES), "merge", "--abort"], capture_output=True)
+            raise SystemExit(f"notes-task: {branch} conflicts with main; canonical main was restored. "
+                             f"In the task worktree run `git merge origin/main`, resolve, commit, and publish again.")
     result = subprocess.run([SYNCDOTS, "--quiet"])
     if result.returncode != 0:
         raise SystemExit("notes-task: syncdots failed; canonical main keeps the local merge for retry")

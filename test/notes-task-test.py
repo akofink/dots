@@ -106,6 +106,16 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.tool("publish", "t1")
         self.assertEqual((self.notes / "t1.md").read_text(), "report v2\n")
 
+    def test_publish_conflict_restores_canonical_main(self):
+        path = self.open_and_commit("t1", "task side\n")
+        (self.notes / "t1.md").write_text("main side\n")
+        self.git(self.notes, "add", "t1.md")
+        self.git(self.notes, "commit", "--quiet", "-m", "main edit")
+        result = self.tool("publish", "t1", ok=False)
+        self.assertIn("conflicts with main", result.stderr)
+        self.assertEqual(self.git(self.notes, "status", "--porcelain"), "")
+        self.assertTrue(path.exists())
+
     def test_publish_refuses_uncommitted_worktree(self):
         path = self.open_and_commit("t1")
         (path / "t1.md").write_text("unsaved\n")
