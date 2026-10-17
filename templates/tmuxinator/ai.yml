@@ -1,16 +1,17 @@
 <%
 # Usage:
-#   mux agent                        -> session "agent",      root ~/dev/
-#   mux agent BBCEEP-1234            -> session "agent-BBCEEP-1234"
-#   mux agent cleanup-old-flags      -> session "agent-cleanup-old-flags"
-#   mux agent BBCEEP-1234 root=PATH  -> root override (else ~/dev/)
+#   mux ai                           -> session "ai", root ~/dev/
+#   mux ai dormancy                  -> session "ai-dormancy"
+#   mux ai BBCEEP-1234                -> session "ai-BBCEEP-1234"
+#   mux ai cleanup-old-flags          -> session "ai-cleanup-old-flags"
+#   mux ai BBCEEP-1234 root=PATH       -> root override (else ~/dev/)
 #
 # `label` is freeform: a Jira key, a short slug, or anything tmux accepts as a
 # session name. Once a ticket exists, agents can rename their session via
-# `tmux rename-session -t <old> agent-<TICKET>` so the session identity stays
+# `tmux rename-session -t <old> ai-<TICKET>` so the session identity stays
 # aligned with durable task state.
 label = @args[0].to_s.strip
-name  = label.empty? ? "agent" : "agent-#{label}"
+name  = label.empty? ? "ai" : "ai-#{label}"
 root  = (@settings["root"] || "~/dev/").to_s
 %>
 name: <%= name %>

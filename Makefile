@@ -31,6 +31,7 @@ test:
 	python3 test/notes-task-test.py
 	bash test/llm-skills-test.sh
 	bash test/tmuxinator-acli-test.sh
+	ruby test/tmuxinator-ai-test.rb
 	bash test/util-backups-test.sh
 
 .PHONY: clean
