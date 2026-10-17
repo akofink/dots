@@ -26,7 +26,9 @@ zmodload zsh/datetime 2>/dev/null
 dots_sync_state="${XDG_STATE_HOME:-$HOME/.local/state}/dots-sync"
 dots_sync_stamp="$dots_sync_state/last-attempt"
 if [[ -x "$HOME/dev/repos/dots/bin/dots-sync.sh" ]] && { [[ ! -f "$dots_sync_stamp" ]] || (( EPOCHSECONDS - $(<"$dots_sync_stamp") >= 21600 )); }; then
-  "$HOME/dev/repos/dots/bin/dots-sync.sh" --quiet &!
+  if mkdir -p "$dots_sync_state" 2>/dev/null; then
+    "$HOME/dev/repos/dots/bin/dots-sync.sh" --quiet </dev/null >>"$dots_sync_state/sync.log" 2>&1 &!
+  fi
 fi
 unset dots_sync_state dots_sync_stamp
 
