@@ -25,14 +25,13 @@ else
   git fetch --tags
 fi
 
-CONFIGURE_ARGS=()
+CONFIGURE_ARGS=(--prefix="$HOME/.local")
 if [[ "$PLATFORM" == "Darwin" ]]; then
   CONFIGURE_ARGS+=(--enable-utf8proc)
   # tmux 3.7c requires an explicit choice on macOS and recommends jemalloc
   # because macOS calloc(3) does not reliably zero some allocations.
   CONFIGURE_ARGS+=(--enable-jemalloc)
   CONFIGURE_ARGS+=(--enable-sixel)
-  CONFIGURE_ARGS+=(--prefix="$HOME/.local")
   CONFIGURE_ARGS+=(--sysconfdir=/usr/local/etc)
 
   # Ensure configure discovers Homebrew's ncurses instead of the system library.
