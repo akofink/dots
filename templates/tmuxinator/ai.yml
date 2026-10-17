@@ -28,4 +28,5 @@ windows:
             - cd ~/dev/repos/dots
         - sandbox:
             - cd ~/dev/repos/sandbox
-  - ai:
+  - 🐙:
+  - 📡:
