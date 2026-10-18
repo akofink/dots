@@ -20,9 +20,14 @@ root: <%= root %>
 
 windows:
   - zsh:
-      layout: <%= personal_machine ? "main-horizontal" : "even-vertical" %>
+      layout: even-vertical
       panes:
-<% if personal_machine %>        - npx -y quota-axi --tui --provider claude,codex,grok,copilot
+<% if personal_machine %>        # Install window-local resize/layout hooks before starting the TUI.
+        # At least 31 window rows (status line excluded) are needed: 23 for
+        # quota, four separators, and one row for each equal-height shell.
+        - quota:
+            - ruby ~/.config/tmuxinator/ai-quota-layout.rb --install "$TMUX_PANE"
+            - npx -y quota-axi --tui --provider claude,codex,grok,copilot
 <% end %>        - dev:
             - cd <%= root %>
         - notes:

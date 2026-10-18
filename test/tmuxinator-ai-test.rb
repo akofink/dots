@@ -16,7 +16,9 @@ raise "agent.yml must remain an alias of ai.yml" unless File.symlink?(legacy_ali
   [[" cleanup-old-flags "], {}, nil, "ai-cleanup-old-flags", "~/dev/"],
   [["   "], {}, nil, "ai", "~/dev/"],
   [["dormancy"], {"root" => "/example/project"}, nil, "ai-dormancy", "/example/project"],
-  [[], {}, "work", "ai", "~/dev/"]
+  [[], {}, "personal", "ai", "~/dev/"],
+  [[], {}, "work", "ai", "~/dev/"],
+  [["work-check"], {"root" => "/example/project"}, "work", "ai-work-check", "/example/project"]
 ].each do |args, settings, machine_class, expected_name, expected_root|
   context = Object.new
   context.instance_variable_set(:@args, args)
@@ -44,12 +46,50 @@ raise "agent.yml must remain an alias of ai.yml" unless File.symlink?(legacy_ali
     raise "work window 1 changed" unless first_window == {"layout" => "even-vertical", "panes" => expected_panes}
   else
     raise "personal quota pane or layout missing" unless first_window == {
-      "layout" => "main-horizontal",
-      "panes" => ["npx -y quota-axi --tui --provider claude,codex,grok,copilot", *expected_panes]
+      "layout" => "even-vertical",
+      "panes" => [{"quota" => [
+        'ruby ~/.config/tmuxinator/ai-quota-layout.rb --install "$TMUX_PANE"',
+        "npx -y quota-axi --tui --provider claude,codex,grok,copilot"
+      ]}, *expected_panes]
     }
   end
 
   puts "tmuxinator-ai-test: #{args.inspect}, #{settings.inspect}, MACHINE_CLASS=#{machine_class || 'unset'} -> #{expected_name}, root #{expected_root}"
 end
 
+require_relative "../templates/tmuxinator/ai-quota-layout"
+
+panes = %w[%10 %11 %12 %13 %14]
+(31..120).each do |height|
+  layout = AiQuotaLayout.layout(160, height, panes)
+  checksum, body = layout.split(",", 2)
+  sum = 0
+  body.each_byte do |byte|
+    sum = ((sum >> 1) + ((sum & 1) << 15) + byte) & 0xffff
+  end
+  raise "invalid layout checksum" unless checksum.to_i(16) == sum
+  raise "legacy layout comparison failed" unless AiQuotaLayout.matches?(layout, layout)
+  cells = body.scan(/160x(\d+),0,(\d+),(1[0-4])/).map { |cell| cell.map(&:to_i) }
+  json = {"V" => 2, "L" => {"t" => "v", "c" => cells.map do |rows, top, id|
+    {"t" => "p", "w" => 160, "h" => rows, "x" => 0, "y" => top, "I" => "%#{id}", "a" => true}
+  end}}.to_json
+  raise "JSON layout comparison failed" unless AiQuotaLayout.matches?(json, layout)
+  raise "wrong pane order" unless cells.map(&:last) == (10..14).to_a
+  raise "quota too short" unless cells.first[0] >= 23
+  raise "unequal shells" unless cells.drop(1).map(&:first).uniq.length == 1
+  y = 0
+  cells.each do |rows, top, _id|
+    raise "not stacked" unless top == y
+    y += rows + 1
+  end
+  raise "wrong total height" unless y - 1 == height
+end
+raise "undersized window should be left alone" if AiQuotaLayout.layout(160, 30, panes)
+raise "changed pane count should be left alone" if AiQuotaLayout.layout(160, 60, panes.take(4))
+%w[top bottom].each do |status|
+  raise "border-status minimum wrong" if AiQuotaLayout.layout(160, 31, panes, status)
+  layout = AiQuotaLayout.layout(160, 32, panes, status)
+  quota_height = status == "top" ? 24 : 23
+  raise "border-status quota too short" unless layout.include?("[160x#{quota_height},0,0,10,")
+end
 puts "tmuxinator-ai-test: ok"
