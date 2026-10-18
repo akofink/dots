@@ -56,6 +56,15 @@ def clean(worktree):
     return git("status", "--porcelain", "--untracked-files=all", cwd=worktree) == ""
 
 
+def require_task_worktree(task_id, path, branch):
+    if not path.is_dir():
+        raise SystemExit(f"notes-task: expected task worktree {path} does not exist; run `notes-task open {task_id}` first")
+    checked_out = git("branch", "--show-current", cwd=path, check=False)
+    if checked_out != branch:
+        actual = checked_out or "(detached HEAD or not a worktree)"
+        raise SystemExit(f"notes-task: {path} is checked out on {actual}, expected {branch}; refusing to continue")
+
+
 def akagent_json(*args):
     try:
         result = subprocess.run([AKAGENT, *args, "--format", "json"], text=True, capture_output=True, timeout=60)
@@ -143,6 +152,7 @@ def cmd_open(args):
     branch, path = f"docs/{args.task_id}", ROOT / args.task_id
     git("fetch", "--quiet", "origin")
     if path.exists():
+        require_task_worktree(args.task_id, path, branch)
         print(path)
         return
     ROOT.mkdir(parents=True, exist_ok=True)
@@ -158,7 +168,10 @@ def cmd_open(args):
 
 def cmd_publish(args):
     branch, path = f"docs/{args.task_id}", ROOT / args.task_id
-    if path.exists() and not clean(path):
+    require_task_worktree(args.task_id, path, branch)
+    if not ref_exists(f"refs/heads/{branch}"):
+        raise SystemExit(f"notes-task: expected task branch {branch} does not exist; refusing to publish")
+    if not clean(path):
         raise SystemExit(f"notes-task: {path} has uncommitted changes; commit owned paths first")
     if git("symbolic-ref", "--short", "HEAD") != "main":
         raise SystemExit("notes-task: canonical notes checkout is not on main; leave it for the owner")

@@ -19,6 +19,7 @@ class NotesTaskTest(unittest.TestCase):
         self.wt_root = self.root / "worktrees"
         self.tasks = self.root / "tasks.json"
         self.panes = self.root / "panes.txt"
+        self.sync_calls = self.root / "sync-calls"
         self.tasks.write_text(json.dumps({"tasks": []}))
         self.panes.write_text("")
         bin_dir = self.root / "bin"
@@ -41,6 +42,7 @@ elif args[:3] == ["task", "resource", "create"]:
         # Stand-in for syncdots: integrate upstream by merge, then push.
         self.fake(bin_dir / "syncdots", f"""
 import subprocess
+open({str(self.sync_calls)!r}, "a").write("called\\n")
 repo = {str(self.notes)!r}
 subprocess.check_call(["git", "-C", repo, "pull", "--quiet", "--no-rebase", "--no-edit"])
 subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
@@ -94,6 +96,16 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertEqual(self.git(path, "branch", "--show-current"), "docs/t1")
         self.assertEqual(Path(self.tool("open", "t1").stdout.strip()), path)
 
+    def test_open_rejects_existing_path_on_wrong_branch_without_mutation(self):
+        path = Path(self.tool("open", "t1").stdout.strip())
+        before = self.git(self.notes, "rev-parse", "refs/heads/docs/t1")
+        self.git(path, "checkout", "--detach")
+        result = self.tool("open", "t1", ok=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("expected docs/t1", result.stderr)
+        self.assertEqual(self.git(path, "branch", "--show-current"), "")
+        self.assertEqual(self.git(self.notes, "rev-parse", "refs/heads/docs/t1"), before)
+
     def test_publish_merges_and_keeps_branch_an_ancestor(self):
         path = self.open_and_commit("t1")
         self.tool("publish", "t1")
@@ -122,6 +134,19 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         result = self.tool("publish", "t1", ok=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("uncommitted", result.stderr)
+
+    def test_publish_rejects_wrong_branch_and_missing_expected_branch_without_sync(self):
+        path = Path(self.tool("open", "t1").stdout.strip())
+        self.git(path, "checkout", "--detach")
+        self.git(path, "branch", "-D", "docs/t1")
+        before_main = self.git(self.notes, "rev-parse", "main")
+        result = self.tool("publish", "t1", ok=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("expected docs/t1", result.stderr)
+        self.assertFalse(self.sync_calls.exists())
+        self.assertEqual(self.git(self.notes, "rev-parse", "main"), before_main)
+        self.assertNotIn("docs/t1", self.branches())
+        self.assertEqual(self.git(path, "branch", "--show-current"), "")
 
     def test_prune_removes_published_idle_worktree_and_keeps_evidence(self):
         path = self.open_and_commit("t1")
