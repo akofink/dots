@@ -13,15 +13,17 @@
 label = @args[0].to_s.strip
 name  = label.empty? ? "ai" : "ai-#{label}"
 root  = (@settings["root"] || "~/dev/").to_s
+personal_machine = ENV["MACHINE_CLASS"] != "work"
 %>
 name: <%= name %>
 root: <%= root %>
 
 windows:
   - zsh:
-      layout: even-vertical
+      layout: <%= personal_machine ? "main-horizontal" : "even-vertical" %>
       panes:
-        - dev:
+<% if personal_machine %>        - npx -y quota-axi --tui --provider claude,codex,grok,copilot
+<% end %>        - dev:
             - cd <%= root %>
         - notes:
             - cd ~/dev/repos/notes
