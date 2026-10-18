@@ -106,6 +106,28 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertEqual(self.git(path, "branch", "--show-current"), "")
         self.assertEqual(self.git(self.notes, "rev-parse", "refs/heads/docs/t1"), before)
 
+    def test_open_and_publish_refuse_named_wrong_branch_without_mutation(self):
+        path = Path(self.tool("open", "t1").stdout.strip())
+        self.git(path, "checkout", "-b", "docs/other")
+        (path / "unpublished.md").write_text("unpublished\n")
+        self.git(path, "add", "unpublished.md")
+        self.git(path, "commit", "--quiet", "-m", "unpublished other branch")
+
+        before_wrong = self.git(path, "rev-parse", "HEAD")
+        before_expected = self.git(self.notes, "rev-parse", "refs/heads/docs/t1")
+        before_main = self.git(self.notes, "rev-parse", "main")
+        before_branches = self.branches()
+        for command in ("open", "publish"):
+            result = self.tool(command, "t1", ok=False)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("expected docs/t1", result.stderr)
+            self.assertEqual(self.git(path, "branch", "--show-current"), "docs/other")
+            self.assertEqual(self.git(path, "rev-parse", "HEAD"), before_wrong)
+            self.assertEqual(self.git(self.notes, "rev-parse", "refs/heads/docs/t1"), before_expected)
+            self.assertEqual(self.git(self.notes, "rev-parse", "main"), before_main)
+            self.assertEqual(self.branches(), before_branches)
+            self.assertFalse(self.sync_calls.exists())
+
     def test_publish_merges_and_keeps_branch_an_ancestor(self):
         path = self.open_and_commit("t1")
         self.tool("publish", "t1")
