@@ -215,6 +215,31 @@ WSL2 system-level config is included as examples only:
 Those files usually need to be applied manually to `/etc/wsl.conf` and `%USERPROFILE%/.wslconfig`,
 then WSL restarted.
 
+The opt-in `setup/windows-claude.sh` copies the selected common skills from the canonical notes checkout
+into native Windows Claude and Codex skill directories, and installs Windows-specific global guidance
+at `.claude/CLAUDE.md` and `.codex/AGENTS.md`. It copies files rather than linking WSL config directories
+across filesystems. Run it from WSL only when ready to modify the specified Windows profile:
+
+```sh
+WINDOWS_HOME='C:\Users\name' bash setup/windows-claude.sh
+```
+
+It requires `wslpath` and the notes skill sources. The selected skill list is explicit and excludes the
+personal-only `sandustry-play` skill even if that skill exists in the notes checkout. This setup path
+has not been run against Windows; the static test checks its scope, copy behavior, explicit exclusion,
+and script-file WSL guidance.
+
+For multi-step notes or akagent operations from a Windows-native agent, keep the calls in a WSL script
+file and invoke that file with `wsl.exe --distribution <name> --exec bash /path/to/script.sh`. Do not
+embed compound shell commands in nested PowerShell/WSL quoting. A minimal script can contain:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+notes-task open my-task
+akagent task inspect my-task
+```
+
 #### LLM config module
 
 `bash setup/llm.sh` renders tool configs and symlinks shared agent/skill files

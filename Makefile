@@ -26,6 +26,7 @@ test:
 	python3 test/pi-mcp-config-test.py
 	bash test/codex-rules-test.sh
 	python3 test/claude-work-settings-test.py
+	python3 test/windows-claude-setup-test.py
 	bash test/dots-backups-test.sh
 	bash test/dots-sync-test.sh
 	python3 test/notes-task-test.py
