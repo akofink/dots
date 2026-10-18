@@ -7,7 +7,9 @@
       "akupdate *",
       "syncdots *",
       "sfx-token *",
-      "tmux-agent-state *"
+      "tmux-agent-state *",
+      "liaison-relay *",
+      "~/.local/bin/liaison-relay *"
     ],
     "filesystem": {
       "allowWrite": [

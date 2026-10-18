@@ -9,7 +9,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 notes_repo="$tmpdir/notes"
 home="$tmpdir/home"
 mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev" "$home/.claude" "$home/.pi/agent"
-printf '{"theme":"light"}\n' > "$home/.claude/settings.json"
+printf '{"theme":"light","permissions":{"allow":["Bash(git status *)"]}}\n' > "$home/.claude/settings.json"
 printf '{"customPiSetting":"preserve-me"}\n' > "$home/.pi/agent/settings.json"
 printf 'global instructions\n' > "$notes_repo/agents/global-personal.md"
 printf 'work instructions\n' > "$notes_repo/agents/global-work.md"
@@ -28,6 +28,28 @@ for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
 done
+helper_scripts=(agent-orchestrator/scripts/wake-orchestrator agent-liaison/scripts/liaison-relay agent-liaison/scripts/liaison-replace)
+for helper in "${helper_scripts[@]}"; do
+  mkdir -p "$notes_repo/agents/skills/${helper%/*}"
+  printf '#!/bin/sh\n' > "$notes_repo/agents/skills/$helper"
+done
+relay_rules=(
+  'Bash(liaison-relay *)'
+  'Bash(~/.local/bin/liaison-relay *)'
+  "Bash($home/.local/bin/liaison-relay *)"
+  'Bash(~/.claude/skills/agent-liaison/scripts/liaison-relay *)'
+  "Bash($home/.claude/skills/agent-liaison/scripts/liaison-relay *)"
+)
+
+# Relays get exactly the helper rules, once each, after any user rules.
+assert_relay_rules() {
+  local settings="$home/.claude/settings.json"
+  test "$(jq -r '.permissions.allow[0]' "$settings")" = 'Bash(git status *)'
+  for rule in "${relay_rules[@]}"; do
+    test "$(jq --arg rule "$rule" '[.permissions.allow[] | select(. == $rule)] | length' "$settings")" = 1
+  done
+  test "$(jq '[.permissions.allow[] | select(test("send-keys|^Bash\\(tmux"))] | length' "$settings")" = 0
+}
 
 obsolete_skill_roots=(
   .agents/skills
@@ -88,6 +110,10 @@ test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
 test "$(jq -r .permissions.defaultMode "$home/.claude/settings.json")" = auto
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
+assert_relay_rules
+for helper in "${helper_scripts[@]}"; do
+  test "$(readlink "$home/.local/bin/${helper##*/}")" = "$notes_repo/agents/skills/$helper"
+done
 test "$(jq -r .customPiSetting "$home/.pi/agent/settings.json")" = preserve-me
 test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
 test "$(readlink "$home/.pi/agent/extensions/disable-animations.ts")" = "$notes_repo/agents/pi-extensions/disable-animations.ts"
@@ -124,6 +150,7 @@ env \
 
 cmp -s "$repo_root/templates/dot_codex/rules/work.rules" "$home/.codex/rules/work.rules"
 jq -e '.sandbox.excludedCommands | index("tmux *")' "$home/.claude/settings.json" >/dev/null
+jq -e '.sandbox.excludedCommands | index("liaison-relay *")' "$home/.claude/settings.json" >/dev/null
 jq -e '.sandbox.filesystem.allowWrite | index("~/dev")' "$home/.claude/settings.json" >/dev/null
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
 test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
@@ -168,6 +195,7 @@ env \
 test ! -e "$home/.codex/rules/work.rules"
 test "$(jq -c .sandbox "$home/.claude/settings.json")" = null
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
+assert_relay_rules
 test ! -e "$home/dev/AGENTS.bbc-core.md"
 test ! -e "$home/dev/AGENTS.dss.md"
 test ! -e "$home/.rovodev/AGENTS.md"
@@ -208,3 +236,9 @@ fi
 
 run_setup
 run_verify
+
+rm "$home/.claude/settings.json"
+run_setup
+test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
+test "$(jq -r .permissions.defaultMode "$home/.claude/settings.json")" = auto
+test "$(jq -c .permissions.allow "$home/.claude/settings.json")" = "$(printf '%s\n' "${relay_rules[@]}" | jq -Rsc 'split("\n")[:-1]')"

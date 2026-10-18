@@ -582,10 +582,15 @@ link_notes_skill_set() {
       link_skill_set "$destination_root" "${work_skills[@]}" || failed=1
     fi
   done
-  local wake_src="$notes_repo/agents/skills/agent-orchestrator/scripts/wake-orchestrator"
-  if [[ -f "$wake_src" ]]; then
-    install_symlink "$wake_src" "$HOME/.local/bin/wake-orchestrator" || failed=1
-  fi
+  local helper_src
+  for helper_src in \
+    "$notes_repo/agents/skills/agent-orchestrator/scripts/wake-orchestrator" \
+    "$notes_repo/agents/skills/agent-liaison/scripts/liaison-relay" \
+    "$notes_repo/agents/skills/agent-liaison/scripts/liaison-replace"; do
+    if [[ -f "$helper_src" ]]; then
+      install_symlink "$helper_src" "$HOME/.local/bin/${helper_src##*/}" || failed=1
+    fi
+  done
   return "$failed"
 }
 
@@ -675,12 +680,23 @@ sync_claude_work_settings() {
 set_claude_base_settings() {
   local claude_settings="$HOME/.claude/settings.json"
   local claude_settings_tmp
+  local relay_rules
+  # The auto-mode classifier blocks liaison relays typed into the orchestrator
+  # pane. Allow only the helper that verifies that target and prefixes the
+  # message, never arbitrary tmux send-keys. Rules match command text, so list
+  # each spelling.
+  relay_rules=$(jq -nc --arg home "$HOME" '["liaison-relay", "~/.local/bin/liaison-relay",
+    "\($home)/.local/bin/liaison-relay", "~/.claude/skills/agent-liaison/scripts/liaison-relay",
+    "\($home)/.claude/skills/agent-liaison/scripts/liaison-relay"] | map("Bash(\(.) *)")') ||
+    fatal "Failed to build Claude relay rules"
+  local base_filter='.autoMemoryEnabled = false | .permissions.defaultMode = "auto"
+    | .permissions.allow = ((.permissions.allow // []) as $allow | $allow + ($relay - $allow))'
   mkdir -p "$(dirname -- "$claude_settings")"
   claude_settings_tmp=$(mktemp "${claude_settings}.XXXXXX") || fatal "Failed to create Claude settings temp file"
   if [[ -f "$claude_settings" ]]; then
-    jq '.autoMemoryEnabled = false | .permissions.defaultMode = "auto"' "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude base settings"
+    jq --argjson relay "$relay_rules" "$base_filter" "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude base settings"
   else
-    printf '{\n  "autoMemoryEnabled": false,\n  "permissions": {\n    "defaultMode": "auto"\n  }\n}\n' > "$claude_settings_tmp"
+    jq -n --argjson relay "$relay_rules" "{} | $base_filter" > "$claude_settings_tmp" || fatal "Failed to create Claude base settings"
   fi
   chmod 600 "$claude_settings_tmp"
   mv -f "$claude_settings_tmp" "$claude_settings"
