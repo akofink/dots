@@ -32,6 +32,9 @@ if [[ -x "$HOME/dev/repos/dots/bin/dots-sync.sh" ]] && { [[ ! -f "$dots_sync_sta
 fi
 unset dots_sync_state dots_sync_stamp
 
+# Report deferred or failed background warmup once; routine success stays quiet.
+[[ -x "$HOME/.local/bin/dots-warmup-report" ]] && "$HOME/.local/bin/dots-warmup-report"
+
 plugins=(gem git rails ruby zsh-autosuggestions)
 
 # rbenv completions need to be on fpath before compinit runs

@@ -19,6 +19,7 @@ check:
 .PHONY: test
 test:
 	bash test/akupdate-test.sh
+	bash test/dots-warmup-test.sh
 	bash test/akagent-test.sh
 	bash test/pi-settings-test.sh
 	bash test/pi-managed-install-test.sh

@@ -70,6 +70,7 @@ wait "$lock_holder"
 [[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ $(git -C "$notes_repo" rev-list --count '@{u}..') -eq 0 ]]
 [[ -f "$notes_repo/.sync-linked" ]]
+[[ ! -e "$state_home/dots-sync/warmup.log" ]]
 # Notes integrates upstream by merge so published task branches stay ancestors.
 rg -q -- '/notes .*pull --no-rebase --no-edit' "$git_log"
 
@@ -178,5 +179,42 @@ set -e
 [[ $failure_status -ne 0 ]]
 [[ $failure_output == *'Deferred dirty-checkout synchronization'* ]]
 
+# A fast-forward launches a detached warmup that retains the sync lock.
+advance_repo=$(setup_repo advance)
+advance_notes=$(setup_repo advance-notes)
+mkdir -p "$advance_repo/bin"
+cp "$script" "$advance_repo/bin/dots-sync.sh"
+cat > "$advance_repo/bin/dots-warmup.sh" <<'EOF'
+#!/usr/bin/env bash
+printf started > "$WARMUP_MARKER"
+sleep 10
+printf done > "$WARMUP_MARKER"
+EOF
+chmod +x "$advance_repo/bin/dots-warmup.sh"
+external="$tmpdir/external"
+git clone "$tmpdir/advance.git" "$external" >/dev/null 2>&1
+git -C "$external" config user.email test@example.com
+git -C "$external" config user.name test
+printf 'incoming\n' >> "$external/README"
+git -C "$external" commit -am incoming >/dev/null
+git -C "$external" push >/dev/null
+advance_state="$tmpdir/advance-state"
+WARMUP_MARKER="$tmpdir/warmup-marker" XDG_STATE_HOME="$advance_state" DOTS_REPO="$advance_repo" NOTES_REPO="$advance_notes" "$script" --quiet
+[[ -d "$advance_state/dots-sync/lock" ]]
+for _ in {1..60}; do
+  [[ -e "$tmpdir/warmup-marker" ]] && break
+  sleep 0.1
+done
+[[ $(<"$tmpdir/warmup-marker") == started ]]
+if WARMUP_MARKER="$tmpdir/warmup-marker" XDG_STATE_HOME="$advance_state" DOTS_REPO="$advance_repo" NOTES_REPO="$advance_notes" "$script" --quiet >/dev/null 2>&1; then
+  echo 'second sync overlapped the warmup child' >&2; exit 1
+fi
+for _ in {1..120}; do
+  [[ $(<"$tmpdir/warmup-marker") == 'done' ]] && break
+  sleep 0.1
+done
+[[ $(<"$tmpdir/warmup-marker") == 'done' ]]
+[[ ! -e "$advance_state/dots-sync/lock" ]]
+
 # Missing repositories are intentionally harmless for a portable shell setup.
-DOTS_REPO="$tmpdir/missing-dots" NOTES_REPO="$tmpdir/missing-notes" "$script" --quiet
+XDG_STATE_HOME="$tmpdir/missing-state" DOTS_REPO="$tmpdir/missing-dots" NOTES_REPO="$tmpdir/missing-notes" "$script" --quiet

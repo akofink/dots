@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
 quiet=0
+warmup_child=0
 if [[ "${1:-}" == "--quiet" ]]; then
   quiet=1
+elif [[ "${1:-}" == "--warmup-child" ]]; then
+  quiet=1
+  warmup_child=1
 fi
 
 dots_repo=${DOTS_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/dots"}
@@ -142,7 +146,7 @@ acquire_lock() {
   fi
 }
 
-if ! acquire_lock; then
+if [[ "$warmup_child" -eq 0 ]] && ! acquire_lock; then
   exit 1
 fi
 # Invoked indirectly by the EXIT trap.
@@ -159,6 +163,25 @@ cleanup_lock() {
   fi
 }
 trap cleanup_lock EXIT
+
+if [[ "$warmup_child" -eq 1 ]]; then
+  child_start=$(process_start_time "$$")
+  for _ in {1..100}; do
+    if [[ -r "$lock_dir/owner" ]]; then
+      IFS=$'\t' read -r child_pid child_host recorded_start < "$lock_dir/owner" || :
+      if [[ "$child_pid" == "$$" && "$child_host" == "$lock_hostname" && "$recorded_start" == "$child_start" ]]; then
+        break
+      fi
+    fi
+    sleep 0.05
+  done
+  if [[ "${child_pid:-}" != "$$" || "${recorded_start:-}" != "$child_start" ]]; then
+    printf 'Warmup child failed to adopt dots sync lock\n' >&2
+    exit 1
+  fi
+  DOTS_WARMUP_LOCKED=1 "$dots_repo/bin/dots-warmup.sh"
+  exit $?
+fi
 
 if [[ $quiet -eq 1 ]]; then
   if ! date +%s > "$state_dir/last-attempt"; then
@@ -241,6 +264,8 @@ sync_llm_skill_links() {
   fi
 }
 
+dots_head_before=$(git -C "$dots_repo" rev-parse HEAD 2>/dev/null || :)
+notes_head_before=$(git -C "$notes_repo" rev-parse HEAD 2>/dev/null || :)
 sync_status=0
 sync_repo "$dots_repo" || sync_status=$?
 notes_status=0
@@ -256,4 +281,35 @@ if (( notes_status == 0 )) && [[ -d "$notes_repo/.git" && -f "$notes_task" ]]; t
   fi
 fi
 sync_llm_skill_links || sync_status=$?
+
+dots_head_after=$(git -C "$dots_repo" rev-parse HEAD 2>/dev/null || :)
+notes_head_after=$(git -C "$notes_repo" rev-parse HEAD 2>/dev/null || :)
+sync_advanced=0
+if (( sync_status == 0 )); then
+  [[ -n "$dots_head_before" && "$dots_head_before" != "$dots_head_after" ]] && sync_advanced=1
+  [[ -n "$notes_head_before" && "$notes_head_before" != "$notes_head_after" ]] && sync_advanced=1
+  if [[ -n "$notes_head_before" && "$notes_head_before" != "$notes_head_after" ]]; then
+    python3 "$dots_repo/bin/dots-guidance-marker.py" "$notes_repo" "$notes_head_before" "$notes_head_after" "$state_dir" || sync_status=$?
+  fi
+fi
+
+if (( sync_status == 0 && sync_advanced == 1 )); then
+  warmup_log="$state_dir/warmup.log"
+  nohup "$dots_repo/bin/dots-sync.sh" --warmup-child >> "$warmup_log" 2>&1 </dev/null &
+  child_pid=$!
+  child_start=$(process_start_time "$child_pid")
+  if [[ -n "$child_start" ]]; then
+    owner_tmp="$lock_dir/owner.warmup.$child_pid"
+    if printf '%s\t%s\t%s\n' "$child_pid" "$lock_hostname" "$child_start" > "$owner_tmp" && mv -f "$owner_tmp" "$lock_dir/owner"; then
+      : # The warmup child now owns the existing synchronization lock.
+    else
+      rm -f "$owner_tmp"
+      kill "$child_pid" 2>/dev/null || :
+      printf 'Unable to transfer dots sync lock to warmup child\n' >&2
+    fi
+  else
+    kill "$child_pid" 2>/dev/null || :
+    printf 'Unable to identify dots warmup child; lock remains with sync parent\n' >&2
+  fi
+fi
 exit "$sync_status"

@@ -16,6 +16,13 @@ fi
 STUB
   chmod +x "$tmp/bin/$command"
 done
+for command in sudo apt-get npm; do
+  cat > "$tmp/bin/$command" <<'STUB'
+#!/usr/bin/env bash
+printf '%s %s\n' "$(basename "$0")" "$*" >> "$CALL_LOG"
+STUB
+  chmod +x "$tmp/bin/$command"
+done
 
 export CALL_LOG="$tmp/calls"
 export PATH="$tmp/bin:$PATH"
@@ -39,5 +46,14 @@ grep -q '^atlas plugin update --all$' "$CALL_LOG"
 grep -q 'Pi and extensions: FAILED (exit 17)' "$tmp/work.out"
 grep -q 'Atlas CLI: OK' "$tmp/work.out"
 grep -q 'Atlas plugins: OK' "$tmp/work.out"
+
+: > "$CALL_LOG"
+MACHINE_CLASS=work bash "$repo_root/bin/akupdate.sh" --warmup-weekly > "$tmp/work-weekly.out"
+[[ ! -s "$CALL_LOG" ]]
+grep -q 'Package updates: deferred by work machine policy' "$tmp/work-weekly.out"
+MACHINE_CLASS=personal bash "$repo_root/bin/akupdate.sh" --warmup-weekly > "$tmp/personal-weekly.out"
+grep -q '^brew update$' "$CALL_LOG"
+grep -q '^sudo -n apt-get update$' "$CALL_LOG"
+grep -q '^npm update -g --no-fund --no-audit$' "$CALL_LOG"
 
 echo 'akupdate tests passed'
