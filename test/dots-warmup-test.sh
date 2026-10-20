@@ -59,13 +59,31 @@ REPOS_SETUP_COMPLETE=1 DOTS_REPO="$fake_repo" NOTES_REPO="$tmp/notes" XDG_STATE_
   bash "$repo/setup.sh" --changed > "$tmp/pending.out"
 [[ -s "$tmp/pending-state/dots-setup/pending" ]]
 [[ $(<"$tmp/pending-state/dots-setup/pending") == 'http aws vim tmux zsh opencode rbenv go tmuxinator glow ghostty akagent' ]]
-mkdir -p "$tmp/pending-state/dots-warmup"
+mkdir -p "$tmp/pending-state/dots-warmup" "$tmp/actions"
 printf 'warmup.log\n' > "$tmp/pending-state/dots-warmup/failure"
-XDG_STATE_HOME="$tmp/pending-state" HOME="$tmp/home" bash "$repo/bin/dots-warmup-report.sh" > "$tmp/report.out" 2> "$tmp/report.err"
+cat > "$tmp/actions/source.md" <<'MD'
+## Machine-wide actions (by host)
+### Operator actions
+#### akmac
+- [ ] akmac action
+#### akwin
+- [ ] akwin action
+#### any host
+- [ ] shared action
+MD
+PERSONAL_ACTION_LIST_FILE="$tmp/actions/source.md" PERSONAL_ACTION_HOST=akmac \
+  XDG_STATE_HOME="$tmp/pending-state" HOME="$tmp/home" bash "$repo/bin/dots-warmup-report.sh" > "$tmp/report.out" 2> "$tmp/report.err"
+grep -q '^Machine-wide personal actions:$' "$tmp/report.out"
+grep -q 'akmac action' "$tmp/report.out"
+grep -q 'shared action' "$tmp/report.out"
+! grep -q 'akwin action' "$tmp/report.out"
 grep -q '^Dots setup pending interactive modules:' "$tmp/report.out"
 grep -q '^Dots background warmup failed: warmup.log$' "$tmp/report.err"
-XDG_STATE_HOME="$tmp/pending-state" HOME="$tmp/home" bash "$repo/bin/dots-warmup-report.sh" > "$tmp/report-again.out" 2> "$tmp/report-again.err"
-[[ ! -s "$tmp/report-again.out" && ! -s "$tmp/report-again.err" ]]
+PERSONAL_ACTION_LIST_FILE="$tmp/actions/source.md" PERSONAL_ACTION_HOST=akmac \
+  XDG_STATE_HOME="$tmp/pending-state" HOME="$tmp/home" bash "$repo/bin/dots-warmup-report.sh" > "$tmp/report-again.out" 2> "$tmp/report-again.err"
+grep -q 'akmac action' "$tmp/report-again.out"
+grep -q 'shared action' "$tmp/report-again.out"
+[[ ! -s "$tmp/report-again.err" ]]
 
 # Isolated cadence tests use only fake setup/updater commands and an injected clock.
 mkdir -p "$tmp/bin"
