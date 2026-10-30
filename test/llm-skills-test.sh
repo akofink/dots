@@ -11,6 +11,13 @@ home="$tmpdir/home"
 mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev" "$home/.claude" "$home/.pi/agent"
 printf '{"theme":"light","permissions":{"allow":["Bash(git status *)"]}}\n' > "$home/.claude/settings.json"
 printf '{"customPiSetting":"preserve-me"}\n' > "$home/.pi/agent/settings.json"
+# Setup must leave independently managed personal executables alone and must
+# never invoke op while configuring either machine role.
+mkdir -p "$home/.local/bin"
+printf '#!/bin/sh\ntouch "$HOME/op-invoked"\nexit 97\n' > "$home/.local/bin/op"
+chmod +x "$home/.local/bin/op"
+cp "$home/.local/bin/op" "$tmpdir/op-original"
+export PATH="$home/.local/bin:$PATH"
 printf 'global instructions\n' > "$notes_repo/agents/global-personal.md"
 printf 'work instructions\n' > "$notes_repo/agents/global-work.md"
 printf 'personal development guidance\n' > "$notes_repo/agents/guidance/dev-root-personal.md"
@@ -24,7 +31,9 @@ printf 'bounded profile\n' > "$notes_repo/agents/pi-agents/bounded-investigator.
 
 common_skills=(agent-feedback-guidance akagent agent-liaison agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring preprod-asap-testing querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
-for skill_name in "${common_skills[@]}" "${work_skills[@]}"; do
+# Use a real retired skill source so an accidental surviving symlink cannot
+# pass an absence check merely because its target is missing.
+for skill_name in "${common_skills[@]}" "${work_skills[@]}" managing-1password-cli; do
   mkdir -p "$notes_repo/agents/skills/$skill_name"
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
 done
@@ -94,9 +103,12 @@ run_verify() {
 run_setup
 run_verify
 test ! -e "$home/.codex/rules/work.rules"
+cmp "$tmpdir/op-original" "$home/.local/bin/op"
+test ! -e "$home/op-invoked"
 
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -L "$home/$skill_root/herdr"
+  test ! -L "$home/$skill_root/managing-1password-cli"
   test ! -e "$home/$skill_root/managing-1password-cli"
 done
 
@@ -148,6 +160,8 @@ env \
   LLM_LINK_ONLY=1 \
   bash "$repo_root/setup/llm.sh"
 
+cmp "$tmpdir/op-original" "$home/.local/bin/op"
+test ! -e "$home/op-invoked"
 cmp -s "$repo_root/templates/dot_codex/rules/work.rules" "$home/.codex/rules/work.rules"
 jq -e '.sandbox.excludedCommands | index("tmux *")' "$home/.claude/settings.json" >/dev/null
 jq -e '.sandbox.excludedCommands | index("liaison-relay *")' "$home/.claude/settings.json" >/dev/null
@@ -170,6 +184,7 @@ test ! -L "$home/.agents/skills/twg"
 test -f "$home/.agents/skills/twg/SKILL.md"
 test "$(cat "$home/.local/share/rovo/current/twg/skills/twg/SKILL.md")" = 'preserved legacy vendor source'
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+  test ! -L "$home/$skill_root/managing-1password-cli"
   test ! -e "$home/$skill_root/managing-1password-cli"
 done
 for root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do

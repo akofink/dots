@@ -95,6 +95,13 @@ bash setup/<module>.sh
 Standalone module scripts resolve the checked-out repo automatically, so they can be run from inside the
 repo or by absolute path without requiring `DOTS_REPO` to point at `$DEV_REPOS/dots`.
 
+#### 1Password CLI policy
+
+Dots setup must not install or download the 1Password `op` CLI on `MACHINE_CLASS=work` machines.
+Currently neither machine class installs it; existing personal-machine installations are left alone.
+The setup-policy regression test covers bootstrap, standalone modules, and helper commands without
+running provisioning. Setup does not uninstall applications or remove 1Password configuration data.
+
 #### Updating tools
 
 `akupdate` upgrades Homebrew packages, Pi and its installed extensions, Claude Code, and Codex. Pi's
