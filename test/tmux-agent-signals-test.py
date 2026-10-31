@@ -88,6 +88,30 @@ class SignalsTest(unittest.TestCase):
             self.assertEqual(len(claude_hooks["PostToolUse"]), 1)
             self.assertTrue((home / ".pi/agent/extensions/tmux-agent-state.ts").is_symlink())
 
+    def test_windows_codex_install_repairs_owned_paths_and_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as folder:
+            codex = Path(folder) / ".codex"
+            codex.mkdir()
+            config = codex / "hooks.json"
+            config.write_text(json.dumps({"otherSetting": "preserve", "hooks": {
+                "SessionStart": [{"matcher": "", "hooks": [
+                    {"type": "command", "command": "keep-me"},
+                    {"type": "command", "command": "python3 /old/hooks/tmux-agent-state.py"},
+                    {"type": "command", "command": "python3 /another/path/tmux-agent-state.py"},
+                    {"type": "command", "command": 42},
+                ]}]
+            }}))
+            installer = ROOT / "install-windows-codex.py"
+            for _ in range(2):
+                subprocess.run([sys.executable, str(installer), str(codex)], check=True)
+            hooks = json.loads(config.read_text())["hooks"]
+            commands = [h["command"] for e in hooks["SessionStart"] for h in e["hooks"]]
+            self.assertIn("keep-me", commands)
+            self.assertEqual(sum(isinstance(c, str) and "tmux-agent-state.py" in c for c in commands), 1)
+            for event in ("PostToolUse", "SessionEnd", "UserPromptSubmit", "Stop"):
+                self.assertEqual(len(hooks[event]), 1)
+            self.assertEqual(Path(commands[-1].split('"')[1]).read_bytes(), (ROOT / "codex.py").read_bytes())
+
     def test_install_merges_scoped_agent_command_rules(self):
         work_checkin = ".claude/skills/work-agent-orchestrator/scripts/checkin"
         for machine_class, count in (("work", 9), ("personal", 7)):

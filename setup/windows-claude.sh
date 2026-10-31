@@ -55,5 +55,6 @@ done
 
 cp -- "$dots_repo/templates/windows-home/CLAUDE.md" "$claude_config/CLAUDE.md"
 cp -- "$dots_repo/templates/windows-home/CLAUDE.md" "$codex_config/AGENTS.md"
-printf 'Installed %d common skills and Windows-native Claude/Codex guidance under %s\n' \
+python3 "$dots_repo/tmux-agent-signals/install-windows-codex.py" "$codex_config"
+printf 'Installed %d common skills, Windows-native guidance, and Codex tmux hooks under %s\n' \
   "${#common_skills[@]}" "$windows_home_linux"
