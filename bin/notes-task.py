@@ -94,6 +94,49 @@ def ensure_agent_repo():
     return AGENT_NOTES
 
 
+def initialize_agent_checkout():
+    """Safely recover an empty agent clone whose symbolic HEAD has no commit."""
+    if subprocess.run(["git", "-C", str(AGENT_NOTES), "rev-parse", "--verify", "--quiet", "HEAD^{commit}"],
+                      capture_output=True).returncode == 0:
+        return
+
+    remote_head = git("symbolic-ref", "--quiet", "refs/remotes/origin/HEAD", cwd=AGENT_NOTES, check=False)
+    candidates = [remote_head, "refs/remotes/origin/main"]
+    target = next((ref for ref in candidates if ref and ref.startswith("refs/remotes/origin/") and
+                   subprocess.run(["git", "-C", str(AGENT_NOTES), "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+                                  capture_output=True).returncode == 0), None)
+    if target is None:
+        raise SystemExit("notes-task: agent clone HEAD is unborn and neither origin/HEAD nor origin/main resolves to a commit; "
+                         "preserving clone for inspection")
+
+    branch = target.removeprefix("refs/remotes/origin/")
+    if subprocess.run(["git", "-C", str(AGENT_NOTES), "check-ref-format", "--branch", branch],
+                      capture_output=True).returncode != 0:
+        raise SystemExit(f"notes-task: agent clone remote default {target} is not a valid branch; preserving clone")
+    local_branches = git("for-each-ref", "--format=%(refname)", "refs/heads/", cwd=AGENT_NOTES)
+    if local_branches:
+        raise SystemExit(f"notes-task: agent clone HEAD is unborn but local branches exist ({local_branches}); "
+                         "preserving clone for inspection")
+    listed = git("worktree", "list", "--porcelain", cwd=AGENT_NOTES)
+    worktree_paths = [line.removeprefix("worktree ") for line in listed.splitlines() if line.startswith("worktree ")]
+    if len(worktree_paths) != 1 or Path(worktree_paths[0]).resolve() != AGENT_NOTES:
+        raise SystemExit("notes-task: agent clone HEAD is unborn and other worktrees exist; preserving clone for inspection")
+    dirty = git("status", "--porcelain", "--untracked-files=all", cwd=AGENT_NOTES)
+    if dirty:
+        raise SystemExit(f"notes-task: agent clone HEAD is unborn and checkout/index state is not clean ({dirty}); "
+                         "preserving clone for inspection")
+    unexpected = [path.name for path in AGENT_NOTES.iterdir() if path.name != ".git"]
+    if unexpected:
+        raise SystemExit(f"notes-task: agent clone HEAD is unborn but checkout files exist ({', '.join(unexpected)}); "
+                         "preserving clone for inspection")
+
+    result = subprocess.run(["git", "-C", str(AGENT_NOTES), "checkout", "-b", branch, target],
+                            text=True, capture_output=True)
+    if result.returncode != 0:
+        raise SystemExit(f"notes-task: unable to initialize empty agent clone on {branch}: {result.stderr.strip()}; "
+                         "preserving clone for inspection")
+
+
 def published(branch):
     """True when every branch commit is already on origin/main."""
     if not ref_exists(f"refs/heads/{branch}"):
@@ -235,6 +278,8 @@ def cmd_open(args):
         NOTES = ensure_agent_repo()
 
     git("fetch", "--quiet", "origin")
+    if NOTES == AGENT_NOTES:
+        initialize_agent_checkout()
     if path.exists():
         print(path)
         return

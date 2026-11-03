@@ -139,6 +139,60 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
                          (self.notes / ".git").resolve())
         self.assertEqual(self.git(self.operator_notes, "status", "--porcelain"), "")
 
+    def test_open_recovers_empty_agent_clone_with_unborn_invalid_head(self):
+        head = Path(self.git(self.notes, "rev-parse", "--path-format=absolute", "--git-path", "HEAD"))
+        self.git(self.notes, "update-ref", "-d", "refs/heads/main")
+        head.write_text("ref: refs/heads/.invalid\n")
+        self.git(self.notes, "read-tree", "--empty")
+        for child in self.notes.iterdir():
+            if child.name != ".git":
+                shutil.rmtree(child) if child.is_dir() else child.unlink()
+        self.assertNotEqual(subprocess.run(["git", "-C", str(self.notes), "rev-parse", "--verify", "HEAD^{commit}"],
+                                          capture_output=True).returncode, 0)
+        self.git(self.operator_notes, "checkout", "-b", "operator-local")
+        with (self.operator_notes / "README.md").open("a") as readme:
+            readme.write(" staged operator edit\\n")
+        self.git(self.operator_notes, "add", "README.md")
+        with (self.operator_notes / "README.md").open("a") as readme:
+            readme.write(" unstaged operator edit\\n")
+        (self.operator_notes / "operator-untracked.md").write_text("untracked operator data\\n")
+        operator_before = self.operator_snapshot()
+
+        path = Path(self.tool("open", "first-use").stdout.strip())
+
+        self.assertEqual(self.git(self.notes, "branch", "--show-current"), "main")
+        self.assertEqual(self.git(self.notes, "rev-parse", "HEAD"), self.git(self.notes, "rev-parse", "origin/main"))
+        self.assertEqual(self.git(self.notes, "status", "--porcelain", "--untracked-files=all"), "")
+        self.assertEqual(self.git(path, "branch", "--show-current"), "docs/first-use")
+        self.assertEqual(Path(self.tool("open", "first-use").stdout.strip()), path)
+        self.assertEqual(self.operator_snapshot(), operator_before)
+
+    def test_open_refuses_to_initialize_unborn_agent_clone_with_checkout_files(self):
+        head = Path(self.git(self.notes, "rev-parse", "--path-format=absolute", "--git-path", "HEAD"))
+        self.git(self.notes, "update-ref", "-d", "refs/heads/main")
+        head.write_text("ref: refs/heads/.invalid\n")
+        self.git(self.notes, "read-tree", "--empty")
+        for child in self.notes.iterdir():
+            if child.name != ".git":
+                shutil.rmtree(child) if child.is_dir() else child.unlink()
+        protected = self.notes / "keep-me.txt"
+        protected.write_text("preserve this file\n")
+        self.git(self.operator_notes, "checkout", "-b", "operator-local")
+        with (self.operator_notes / "README.md").open("a") as readme:
+            readme.write(" staged operator edit\\n")
+        self.git(self.operator_notes, "add", "README.md")
+        with (self.operator_notes / "README.md").open("a") as readme:
+            readme.write(" unstaged operator edit\\n")
+        (self.operator_notes / "operator-untracked.md").write_text("untracked operator data\\n")
+        operator_before = self.operator_snapshot()
+
+        result = self.tool("open", "unsafe", ok=False)
+
+        self.assertIn("checkout/index state is not clean", result.stderr)
+        self.assertEqual(protected.read_text(), "preserve this file\n")
+        self.assertFalse((self.wt_root / "unsafe").exists())
+        self.assertEqual(self.operator_snapshot(), operator_before)
+
     def test_open_preserves_existing_legacy_branch_binding(self):
         self.git(self.operator_notes, "branch", "docs/legacy")
         path = Path(self.tool("open", "legacy").stdout.strip())
