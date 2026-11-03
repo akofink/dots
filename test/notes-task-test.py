@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """notes-task lifecycle against disposable signed clones and fake akagent/tmux."""
+import fcntl
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -15,7 +17,8 @@ class NotesTaskTest(unittest.TestCase):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name)
-        self.notes = self.root / "notes"
+        self.operator_notes = self.root / "operator-notes"
+        self.notes = self.root / "agent-notes"
         self.wt_root = self.root / "worktrees"
         self.tasks = self.root / "tasks.json"
         self.panes = self.root / "panes.txt"
@@ -39,27 +42,37 @@ elif args[:3] == ["task", "resource", "create"]:
     open({str(self.root / "registered")!r}, "a").write(" ".join(args) + "\\n")
 """)
         self.fake(bin_dir / "tmux", f"print(open({str(self.panes)!r}).read(), end='')")
-        # Stand-in for syncdots: integrate upstream by merge, then push.
+        # Stand-in for syncdots: integrate the selected checkout by merge, then push.
         self.fake(bin_dir / "syncdots", f"""
-import subprocess
-open({str(self.sync_calls)!r}, "a").write("called\\n")
-repo = {str(self.notes)!r}
+import os, subprocess, sys
+repo = os.environ["NOTES_REPO"]
+open({str(self.sync_calls)!r}, "a").write(repo + "\\t" + os.environ.get("DOTS_SYNC_NOTES_ONLY", "0") + "\\n")
+fail_once = os.environ.get("FAKE_SYNCDOTS_FAIL_ONCE")
+if fail_once and not os.path.exists(fail_once):
+    open(fail_once, "w").close()
+    sys.exit(1)
 subprocess.check_call(["git", "-C", repo, "pull", "--quiet", "--no-rebase", "--no-edit"])
 subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
 """)
         self.env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
-                    "NOTES_REPO": str(self.notes), "NOTES_WORKTREE_ROOT": str(self.wt_root),
+                    "NOTES_REPO": str(self.operator_notes), "NOTES_AGENT_REPO": str(self.notes),
+                    "NOTES_WORKTREE_ROOT": str(self.wt_root), "XDG_STATE_HOME": str(self.root / "state"),
+                    "NOTES_REPO_URL": "", "FAKE_SYNCDOTS_FAIL_ONCE": "",
                     "AKAGENT_BIN": str(bin_dir / "akagent"), "TMUX_BIN": str(bin_dir / "tmux"),
                     "SYNCDOTS_BIN": str(bin_dir / "syncdots")}
         remote = self.root / "remote.git"
+        self.remote = remote
         self.git(self.root, "init", "--quiet", "--bare", "--initial-branch=main", str(remote))
+        self.git(self.root, "clone", "--quiet", str(remote), str(self.operator_notes))
+        self.configure(self.operator_notes)
+        (self.operator_notes / ".gitignore").write_text("tmp/\n")
+        (self.operator_notes / "README.md").write_text("notes\n")
+        self.git(self.operator_notes, "add", "--all")
+        self.git(self.operator_notes, "commit", "--quiet", "-m", "initial")
+        self.git(self.operator_notes, "push", "--quiet", "-u", "origin", "main")
         self.git(self.root, "clone", "--quiet", str(remote), str(self.notes))
         self.configure(self.notes)
-        (self.notes / ".gitignore").write_text("tmp/\n")
-        (self.notes / "README.md").write_text("notes\n")
-        self.git(self.notes, "add", "--all")
-        self.git(self.notes, "commit", "--quiet", "-m", "initial")
-        self.git(self.notes, "push", "--quiet", "-u", "origin", "main")
+        self.env["NOTES_REPO_URL"] = str(remote)
 
     def fake(self, path, body):
         path.write_text("#!/usr/bin/env python3\n" + body)
@@ -75,7 +88,10 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
             self.git(repo, "config", key, value)
 
     def tool(self, *args, ok=True):
-        result = subprocess.run(["python3", str(TOOL), *args], env=self.env, text=True, capture_output=True)
+        env = dict(self.env)
+        if args and args[0] == "prune":
+            env["NOTES_REPO"] = str(self.notes)
+        result = subprocess.run(["python3", str(TOOL), *args], env=env, text=True, capture_output=True)
         if ok:
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
@@ -90,11 +106,46 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
     def branches(self):
         return self.git(self.notes, "for-each-ref", "--format=%(refname:short)", "refs/heads/docs/").split()
 
+    def operator_snapshot(self):
+        index = Path(self.git(self.operator_notes, "rev-parse", "--path-format=absolute", "--git-path", "index"))
+        untracked = self.operator_notes / "operator-untracked.md"
+        readme = self.operator_notes / "README.md"
+        return {
+            "branch": self.git(self.operator_notes, "branch", "--show-current"),
+            "head": self.git(self.operator_notes, "rev-parse", "HEAD"),
+            "refs": self.git(self.operator_notes, "for-each-ref", "--format=%(refname) %(objectname)"),
+            "status": self.git(self.operator_notes, "status", "--porcelain=v2", "--untracked-files=all"),
+            "index": index.read_bytes(),
+            "readme": readme.read_bytes(),
+            "untracked": untracked.read_bytes(),
+            "cached_diff": self.git(self.operator_notes, "diff", "--cached", "--binary"),
+            "worktree_diff": self.git(self.operator_notes, "diff", "--binary"),
+        }
+
     def test_open_creates_and_reuses_worktree(self):
         path = Path(self.tool("open", "t1").stdout.strip())
         self.assertEqual(path, (self.wt_root / "t1").resolve())
         self.assertEqual(self.git(path, "branch", "--show-current"), "docs/t1")
+        self.assertEqual(Path(self.git(path, "rev-parse", "--path-format=absolute", "--git-common-dir")),
+                         (self.notes / ".git").resolve())
         self.assertEqual(Path(self.tool("open", "t1").stdout.strip()), path)
+
+    def test_open_initializes_agent_clone_from_operator_remote(self):
+        shutil.rmtree(self.notes)
+        path = Path(self.tool("open", "bootstrap").stdout.strip())
+        self.assertTrue((self.notes / ".git").is_dir())
+        self.assertEqual(self.git(self.notes, "remote", "get-url", "origin"), str(self.remote))
+        self.assertEqual(Path(self.git(path, "rev-parse", "--path-format=absolute", "--git-common-dir")),
+                         (self.notes / ".git").resolve())
+        self.assertEqual(self.git(self.operator_notes, "status", "--porcelain"), "")
+
+    def test_open_preserves_existing_legacy_branch_binding(self):
+        self.git(self.operator_notes, "branch", "docs/legacy")
+        path = Path(self.tool("open", "legacy").stdout.strip())
+        common = Path(self.git(path, "rev-parse", "--path-format=absolute", "--git-common-dir"))
+        self.assertEqual(common, (self.operator_notes / ".git").resolve())
+        self.assertEqual(self.git(path, "branch", "--show-current"), "docs/legacy")
+        self.assertNotIn("docs/legacy", self.branches())
 
     def test_open_rejects_existing_path_on_wrong_branch_without_mutation(self):
         path = Path(self.tool("open", "t1").stdout.strip())
@@ -140,6 +191,68 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.tool("publish", "t1")
         self.assertEqual((self.notes / "t1.md").read_text(), "report v2\n")
 
+    def test_agent_publish_preserves_dirty_operator_checkout_and_only_pushes_agent_history(self):
+        path = self.open_and_commit("t1")
+        self.git(self.operator_notes, "checkout", "-b", "operator-local")
+        with (self.operator_notes / "README.md").open("a") as readme:
+            readme.write(" staged operator edit\n")
+        self.git(self.operator_notes, "add", "README.md")
+        with (self.operator_notes / "README.md").open("a") as readme:
+            readme.write(" unstaged operator edit\n")
+        (self.operator_notes / "operator-untracked.md").write_text("untracked operator data\n")
+        before = self.operator_snapshot()
+        initial = self.git(self.remote, "rev-parse", "refs/heads/main")
+        task_commit = self.git(path, "rev-parse", "HEAD")
+
+        result = self.tool("publish", "t1")
+
+        self.assertIn("published docs/t1", result.stdout)
+        self.assertEqual(self.operator_snapshot(), before)
+        remote_head = self.git(self.remote, "rev-parse", "refs/heads/main")
+        self.git(self.remote, "merge-base", "--is-ancestor", task_commit, remote_head)
+        self.assertEqual(self.git(self.remote, "rev-list", "--count", f"{initial}..{remote_head}"), "2")
+        self.assertNotIn("operator-untracked.md", self.git(self.remote, "ls-tree", "-r", "--name-only", remote_head))
+        calls = self.sync_calls.read_text().splitlines()
+        self.assertEqual(calls, [f"{self.notes.resolve()}\t1"])
+
+    def test_publish_lock_refuses_without_merging_and_can_be_retried(self):
+        self.open_and_commit("locked")
+        lock = self.root / "state/notes-task/publish.lock"
+        lock.parent.mkdir(parents=True, exist_ok=True)
+        with lock.open("a+") as held:
+            fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            before_main = self.git(self.notes, "rev-parse", "main")
+            result = self.tool("publish", "locked", ok=False)
+            self.assertIn("another notes publication is running", result.stderr)
+            self.assertEqual(self.git(self.notes, "rev-parse", "main"), before_main)
+            self.assertFalse(self.sync_calls.exists())
+            fcntl.flock(held, fcntl.LOCK_UN)
+        self.tool("publish", "locked")
+
+    def test_non_fast_forward_sync_failure_is_retryable(self):
+        path = self.open_and_commit("retry")
+        initial = self.git(self.remote, "rev-parse", "refs/heads/main")
+        fail_once = self.root / "sync-fail-once"
+        self.env["FAKE_SYNCDOTS_FAIL_ONCE"] = str(fail_once)
+        first = self.tool("publish", "retry", ok=False)
+        self.assertIn("keeps the local merge for retry", first.stderr)
+        local_merge = self.git(self.notes, "rev-parse", "main")
+        self.assertNotEqual(local_merge, initial)
+        self.assertEqual(self.git(self.remote, "rev-parse", "refs/heads/main"), initial)
+
+        racer = self.root / "racer"
+        self.git(self.root, "clone", "--quiet", str(self.remote), str(racer))
+        self.configure(racer)
+        (racer / "concurrent.md").write_text("concurrent remote change\n")
+        self.git(racer, "add", "concurrent.md")
+        self.git(racer, "commit", "--quiet", "-m", "concurrent remote change")
+        self.git(racer, "push", "--quiet")
+
+        self.tool("publish", "retry")
+        remote_head = self.git(self.remote, "rev-parse", "refs/heads/main")
+        self.git(self.remote, "merge-base", "--is-ancestor", self.git(path, "rev-parse", "HEAD"), remote_head)
+        self.assertEqual(self.git(self.remote, "show", f"{remote_head}:concurrent.md"), "concurrent remote change")
+
     def test_publish_conflict_restores_canonical_main(self):
         path = self.open_and_commit("t1", "task side\n")
         (self.notes / "t1.md").write_text("main side\n")
@@ -149,6 +262,29 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertIn("conflicts with main", result.stderr)
         self.assertEqual(self.git(self.notes, "status", "--porcelain"), "")
         self.assertTrue(path.exists())
+
+    def test_shared_guidance_conflict_aborts_without_preference_resolution(self):
+        path = Path(self.tool("open", "guidance").stdout.strip())
+        guidance = path / "agents/skills/example/SKILL.md"
+        guidance.parent.mkdir(parents=True)
+        guidance.write_text("agent side\n")
+        self.git(path, "add", "agents/skills/example/SKILL.md")
+        self.git(path, "commit", "--quiet", "-m", "agent guidance edit")
+        main_guidance = self.notes / "agents/skills/example/SKILL.md"
+        main_guidance.parent.mkdir(parents=True)
+        main_guidance.write_text("existing shared guidance\n")
+        self.git(self.notes, "add", "agents/skills/example/SKILL.md")
+        self.git(self.notes, "commit", "--quiet", "-m", "main guidance edit")
+        before = self.git(self.notes, "rev-parse", "main")
+
+        result = self.tool("publish", "guidance", ok=False)
+
+        self.assertIn("conflicts in shared agent guidance", result.stderr)
+        self.assertIn("Preserve both sides", result.stderr)
+        self.assertEqual(self.git(self.notes, "rev-parse", "main"), before)
+        self.assertEqual(self.git(self.notes, "status", "--porcelain"), "")
+        self.assertTrue(path.exists())
+        self.assertFalse(self.sync_calls.exists())
 
     def test_publish_refuses_uncommitted_worktree(self):
         path = self.open_and_commit("t1")

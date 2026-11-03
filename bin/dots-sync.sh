@@ -11,6 +11,7 @@ fi
 
 dots_repo=${DOTS_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/dots"}
 notes_repo=${NOTES_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/notes"}
+notes_only=${DOTS_SYNC_NOTES_ONLY:-0}
 state_dir=${XDG_STATE_HOME:-"$HOME/.local/state"}/dots-sync
 lock_dir="$state_dir/lock"
 lock_retry_limit=5
@@ -229,6 +230,11 @@ sync_repo() {
   fi
   status=$?
   if (( status != 0 )); then
+    if [[ "$mode" == merge ]] && git -C "$repo" rev-parse --verify --quiet MERGE_HEAD >/dev/null; then
+      if ! git -C "$repo" merge --abort; then
+        printf 'Unable to abort notes merge in %s; inspect and preserve the integration checkout\n' "$repo" >&2
+      fi
+    fi
     printf 'Failed to sync %s during pull (exit %d)\n' "$repo" "$status" >&2
     return "$status"
   fi
@@ -246,6 +252,7 @@ sync_repo() {
 }
 
 sync_llm_skill_links() {
+  [[ "$notes_only" == 1 || "${DOTS_SYNC_SKIP_LLM_LINKS:-0}" == 1 ]] && return 0
   [[ -f "$dots_repo/setup/llm.sh" && -d "$notes_repo" ]] || return 0
 
   local command=(env DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" DOTS_SETUP_ENV_ONLY=1 LLM_LINK_ONLY=1 bash "$dots_repo/setup/llm.sh")
@@ -267,7 +274,9 @@ sync_llm_skill_links() {
 dots_head_before=$(git -C "$dots_repo" rev-parse HEAD 2>/dev/null || :)
 notes_head_before=$(git -C "$notes_repo" rev-parse HEAD 2>/dev/null || :)
 sync_status=0
-sync_repo "$dots_repo" || sync_status=$?
+if [[ "$notes_only" != 1 ]]; then
+  sync_repo "$dots_repo" || sync_status=$?
+fi
 notes_status=0
 sync_repo "$notes_repo" merge || notes_status=$?
 (( notes_status == 0 )) || sync_status=$notes_status
@@ -288,12 +297,12 @@ sync_advanced=0
 if (( sync_status == 0 )); then
   [[ -n "$dots_head_before" && "$dots_head_before" != "$dots_head_after" ]] && sync_advanced=1
   [[ -n "$notes_head_before" && "$notes_head_before" != "$notes_head_after" ]] && sync_advanced=1
-  if [[ -n "$notes_head_before" && "$notes_head_before" != "$notes_head_after" ]]; then
+  if [[ "$notes_only" != 1 && -n "$notes_head_before" && "$notes_head_before" != "$notes_head_after" ]]; then
     python3 "$dots_repo/bin/dots-guidance-marker.py" "$notes_repo" "$notes_head_before" "$notes_head_after" "$state_dir" || sync_status=$?
   fi
 fi
 
-if (( sync_status == 0 && sync_advanced == 1 )); then
+if (( sync_status == 0 && sync_advanced == 1 )) && [[ "$notes_only" != 1 ]]; then
   warmup_log="$state_dir/warmup.log"
   nohup "$dots_repo/bin/dots-sync.sh" --warmup-child >> "$warmup_log" 2>&1 </dev/null &
   child_pid=$!

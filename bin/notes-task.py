@@ -4,8 +4,12 @@
 Agents call this instead of running git worktree or git branch in the notes repo:
 
   notes-task open <task-id>      create or reuse ~/dev/worktrees/notes/<task-id> on docs/<task-id>
-  notes-task publish <task-id>   merge the committed task branch into canonical main and sync
+  notes-task publish <task-id>   merge the committed task branch into its owning main and sync
   notes-task prune [--dry-run]   remove published, idle task worktrees and branches (syncdots runs this)
+
+New tasks use the separate NOTES_AGENT_REPO clone by default. Existing task worktrees and
+branches in NOTES_REPO remain attached to that legacy checkout until their owners finish.
+The isolated lane publishes without refreshing links into the operator checkout.
 
 Prune removes a worktree or docs/* branch only when every commit is already on
 origin/main (by ancestry or patch equivalence), the worktree has no tracked or
@@ -15,6 +19,11 @@ own <task-id> worktree and its newest notes resource. Ignored files (task tmp/
 evidence) are moved to the canonical checkout's tmp/<worktree-name>/ first.
 """
 import argparse
+try:
+    import fcntl
+except ImportError:  # Windows uses the standard-library byte-range lock.
+    fcntl = None
+    import msvcrt
 import json
 import os
 from pathlib import Path
@@ -25,14 +34,17 @@ import time
 
 HOME = Path.home()
 NOTES = Path(os.environ.get("NOTES_REPO", HOME / "dev/repos/notes")).resolve()
+AGENT_NOTES = Path(os.environ.get("NOTES_AGENT_REPO", HOME / "dev/repos/notes-agent")).resolve()
 ROOT = Path(os.environ.get("NOTES_WORKTREE_ROOT", HOME / "dev/worktrees/notes")).resolve()
+PUBLISH_LOCK = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "notes-task" / "publish.lock"
 AKAGENT = os.environ.get("AKAGENT_BIN", "akagent")
 TMUX = os.environ.get("TMUX_BIN", "tmux")
 SYNCDOTS = os.environ.get("SYNCDOTS_BIN", "syncdots")
 LIVE_TASK = {"created", "active", "waiting", "blocked"}
 
 
-def git(*args, cwd=NOTES, check=True):
+def git(*args, cwd=None, check=True):
+    cwd = NOTES if cwd is None else cwd
     result = subprocess.run(["git", "-C", str(cwd), *args], text=True, capture_output=True)
     if check and result.returncode != 0:
         raise SystemExit(f"notes-task: git {' '.join(args)} failed: {result.stderr.strip()}")
@@ -42,6 +54,44 @@ def git(*args, cwd=NOTES, check=True):
 def ref_exists(ref):
     return subprocess.run(["git", "-C", str(NOTES), "rev-parse", "--verify", "--quiet", ref],
                           capture_output=True).returncode == 0
+
+
+def common_dir(repo):
+    return Path(git("rev-parse", "--path-format=absolute", "--git-common-dir", cwd=repo)).resolve()
+
+
+def repository_for_worktree(path):
+    try:
+        task_common = common_dir(path)
+    except SystemExit:
+        raise SystemExit(f"notes-task: {path} is not a recognized notes worktree; refusing to continue")
+    candidates = {NOTES, AGENT_NOTES}
+    for repo in candidates:
+        if repo.is_dir():
+            try:
+                if common_dir(repo) == task_common:
+                    return repo
+            except SystemExit:
+                continue
+    raise SystemExit(f"notes-task: {path} belongs to an unconfigured notes clone; refusing to rebind it")
+
+
+def ensure_agent_repo():
+    if AGENT_NOTES == NOTES:
+        raise SystemExit("notes-task: NOTES_AGENT_REPO must be separate from NOTES_REPO")
+    if AGENT_NOTES.exists():
+        if not (AGENT_NOTES / ".git").exists():
+            raise SystemExit(f"notes-task: agent notes path exists but is not a Git checkout: {AGENT_NOTES}")
+        return AGENT_NOTES
+
+    remote = os.environ.get("NOTES_REPO_URL")
+    if not remote:
+        remote = git("remote", "get-url", "origin", cwd=NOTES)
+    AGENT_NOTES.parent.mkdir(parents=True, exist_ok=True)
+    cloned = subprocess.run(["git", "clone", "--", remote, str(AGENT_NOTES)], text=True, capture_output=True)
+    if cloned.returncode != 0:
+        raise SystemExit(f"notes-task: unable to initialize agent notes clone: {cloned.stderr.strip()}")
+    return AGENT_NOTES
 
 
 def published(branch):
@@ -63,6 +113,32 @@ def require_task_worktree(task_id, path, branch):
     if checked_out != branch:
         actual = checked_out or "(detached HEAD or not a worktree)"
         raise SystemExit(f"notes-task: {path} is checked out on {actual}, expected {branch}; refusing to continue")
+
+
+def publisher_lock():
+    PUBLISH_LOCK.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(PUBLISH_LOCK, os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        if fcntl is not None:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        else:
+            if os.fstat(descriptor).st_size == 0:
+                os.write(descriptor, b"\0")
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            msvcrt.locking(descriptor, msvcrt.LK_NBLCK, 1)
+    except OSError:
+        os.close(descriptor)
+        raise SystemExit("notes-task: another notes publication is running; preserve state and retry after it finishes")
+    return descriptor
+
+
+def release_publisher_lock(descriptor):
+    if fcntl is not None:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+    else:
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+    os.close(descriptor)
 
 
 def akagent_json(*args):
@@ -149,10 +225,17 @@ def register(task_id, branch, path):
 
 
 def cmd_open(args):
+    global NOTES
     branch, path = f"docs/{args.task_id}", ROOT / args.task_id
+    if path.exists():
+        NOTES = repository_for_worktree(path)
+        require_task_worktree(args.task_id, path, branch)
+    elif subprocess.run(["git", "-C", str(NOTES), "show-ref", "--verify", "--quiet",
+                         f"refs/heads/{branch}"]).returncode != 0:
+        NOTES = ensure_agent_repo()
+
     git("fetch", "--quiet", "origin")
     if path.exists():
-        require_task_worktree(args.task_id, path, branch)
         print(path)
         return
     ROOT.mkdir(parents=True, exist_ok=True)
@@ -166,35 +249,60 @@ def cmd_open(args):
     print(path)
 
 
-def cmd_publish(args):
-    branch, path = f"docs/{args.task_id}", ROOT / args.task_id
-    require_task_worktree(args.task_id, path, branch)
+def cmd_publish_locked(branch, path):
     if not ref_exists(f"refs/heads/{branch}"):
         raise SystemExit(f"notes-task: expected task branch {branch} does not exist; refusing to publish")
     if not clean(path):
         raise SystemExit(f"notes-task: {path} has uncommitted changes; commit owned paths first")
     if git("symbolic-ref", "--short", "HEAD") != "main":
-        raise SystemExit("notes-task: canonical notes checkout is not on main; leave it for the owner")
-    if git("status", "--porcelain", "--untracked-files=no"):
-        raise SystemExit("notes-task: canonical notes main has tracked changes; leave them and retry later")
+        raise SystemExit("notes-task: integration checkout is not on main; leave it for the owner")
+    status_args = ["status", "--porcelain", "--untracked-files=all"] if NOTES == AGENT_NOTES else [
+        "status", "--porcelain", "--untracked-files=no"]
+    if git(*status_args):
+        scope = "agent integration" if NOTES == AGENT_NOTES else "canonical notes"
+        raise SystemExit(f"notes-task: {scope} main has local changes; leave them and retry later")
     for marker in ("MERGE_HEAD", "rebase-merge", "rebase-apply"):
         if Path(git("rev-parse", "--path-format=absolute", "--git-path", marker)).exists():
-            raise SystemExit(f"notes-task: canonical notes has {marker} in progress; leave it for the owner")
+            raise SystemExit(f"notes-task: integration checkout has {marker} in progress; leave it for the owner")
     if published(branch):
         print(f"notes-task: {branch} is already published")
     else:
         merged = subprocess.run(["git", "-C", str(NOTES), "merge", "--no-ff", "--no-edit",
                                  "-m", f"Merge {branch}", branch], text=True, capture_output=True)
-        if merged.returncode != 0:  # never leave canonical main mid-merge
-            subprocess.run(["git", "-C", str(NOTES), "merge", "--abort"], capture_output=True)
-            raise SystemExit(f"notes-task: {branch} conflicts with main; canonical main was restored. "
-                             f"In the task worktree run `git merge origin/main`, resolve, commit, and publish again.")
-    result = subprocess.run([SYNCDOTS, "--quiet"])
+        if merged.returncode != 0:
+            conflicts = git("diff", "--name-only", "--diff-filter=U", check=False).splitlines()
+            aborted = subprocess.run(["git", "-C", str(NOTES), "merge", "--abort"], text=True, capture_output=True)
+            if aborted.returncode != 0:
+                raise SystemExit(f"notes-task: {branch} conflicts and integration abort failed; preserve and inspect "
+                                 f"the checkout before retrying: {aborted.stderr.strip()}")
+            if any(path in {"AGENTS.md", "agents"} or path.startswith("agents/") for path in conflicts):
+                raise SystemExit(f"notes-task: {branch} conflicts in shared agent guidance; integration was aborted. "
+                                 "Preserve both sides and report the conflict to the primary; do not resolve by preference.")
+            raise SystemExit(f"notes-task: {branch} conflicts with main; integration was aborted. "
+                             f"In the task worktree run `git merge origin/main`, resolve, and publish again.")
+
+    sync_env = None
+    if NOTES == AGENT_NOTES:
+        sync_env = {**os.environ, "NOTES_REPO": str(NOTES), "DOTS_SYNC_NOTES_ONLY": "1"}
+    result = subprocess.run([SYNCDOTS, "--quiet"], env=sync_env)
     if result.returncode != 0:
-        raise SystemExit("notes-task: syncdots failed; canonical main keeps the local merge for retry")
+        raise SystemExit("notes-task: syncdots failed; integration checkout keeps the local merge for retry")
     if not published(branch):
         raise SystemExit(f"notes-task: {branch} is still not on origin/main after sync")
     print(f"notes-task: published {branch} at {git('rev-parse', '--short', 'origin/main')}")
+
+
+def cmd_publish(args):
+    global NOTES
+    branch, path = f"docs/{args.task_id}", ROOT / args.task_id
+    require_task_worktree(args.task_id, path, branch)
+    NOTES = repository_for_worktree(path)
+    descriptor = publisher_lock()
+    try:
+        require_task_worktree(args.task_id, path, branch)
+        cmd_publish_locked(branch, path)
+    finally:
+        release_publisher_lock(descriptor)
 
 
 def cmd_prune(args):

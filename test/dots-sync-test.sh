@@ -4,7 +4,7 @@ set -euo pipefail
 
 repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 script="$repo_root/bin/dots-sync.sh"
-tmpdir=$(mktemp -d)
+tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/dots-sync.XXXXXX")
 trap 'rm -rf "$tmpdir"' EXIT
 ln -s "$script" "$tmpdir/syncdots"
 script="$tmpdir/syncdots"
@@ -73,6 +73,28 @@ wait "$lock_holder"
 [[ ! -e "$state_home/dots-sync/warmup.log" ]]
 # Notes integrates upstream by merge so published task branches stay ancestors.
 rg -q -- '/notes .*pull --no-rebase --no-edit' "$git_log"
+
+# Notes-only publication does not push dots, refresh operator skill links, or start warmup.
+printf 'local-only dots\n' >> "$dots_repo/README"
+git -C "$dots_repo" commit -am 'local-only dots' >/dev/null
+dots_head=$(git -C "$dots_repo" rev-parse HEAD)
+external_notes="$tmpdir/external-notes"
+git clone "$tmpdir/notes.git" "$external_notes" >/dev/null 2>&1
+git -C "$external_notes" config user.email test@example.com
+git -C "$external_notes" config user.name test
+printf 'incoming notes\n' >> "$external_notes/README"
+git -C "$external_notes" commit -am 'incoming notes' >/dev/null
+git -C "$external_notes" push >/dev/null
+rm "$notes_repo/.sync-linked"
+notes_only_state="$tmpdir/notes-only-state"
+DOTS_SYNC_NOTES_ONLY=1 XDG_STATE_HOME="$notes_only_state" DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" \
+  "$script" --quiet
+[[ $(git -C "$dots_repo" rev-parse HEAD) == "$dots_head" ]]
+[[ $(git -C "$dots_repo" rev-list --count '@{u}..') -eq 1 ]]
+[[ $(git -C "$notes_repo" rev-list --count '@{u}..') -eq 0 ]]
+[[ $(git -C "$notes_repo" show HEAD:README) == *'incoming notes'* ]]
+[[ ! -e "$notes_repo/.sync-linked" ]]
+[[ ! -e "$notes_only_state/dots-sync/warmup.log" ]]
 
 lock_state="$tmpdir/lock-tests"
 lock_dir="$lock_state/dots-sync/lock"
@@ -214,7 +236,36 @@ for _ in {1..120}; do
   sleep 0.1
 done
 [[ $(<"$tmpdir/warmup-marker") == 'done' ]]
+for _ in {1..50}; do
+  [[ ! -e "$advance_state/dots-sync/lock" ]] && break
+  sleep 0.1
+done
 [[ ! -e "$advance_state/dots-sync/lock" ]]
+
+# A conflicting upstream notes merge is aborted cleanly so publication can be retried.
+conflict_notes=$(setup_repo conflict-notes)
+conflict_remote="$tmpdir/conflict-notes.git"
+conflict_external="$tmpdir/conflict-external"
+git clone "$conflict_remote" "$conflict_external" >/dev/null 2>&1
+git -C "$conflict_external" config user.email test@example.com
+git -C "$conflict_external" config user.name test
+printf 'local conflicting content\n' >> "$conflict_notes/README"
+git -C "$conflict_notes" commit -am 'local conflicting notes' >/dev/null
+local_conflict_head=$(git -C "$conflict_notes" rev-parse HEAD)
+printf 'remote conflicting content\n' >> "$conflict_external/README"
+git -C "$conflict_external" commit -am 'remote conflicting notes' >/dev/null
+git -C "$conflict_external" push >/dev/null
+set +e
+conflict_output=$(DOTS_SYNC_NOTES_ONLY=1 XDG_STATE_HOME="$tmpdir/conflict-state" \
+  DOTS_REPO="$tmpdir/missing-dots" NOTES_REPO="$conflict_notes" "$script" --quiet 2>&1)
+conflict_status=$?
+set -e
+[[ $conflict_status -ne 0 ]]
+[[ "$conflict_output" == *'Failed to sync'* ]]
+[[ $(git -C "$conflict_notes" rev-parse HEAD) == "$local_conflict_head" ]]
+[[ ! -e "$(git -C "$conflict_notes" rev-parse --path-format=absolute --git-path MERGE_HEAD)" ]]
+[[ -z $(git -C "$conflict_notes" status --porcelain) ]]
+[[ $(git -C "$conflict_remote" show main:README) == *'remote conflicting content'* ]]
 
 # Missing repositories are intentionally harmless for a portable shell setup.
 XDG_STATE_HOME="$tmpdir/missing-state" DOTS_REPO="$tmpdir/missing-dots" NOTES_REPO="$tmpdir/missing-notes" "$script" --quiet
