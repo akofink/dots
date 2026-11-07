@@ -395,9 +395,19 @@ seed_pi_subagent_settings() {
   fi
 }
 
+seed_agent_workflow_defaults() {
+  # Versioned, seed-only activation. Never overwrite an operator's disable switch.
+  local config="${XDG_CONFIG_HOME:-$HOME/.config}/agent-workflow/defaults.json"
+  if [[ ! -e "$config" && ! -L "$config" ]]; then
+    (umask 077; mkdir -p "$(dirname -- "$config")"; set -o noclobber
+      printf '%s\n' '{"schema":1,"enabled":true}' > "$config")
+  fi
+}
+
 link_pi_extensions() {
   link_pi_agents
   seed_pi_subagent_settings
+  seed_agent_workflow_defaults
   local pi_extensions_source="$notes_repo/agents/pi-extensions"
 
   [[ -d "$pi_extensions_source" ]] || return 0
@@ -585,6 +595,7 @@ link_notes_skill_set() {
   local helper_src
   for helper_src in \
     "$notes_repo/agents/skills/agent-orchestrator/scripts/wake-orchestrator" \
+    "$notes_repo/agents/skills/agent-orchestrator/scripts/agent-workflow" \
     "$notes_repo/agents/skills/agent-liaison/scripts/liaison-relay" \
     "$notes_repo/agents/skills/agent-liaison/scripts/liaison-replace"; do
     if [[ -f "$helper_src" ]]; then
