@@ -10,8 +10,8 @@ import tempfile
 repo = Path(__file__).resolve().parents[1]
 source = (repo/'setup/llm.sh').read_text()
 function = re.search(r'^seed_agent_workflow_defaults\(\) \{.*?^\}', source, re.M | re.S).group()
-# The caller chooses its ignored evidence directory; no system-temp artifacts.
-with tempfile.TemporaryDirectory(prefix='workflow-seed-', dir=os.environ['WORKFLOW_TEST_TMP']) as temporary:
+# Agents can keep fixtures in their task's ignored evidence directory.
+with tempfile.TemporaryDirectory(prefix='workflow-seed-', dir=os.environ.get('WORKFLOW_TEST_TMP')) as temporary:
     root = Path(temporary)
     env = {**os.environ, 'HOME': str(root), 'XDG_CONFIG_HOME': str(root/'config')}
     def seed(): subprocess.run(['bash','-euc', function+'\nseed_agent_workflow_defaults'], env=env, check=True)

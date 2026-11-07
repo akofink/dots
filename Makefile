@@ -23,6 +23,7 @@ test:
 	bash test/dots-warmup-test.sh
 	bash test/akagent-test.sh
 	bash test/pi-settings-test.sh
+	python3 test/agent-workflow-defaults-test.py
 	bash test/pi-managed-install-test.sh
 	bash test/zshenv-nvm-default-test.sh
 	python3 test/pi-mcp-config-test.py
