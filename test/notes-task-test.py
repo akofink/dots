@@ -130,6 +130,15 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
                          (self.notes / ".git").resolve())
         self.assertEqual(Path(self.tool("open", "t1").stdout.strip()), path)
 
+    def test_new_registration_declares_local_publication_contract(self):
+        self.tasks.write_text(json.dumps({"tasks": [{"id": "contract", "resources": []}]}))
+        path = Path(self.tool("open", "contract").stdout.strip())
+        registered = (self.root / "registered").read_text()
+        self.assertIn("--metadata delivery_contract=local_publication", registered)
+        self.assertIn("--worktree " + str(path), registered)
+        self.tool("open", "contract")
+        self.assertEqual((self.root / "registered").read_text(), registered)
+
     def test_open_initializes_agent_clone_from_operator_remote(self):
         shutil.rmtree(self.notes)
         path = Path(self.tool("open", "bootstrap").stdout.strip())

@@ -264,7 +264,8 @@ def register(task_id, branch, path):
     if any(r.get("worktree_path") == str(path) for r in detail.get("resources") or []):
         return
     subprocess.run([AKAGENT, "task", "resource", "create", task_id, "--repository", "notes",
-                    "--branch", branch, "--worktree", str(path)], capture_output=True, text=True)
+                    "--branch", branch, "--worktree", str(path),
+                    "--metadata", "delivery_contract=local_publication"], capture_output=True, text=True)
 
 
 def cmd_open(args):
