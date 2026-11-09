@@ -713,6 +713,89 @@ set_claude_base_settings() {
   mv -f "$claude_settings_tmp" "$claude_settings"
 }
 
+# Direct-CLI inbox for operator-launched Claude Code and Codex sessions (attended mode). It is a
+# host-local, reviewed opt-in: only a private ${XDG_CONFIG_HOME:-~/.config}/agent-workflow/direct-cli.json
+# with {"schema":1,"attended_default":true} enables it. Absent or off converges these entries away.
+# Dispatched children stay unattended: dispatch-agent marks them AGENT_INBOX_MODE=unattended and
+# overrides the same server name, so a child never runs a second, attended server.
+agent_inbox_adapter() {
+  printf '%s' "$notes_repo/agents/skills/agent-orchestrator/scripts/agent-inbox-mcp"
+}
+
+agent_inbox_attended_enabled() {
+  local switch="${XDG_CONFIG_HOME:-$HOME/.config}/agent-workflow/direct-cli.json"
+  [[ -x "$(agent_inbox_adapter)" && -f "$switch" && ! -L "$switch" ]] || return 1
+  jq -e '.schema == 1 and .attended_default == true' "$switch" > /dev/null 2>&1
+}
+
+# Claude user settings: exactly the adapter's four hook handlers and six scoped tool allows.
+# The user-scope MCP server goes through Claude's own CLI, which owns ~/.claude.json.
+sync_claude_agent_inbox() {
+  local settings="$HOME/.claude/settings.json" generated='' enabled=false tmp want have
+  if agent_inbox_attended_enabled; then
+    generated=$("$(agent_inbox_adapter)" config --cli claude --mode auto) || fatal "Failed to generate agent-inbox Claude config"
+    enabled=true
+  fi
+  if [[ -f "$settings" ]]; then
+    tmp=$(mktemp "${settings}.XXXXXX") || fatal "Failed to create Claude settings temp file"
+    jq --argjson on "$enabled" --argjson gen "${generated:-null}" '
+      def ours: (.command // "") | test("/agent-inbox-mcp hook( |$)");
+      .hooks = ((.hooks // {})
+        | with_entries(.value |= (map(.hooks |= map(select(ours | not))) | map(select((.hooks | length) > 0))))
+        | with_entries(select(.value | length > 0)))
+      | .permissions.allow = ((.permissions.allow // []) | map(select(startswith("mcp__agent-inbox__") | not)))
+      | if $on then
+          .hooks = reduce ($gen.settings.hooks | to_entries[]) as $e (.hooks; .[$e.key] = ((.[$e.key] // []) + $e.value))
+          | .permissions.allow += $gen.settings.permissions.allow
+        else . end
+      | if (.hooks | length) == 0 then del(.hooks) else . end' "$settings" > "$tmp" || fatal "Failed to update Claude agent-inbox settings"
+    if cmp -s "$tmp" "$settings"; then
+      rm -f "$tmp"
+    else
+      chmod 600 "$tmp"
+      mv -f "$tmp" "$settings"
+    fi
+  fi
+  command -v claude > /dev/null || return 0
+  have=$(jq -c '.mcpServers["agent-inbox"] // empty' "$HOME/.claude.json" 2> /dev/null || :)
+  if [[ "$enabled" == true ]]; then
+    want=$(jq -c '.mcp_config.mcpServers["agent-inbox"]' <<< "$generated")
+    [[ "$have" == "$want" ]] && return 0
+    [[ -n "$have" ]] && { claude mcp remove --scope user agent-inbox > /dev/null || fatal "Failed to replace agent-inbox MCP server"; }
+    claude mcp add-json --scope user agent-inbox "$want" > /dev/null || fatal "Failed to add agent-inbox MCP server"
+  elif [[ -n "$have" ]]; then
+    claude mcp remove --scope user agent-inbox > /dev/null || fatal "Failed to remove agent-inbox MCP server"
+  fi
+}
+
+# Codex config.toml: one marker-delimited block, rendered from the adapter's own per-launch entries.
+sync_codex_agent_inbox() {
+  local config="$HOME/.codex/config.toml" begin='# BEGIN agent-inbox (dots; host switch agent-workflow/direct-cli.json)'
+  local end='# END agent-inbox' block='' tmp
+  [[ -f "$config" ]] || return 0
+  if agent_inbox_attended_enabled; then
+    block=$("$(agent_inbox_adapter)" config --cli codex --mode auto |
+      jq -r '"[mcp_servers.agent-inbox]", (.codex_config[] | sub("^mcp_servers\\.agent-inbox\\."; "") | sub("="; " = "))') ||
+      fatal "Failed to generate agent-inbox Codex config"
+  fi
+  tmp=$(mktemp "${config}.XXXXXX") || fatal "Failed to create Codex config temp file"
+  awk -v b="$begin" -v e="$end" '$0 == b { skip = 1; next } $0 == e { skip = 0; next } !skip' "$config" > "$tmp"
+  if [[ -n "$block" ]]; then
+    if grep -q '^\[mcp_servers\.agent-inbox\]' "$tmp"; then
+      rm -f "$tmp"
+      printf 'Skipping agent-inbox Codex block: an unmanaged [mcp_servers.agent-inbox] exists in %s\n' "$config" >&2
+      return 0
+    fi
+    printf '%s\n%s\n%s\n' "$begin" "$block" "$end" >> "$tmp"
+  fi
+  if cmp -s "$tmp" "$config"; then
+    rm -f "$tmp"
+  else
+    chmod 600 "$tmp"
+    mv -f "$tmp" "$config"
+  fi
+}
+
 if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
   status=0
   if [[ "$has_notes_agents" -eq 1 ]]; then
@@ -738,6 +821,8 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       link_development_guidance
       set_claude_base_settings
       sync_claude_work_settings
+      sync_claude_agent_inbox
+      sync_codex_agent_inbox
 
       if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
         install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
@@ -792,6 +877,7 @@ mkdir -p \
 sync_codex_work_rules
 
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
+sync_codex_agent_inbox
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
 OPENCODE_WORK_CONFIG=''
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
@@ -833,6 +919,7 @@ remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
 
 set_claude_base_settings
 sync_claude_work_settings
+sync_claude_agent_inbox
 
 if [[ $has_notes_agents -eq 1 ]]; then
   install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
