@@ -714,8 +714,10 @@ set_claude_base_settings() {
 }
 
 # Direct-CLI inbox for operator-launched Claude Code and Codex sessions (attended mode). It is a
-# host-local, reviewed opt-in: only a private ${XDG_CONFIG_HOME:-~/.config}/agent-workflow/direct-cli.json
-# with {"schema":1,"attended_default":true} enables it. Absent or off converges these entries away.
+# host-local, reviewed opt-in: only a private ~/.config/agent-workflow/direct-cli.json with
+# {"schema":1,"attended_default":true} enables it. Absent or off converges these entries away.
+# The switch is resolved from HOME, like the files it governs, never from XDG_CONFIG_HOME: a shell
+# with an isolated XDG directory (a probe) that triggers a sync must not converge the entries away.
 # Dispatched children stay unattended: dispatch-agent marks them AGENT_INBOX_MODE=unattended and
 # overrides the same server name, so a child never runs a second, attended server.
 agent_inbox_adapter() {
@@ -723,7 +725,7 @@ agent_inbox_adapter() {
 }
 
 agent_inbox_attended_enabled() {
-  local switch="${XDG_CONFIG_HOME:-$HOME/.config}/agent-workflow/direct-cli.json"
+  local switch="$HOME/.config/agent-workflow/direct-cli.json"
   [[ -x "$(agent_inbox_adapter)" && -f "$switch" && ! -L "$switch" ]] || return 1
   jq -e '.schema == 1 and .attended_default == true' "$switch" > /dev/null 2>&1
 }
