@@ -27,6 +27,7 @@ try:
 except ImportError:  # Windows uses the standard-library byte-range lock.
     fcntl = None
     import msvcrt
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -372,6 +373,47 @@ def move_ignored(path):
     return dest
 
 
+OS_CRUFT = {".DS_Store"}
+
+
+def blob_id(path):
+    data = os.readlink(path).encode() if path.is_symlink() else path.read_bytes()
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def remove_worktree(path, tip):
+    """`git worktree remove` without force, finishing a partial removal only when safe.
+
+    macOS can recreate .DS_Store while Git deletes the checkout; Git then fails after
+    dropping the worktree's admin entry and leaves a partial directory. Finish that
+    removal only when the worktree is no longer registered and every leftover is OS
+    cruft or byte-identical to the committed tip; otherwise preserve it and stop.
+    """
+    result = subprocess.run(["git", "-C", str(NOTES), "worktree", "remove", str(path)],
+                            text=True, capture_output=True)
+    if result.returncode == 0 and not path.exists():
+        return
+    if any(Path(e["worktree"]).resolve() == path.resolve() for e in worktrees()):
+        raise SystemExit(f"notes-task: git worktree remove {path} failed and it is still registered; "
+                         f"preserving it: {result.stderr.strip()}")
+    committed = {}
+    for line in git("ls-tree", "-r", "--full-tree", tip).splitlines():
+        meta, rel = line.split("\t", 1)
+        committed[rel] = meta.split()[2]
+    for _ in range(5):
+        if not path.exists():
+            return
+        for file in [p for p in path.rglob("*") if p.is_file() or p.is_symlink()]:
+            rel = file.relative_to(path).as_posix()
+            if file.name in OS_CRUFT or rel == ".git":
+                continue
+            if committed.get(rel) != blob_id(file):
+                raise SystemExit(f"notes-task: partial removal left {file} that differs from {tip}; "
+                                 "preserving the directory for inspection")
+        shutil.rmtree(path, ignore_errors=True)
+    raise SystemExit(f"notes-task: unable to finish removing {path}; leftovers match {tip} and are preserved")
+
+
 def cmd_park(args):
     """Retire an idle, unowned worktree that prune keeps because it is unpublished or dirty.
 
@@ -438,7 +480,7 @@ def cmd_park(args):
             raise SystemExit(f"notes-task: {ref} does not pin {tip}; worktree preserved")
         moved = move_ignored(path)
         planned["evidence"] = str(moved) if moved else None
-        git("worktree", "remove", str(path))
+        remove_worktree(path, tip)
         print(json.dumps({"parked": planned}))
         return 0
     finally:
@@ -477,7 +519,7 @@ def cmd_prune(args):
         if args.dry_run:
             continue
         move_ignored(path)
-        git("worktree", "remove", str(path))
+        remove_worktree(path, git("rev-parse", f"refs/heads/{branch}"))
         git("branch", "-D", branch)
         checked_out.discard(branch)
     for branch in git("for-each-ref", "--format=%(refname:short)", "refs/heads/docs/").splitlines():

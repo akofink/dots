@@ -518,6 +518,52 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertIn("refusing to overwrite", result.stderr)
         self.assertTrue(path.exists())
 
+    def partial_removal(self, leftover):
+        """Make `git worktree remove` behave like the macOS .DS_Store race: remove, leave files, fail."""
+        real = shutil.which("git")
+        wrap = self.root / "gitwrap"
+        wrap.mkdir()
+        self.fake(wrap / "git", f"""
+import os, sys, subprocess
+args = sys.argv[1:]
+if "worktree" in args and "remove" in args:
+    path = args[-1]
+    subprocess.check_call([{real!r}, *args])
+    os.makedirs(os.path.join(path, "sub"), exist_ok=True)
+    open(os.path.join(path, ".DS_Store"), "w").write("cruft")
+    open(os.path.join(path, "sub", ".DS_Store"), "w").write("cruft")
+    for rel, text in {leftover!r}.items():
+        open(os.path.join(path, rel), "w").write(text)
+    sys.exit(1)
+os.execv({real!r}, [{real!r}, *args])
+""")
+        self.env["PATH"] = f"{wrap}{os.pathsep}{self.env['PATH']}"
+
+    def test_prune_finishes_partial_removal_of_committed_content(self):
+        path = self.open_and_commit("r1", text="committed\n")
+        self.tool("publish", "r1")
+        self.partial_removal({"r1.md": "committed\n"})
+        self.tool("prune", "--idle-hours", "0")
+        self.assertFalse(path.exists())
+        self.assertNotIn("docs/r1", self.branches())
+
+    def test_partial_removal_with_divergent_leftover_is_preserved(self):
+        path = self.open_and_commit("r2", text="committed\n")
+        tip = self.git(path, "rev-parse", "HEAD")
+        self.partial_removal({"r2.md": "different\n"})
+        result = self.park("r2", ok=False)
+        self.assertIn("differs from", result.stderr)
+        self.assertEqual((path / "r2.md").read_text(), "different\n")
+        self.assertEqual(self.git(self.notes, "rev-parse", "refs/notes-task/parked/r2"), tip)
+        self.assertIn("docs/r2", self.branches())
+
+    def test_park_finishes_partial_removal(self):
+        path = self.open_and_commit("r3", text="committed\n")
+        self.partial_removal({"r3.md": "committed\n"})
+        self.park("r3")
+        self.assertFalse(path.exists())
+        self.assertIn("docs/r3", self.branches())
+
     def test_prune_refuses_without_akagent(self):
         self.env["AKAGENT_BIN"] = str(self.root / "missing")
         result = self.tool("prune", "--idle-hours", "0", ok=False)
