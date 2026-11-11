@@ -40,6 +40,8 @@ def install(codex_dir: Path) -> None:
                 # Replace only this integration's stale hook path; retain every other hook.
                 if isinstance(old_command, str) and "tmux-agent-state.py" in old_command:
                     if old_command == command and not found:
+                        if event == "SessionEnd" and item.get("timeout") != 3:
+                            item["timeout"] = 3
                         owned.append(item)
                         found = True
                     changed = True
@@ -48,7 +50,7 @@ def install(codex_dir: Path) -> None:
             if owned:
                 rebuilt.append({**entry, "hooks": owned})
         if not found:
-            rebuilt.append({"hooks": [{"type": "command", "command": command, "timeout": 5}]})
+            rebuilt.append({"hooks": [{"type": "command", "command": command, "timeout": 3 if event == "SessionEnd" else 5}]})
             changed = True
         hooks[event] = rebuilt
     if changed or not config.exists():

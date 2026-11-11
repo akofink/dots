@@ -84,6 +84,16 @@ class SignalsTest(unittest.TestCase):
             self.assertEqual(config.read_text(), 'notify = ["other"]\n')
             codex_hooks = json.loads((home / ".codex/hooks.json").read_text())["hooks"]
             self.assertEqual(len(codex_hooks["Stop"]), 1)
+            self.assertEqual(codex_hooks["SessionEnd"][0]["hooks"][0]["timeout"], 3)
+            codex_path = home / ".codex/hooks.json"
+            data = json.loads(codex_path.read_text())
+            data["hooks"]["SessionEnd"][0]["hooks"][0]["timeout"] = 5
+            data["hooks"]["SessionEnd"].append({"hooks": [{"command": "other", "timeout": 5}]})
+            codex_path.write_text(json.dumps(data))
+            subprocess.run([sys.executable, str(ROOT / "install.py")], env=env, check=True, capture_output=True)
+            end_hooks = json.loads(codex_path.read_text())["hooks"]["SessionEnd"]
+            self.assertEqual(end_hooks[0]["hooks"][0]["timeout"], 3)
+            self.assertEqual(end_hooks[1]["hooks"][0]["timeout"], 5)
             claude_hooks = json.loads(first)["hooks"]
             self.assertEqual(len(claude_hooks["PostToolUse"]), 1)
             self.assertTrue((home / ".pi/agent/extensions/tmux-agent-state.ts").is_symlink())
@@ -110,6 +120,7 @@ class SignalsTest(unittest.TestCase):
             self.assertEqual(sum(isinstance(c, str) and "tmux-agent-state.py" in c for c in commands), 1)
             for event in ("PostToolUse", "SessionEnd", "UserPromptSubmit", "Stop"):
                 self.assertEqual(len(hooks[event]), 1)
+            self.assertEqual(hooks["SessionEnd"][0]["hooks"][0]["timeout"], 3)
             self.assertEqual(Path(commands[-1].split('"')[1]).read_bytes(), (ROOT / "codex.py").read_bytes())
 
     def test_install_merges_scoped_agent_command_rules(self):

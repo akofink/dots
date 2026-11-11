@@ -33,7 +33,7 @@ cleanup_opencode_install() {
 }
 trap cleanup_opencode_install RETURN
 
-if ! curl -fsSL https://opencode.ai/install -o "$opencode_install_script"; then
+if ! curl -fsSL https://opencode.ai/v2/install -o "$opencode_install_script"; then
   warn "Failed to download opencode installer; skipping"
   return 1
 fi

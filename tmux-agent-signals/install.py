@@ -86,9 +86,17 @@ def main():
         changed = False
         for event in ("SessionStart", "UserPromptSubmit", "Stop", "SessionEnd"):
             entries = hooks.setdefault(event, [])
-            if any(h.get("command") == command for entry in entries for h in entry.get("hooks", []) if isinstance(h, dict)):
+            owned = [h for entry in entries for h in entry.get("hooks", [])
+                     if isinstance(h, dict) and h.get("command") == command]
+            if owned:
+                if event == "SessionEnd":
+                    for hook in owned:
+                        if hook.get("timeout") != 3:
+                            hook["timeout"] = 3
+                            changed = True
                 continue
-            entries.append({"hooks": [{"type": "command", "command": command, "timeout": 5}]})
+            entries.append({"hooks": [{"type": "command", "command": command,
+                                        "timeout": 3 if event == "SessionEnd" else 5}]})
             changed = True
         if changed:
             codex_hooks.parent.mkdir(parents=True, exist_ok=True)

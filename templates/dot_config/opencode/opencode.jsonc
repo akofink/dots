@@ -16,6 +16,7 @@
   "lsp": true,
   "permission": {
     "external_directory": {
+      "*": "ask",
       "~/dev/**": "allow"
     }
   }${OPENCODE_WORK_CONFIG}
