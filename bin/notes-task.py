@@ -6,6 +6,9 @@ Agents call this instead of running git worktree or git branch in the notes repo
   notes-task open <task-id>      create or reuse ~/dev/worktrees/notes/<task-id> on docs/<task-id>
   notes-task publish <task-id>   merge the committed task branch into its owning main and sync
   notes-task prune [--dry-run]   remove published, idle task worktrees and branches (syncdots runs this)
+  notes-task park <name> --reason <text>
+                                 retire an idle, unowned, unpublished worktree; keep its branch and pin
+                                 refs/notes-task/parked/<name> (--checkpoint-dirty commits edits first)
 
 New tasks use the separate NOTES_AGENT_REPO clone by default. Existing task worktrees and
 branches in NOTES_REPO remain attached to that legacy checkout until their owners finish.
@@ -354,6 +357,94 @@ def cmd_publish(args):
         release_publisher_lock(descriptor)
 
 
+def move_ignored(path):
+    """Move ignored task evidence to the clone's tmp/<worktree-name>/; return the destination or None."""
+    ignored = git("ls-files", "--others", "--ignored", "--exclude-standard", "--directory", cwd=path)
+    if not ignored:
+        return None
+    dest = NOTES / "tmp" / path.name
+    for rel in ignored.splitlines():
+        src = path / rel.rstrip("/")
+        target = dest / rel.rstrip("/")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if src.exists() and not target.exists():
+            shutil.move(str(src), str(target))
+    return dest
+
+
+def cmd_park(args):
+    """Retire an idle, unowned worktree that prune keeps because it is unpublished or dirty.
+
+    The branch and its history stay; the tip is also pinned under
+    refs/notes-task/parked/<name> with the reason in the reflog. Only the
+    worktree checkout is removed (never forced). `notes-task open` on the
+    branch's task ID resumes it.
+    """
+    global NOTES
+    reason = " ".join(args.reason.split())
+    if not reason:
+        raise SystemExit("notes-task: park requires a non-empty --reason")
+    path = ROOT / args.name
+    if path.parent != ROOT or not path.is_dir():
+        raise SystemExit(f"notes-task: {path} is not a notes task worktree")
+    NOTES = repository_for_worktree(path)
+    entry = next((e for e in worktrees() if Path(e["worktree"]).resolve() == path.resolve()), None)
+    branch = (entry or {}).get("branch", "").removeprefix("refs/heads/")
+    if not branch.startswith("docs/"):
+        raise SystemExit(f"notes-task: {path} is not on a docs/* branch; refusing to park")
+    descriptor = publisher_lock()
+    try:
+        claimed_paths, claimed_branches = live_claims(strict=True)
+        if str(path.resolve()) in claimed_paths or branch in claimed_branches:
+            raise SystemExit(f"notes-task: {args.name} is owned by a live task; its owner must finish first")
+        if any(p == path or path in p.parents for p in pane_paths()):
+            raise SystemExit(f"notes-task: a tmux pane is inside {path}; refusing to park")
+        if last_activity(path) > time.time() - args.idle_hours * 3600:
+            raise SystemExit(f"notes-task: {args.name} was recently active; refusing to park")
+        dirty = not clean(path)
+        if dirty and not args.checkpoint_dirty:
+            raise SystemExit(f"notes-task: {path} has uncommitted changes; pass --checkpoint-dirty to commit them "
+                             "to its branch before parking")
+        ref = f"refs/notes-task/parked/{args.name}"
+        existing = git("rev-parse", "--verify", "--quiet", ref, check=False)
+        planned = {"name": args.name, "path": str(path), "branch": branch, "ref": ref,
+                   "head": git("rev-parse", "HEAD", cwd=path), "checkpoint": None,
+                   "evidence": None, "reason": reason}
+        if args.dry_run:
+            print(json.dumps({"would_park": planned, "dirty": dirty}))
+            return 0
+        if dirty:
+            git("add", "--all", cwd=path)
+            committed = subprocess.run(
+                ["git", "-C", str(path), "commit", "--quiet", "-m",
+                 "chore: checkpoint uncommitted work before notes-task park",
+                 "-m", f"Preserved verbatim; historical, not current truth. Reason: {reason}"],
+                text=True, capture_output=True)
+            if committed.returncode != 0:
+                git("restore", "--staged", "--", ".", cwd=path, check=False)
+                raise SystemExit(f"notes-task: checkpoint commit failed; worktree preserved unchanged: "
+                                 f"{committed.stderr.strip()}")
+            if not clean(path):
+                raise SystemExit(f"notes-task: {path} is still dirty after checkpoint; preserving it")
+            planned["checkpoint"] = planned["head"] = git("rev-parse", "HEAD", cwd=path)
+        tip = planned["head"]
+        if git("rev-parse", f"refs/heads/{branch}") != tip:
+            raise SystemExit(f"notes-task: {branch} does not match {path} HEAD; refusing to park")
+        if existing and existing != tip:
+            raise SystemExit(f"notes-task: {ref} already pins {existing}; refusing to overwrite")
+        if not existing:
+            git("update-ref", "--create-reflog", "-m", f"notes-task park {branch}: {reason}", ref, tip, "")
+        if git("rev-parse", ref) != tip:
+            raise SystemExit(f"notes-task: {ref} does not pin {tip}; worktree preserved")
+        moved = move_ignored(path)
+        planned["evidence"] = str(moved) if moved else None
+        git("worktree", "remove", str(path))
+        print(json.dumps({"parked": planned}))
+        return 0
+    finally:
+        release_publisher_lock(descriptor)
+
+
 def cmd_prune(args):
     git("fetch", "--quiet", "origin")
     claimed_paths, claimed_branches = live_claims()
@@ -382,18 +473,10 @@ def cmd_prune(args):
             if args.verbose:
                 print(f"keep {path.name}: {reason}")
             continue
-        ignored = git("ls-files", "--others", "--ignored", "--exclude-standard", "--directory", cwd=path)
         print(f"{'would remove' if args.dry_run else 'remove'} worktree {path.name} ({branch})")
         if args.dry_run:
             continue
-        if ignored:
-            dest = NOTES / "tmp" / path.name
-            for rel in ignored.splitlines():
-                src = path / rel.rstrip("/")
-                target = dest / rel.rstrip("/")
-                target.parent.mkdir(parents=True, exist_ok=True)
-                if src.exists() and not target.exists():
-                    shutil.move(str(src), str(target))
+        move_ignored(path)
         git("worktree", "remove", str(path))
         git("branch", "-D", branch)
         checked_out.discard(branch)
@@ -474,9 +557,16 @@ def main():
     p = sub.add_parser("inventory", help="Read-only structured retention inventory using local refs")
     p.add_argument("--task-id", action="append", default=[])
     p.add_argument("--idle-hours", type=float, default=2.0)
+    p = sub.add_parser("park", help="Remove an idle unowned worktree, keeping its branch and a pinned parked ref")
+    p.add_argument("name", help="worktree directory name under the notes worktree root")
+    p.add_argument("--reason", required=True)
+    p.add_argument("--checkpoint-dirty", action="store_true",
+                   help="commit uncommitted changes to the branch before parking")
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--idle-hours", type=float, default=2.0)
     args = parser.parse_args()
     return {"open": cmd_open, "publish": cmd_publish, "prune": cmd_prune,
-            "inventory": cmd_inventory}[args.command](args)
+            "inventory": cmd_inventory, "park": cmd_park}[args.command](args)
 
 
 if __name__ == "__main__":

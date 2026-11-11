@@ -439,6 +439,85 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertIn("would remove worktree t1", out)
         self.assertTrue(path.exists())
 
+    def park(self, name, *extra, ok=True):
+        return self.tool("park", name, "--reason", "legacy test retirement", "--idle-hours", "0", *extra, ok=ok)
+
+    def test_park_removes_unpublished_worktree_keeps_branch_ref_and_evidence(self):
+        path = self.open_and_commit("p1")
+        tip = self.git(path, "rev-parse", "HEAD")
+        (path / "tmp").mkdir()
+        (path / "tmp" / "log.txt").write_text("evidence")
+        value = json.loads(self.park("p1").stdout)["parked"]
+        self.assertFalse(path.exists())
+        self.assertEqual(value["head"], tip)
+        self.assertIsNone(value["checkpoint"])
+        self.assertIn("docs/p1", self.branches())
+        self.assertEqual(self.git(self.notes, "rev-parse", "docs/p1"), tip)
+        self.assertEqual(self.git(self.notes, "rev-parse", "refs/notes-task/parked/p1"), tip)
+        self.assertIn("legacy test retirement", self.git(self.notes, "reflog", "refs/notes-task/parked/p1"))
+        self.assertEqual((self.notes / "tmp" / "p1" / "tmp" / "log.txt").read_text(), "evidence")
+        # Prune never deletes the parked unpublished branch, and open resumes it.
+        self.tool("prune", "--idle-hours", "0")
+        self.assertIn("docs/p1", self.branches())
+        resumed = Path(self.tool("open", "p1").stdout.strip())
+        self.assertEqual(self.git(resumed, "rev-parse", "HEAD"), tip)
+
+    def test_park_refuses_live_owner_pane_recent_and_dirty_without_mutation(self):
+        live = self.open_and_commit("live")
+        occupied = self.open_and_commit("occupied")
+        recent = self.open_and_commit("recent")
+        dirty = self.open_and_commit("dirty")
+        (dirty / "dirty.md").write_text("edit\n")
+        self.tasks.write_text(json.dumps({"tasks": [{"id": "live", "status": "waiting"}]}))
+        self.panes.write_text(f"{occupied}/sub\n")
+        before = self.git(self.notes, "for-each-ref", "--format=%(refname) %(objectname)")
+        for name, extra in (("live", ()), ("occupied", ()), ("dirty", ())):
+            result = self.park(name, *extra, ok=False)
+            self.assertNotEqual(result.returncode, 0, name)
+        result = self.tool("park", "recent", "--reason", "x", ok=False)
+        self.assertIn("recently active", result.stderr)
+        for path in (live, occupied, recent, dirty):
+            self.assertTrue(path.exists(), path)
+        self.assertEqual(self.git(dirty, "status", "--porcelain"), "M dirty.md")
+        self.assertEqual(self.git(self.notes, "for-each-ref", "--format=%(refname) %(objectname)"), before)
+
+    def test_park_checkpoints_dirty_work_verbatim(self):
+        path = self.open_and_commit("d1")
+        base = self.git(path, "rev-parse", "HEAD")
+        (path / "d1.md").write_text("edited historical text\n")
+        (path / "new.md").write_text("untracked note\n")
+        value = json.loads(self.park("d1", "--checkpoint-dirty").stdout)["parked"]
+        self.assertFalse(path.exists())
+        checkpoint = value["checkpoint"]
+        self.assertEqual(self.git(self.notes, "rev-parse", f"{checkpoint}^"), base)
+        self.assertEqual(self.git(self.notes, "rev-parse", "docs/d1"), checkpoint)
+        self.assertEqual(self.git(self.notes, "rev-parse", "refs/notes-task/parked/d1"), checkpoint)
+        self.assertEqual(self.git(self.notes, "show", f"{checkpoint}:d1.md"), "edited historical text")
+        self.assertEqual(self.git(self.notes, "show", f"{checkpoint}:new.md"), "untracked note")
+
+    def test_park_failed_checkpoint_preserves_worktree(self):
+        path = self.open_and_commit("f1")
+        (path / "f1.md").write_text("edit\n")
+        hooks = self.root / "hooks"
+        hooks.mkdir()
+        self.fake(hooks / "pre-commit", "import sys; sys.exit(1)")
+        self.git(self.notes, "config", "core.hooksPath", str(hooks))
+        result = self.park("f1", "--checkpoint-dirty", ok=False)
+        self.assertIn("checkpoint commit failed", result.stderr)
+        self.assertTrue(path.exists())
+        self.assertEqual(self.git(path, "status", "--porcelain"), "M f1.md")
+        self.assertNotIn("refs/notes-task/parked/f1", self.git(self.notes, "for-each-ref", "refs/notes-task/"))
+
+    def test_park_dry_run_and_conflicting_ref_change_nothing(self):
+        path = self.open_and_commit("c1")
+        out = json.loads(self.park("c1", "--dry-run").stdout)
+        self.assertEqual(out["would_park"]["name"], "c1")
+        self.assertTrue(path.exists())
+        self.git(self.notes, "update-ref", "refs/notes-task/parked/c1", "main")
+        result = self.park("c1", ok=False)
+        self.assertIn("refusing to overwrite", result.stderr)
+        self.assertTrue(path.exists())
+
     def test_prune_refuses_without_akagent(self):
         self.env["AKAGENT_BIN"] = str(self.root / "missing")
         result = self.tool("prune", "--idle-hours", "0", ok=False)
