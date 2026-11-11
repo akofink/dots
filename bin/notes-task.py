@@ -197,7 +197,7 @@ def akagent_json(*args):
         return None
 
 
-def live_claims():
+def live_claims(*, strict=False):
     """Worktree paths and branches owned by akagent tasks that are not terminal."""
     paths, branches = set(), set()
     listing = akagent_json("task", "list")
@@ -208,7 +208,10 @@ def live_claims():
             continue
         paths.add(str(ROOT / task["id"]))
         branches.add(f"docs/{task['id']}")
-        detail = akagent_json("task", "inspect", task["id"]) or {}
+        detail = akagent_json("task", "inspect", task["id"])
+        if detail is None and strict:
+            raise SystemExit("notes-task: task ownership inspection unavailable")
+        detail = detail or {}
         # Long-lived tasks accumulate resources they cannot archive while live;
         # protect only the newest (IDs sort by creation time). Older ones still
         # need the clean, published, idle, and no-pane checks before removal.
@@ -406,6 +409,58 @@ def cmd_prune(args):
     git("worktree", "prune")
 
 
+def retention_inventory(task_ids=(), idle_hours=2.0):
+    """Read-only local retention view; no fetch, Git mutation, or deletion authority."""
+    global NOTES
+    original = NOTES
+    result = {"schema": 1, "complete": True, "items": [], "errors": [],
+              "publication_basis": "local origin/main; no network refresh"}
+    try:
+        paths, branches = live_claims(strict=True)
+        pane_result = subprocess.run([TMUX, "list-panes", "-a", "-F", "#{pane_current_path}"],
+                                     text=True, capture_output=True, timeout=10)
+        if pane_result.returncode:
+            raise ValueError("tmux pane inventory unavailable")
+        panes = [Path(p).resolve() for p in pane_result.stdout.splitlines() if p]
+        for repo in sorted({NOTES, AGENT_NOTES}):
+            if not repo.is_dir():
+                continue
+            NOTES = repo
+            for entry in worktrees():
+                path = Path(entry["worktree"]).resolve()
+                branch = entry.get("branch", "").removeprefix("refs/heads/")
+                if path.parent != ROOT or not branch.startswith("docs/"):
+                    continue
+                task_id = path.name
+                if task_ids and task_id not in task_ids:
+                    continue
+                holds = []
+                if str(path) in paths or branch in branches:
+                    holds.append("live_owner")
+                if any(p == path or path in p.parents for p in panes):
+                    holds.append("pane")
+                if not clean(path):
+                    holds.append("dirty")
+                if not published(branch):
+                    holds.append("unpublished")
+                if last_activity(path) > time.time() - idle_hours * 3600:
+                    holds.append("recent")
+                result["items"].append({"task_id": task_id, "path": str(path), "branch": branch,
+                                        "repository": str(repo), "holds": holds})
+    except (SystemExit, OSError, ValueError, subprocess.SubprocessError) as error:
+        result["complete"] = False
+        result["errors"].append(str(error))
+    finally:
+        NOTES = original
+    return result
+
+
+def cmd_inventory(args):
+    result = retention_inventory(args.task_id, args.idle_hours)
+    print(json.dumps(result))
+    return 0 if result["complete"] else 1
+
+
 def main():
     parser = argparse.ArgumentParser(prog="notes-task", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -416,9 +471,13 @@ def main():
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--verbose", action="store_true")
     p.add_argument("--idle-hours", type=float, default=2.0)
+    p = sub.add_parser("inventory", help="Read-only structured retention inventory using local refs")
+    p.add_argument("--task-id", action="append", default=[])
+    p.add_argument("--idle-hours", type=float, default=2.0)
     args = parser.parse_args()
-    {"open": cmd_open, "publish": cmd_publish, "prune": cmd_prune}[args.command](args)
+    return {"open": cmd_open, "publish": cmd_publish, "prune": cmd_prune,
+            "inventory": cmd_inventory}[args.command](args)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -96,6 +96,28 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
 
+    def test_inventory_read_only_scoped_and_all_holds(self):
+        path = self.open_and_commit("inventory-one")
+        self.open_and_commit("inventory-other")
+        (path / "dirty.txt").write_text("preserve me")
+        self.tasks.write_text(json.dumps({"tasks": [{"id": "inventory-one", "status": "active"}]}))
+        self.panes.write_text(str(path) + "\n")
+        before = self.git(path, "status", "--porcelain")
+        value = json.loads(self.tool("inventory", "--task-id", "inventory-one").stdout)
+        self.assertTrue(value["complete"])
+        self.assertEqual(len(value["items"]), 1)
+        self.assertEqual(set(value["items"][0]["holds"]), {"live_owner", "pane", "dirty", "unpublished", "recent"})
+        self.assertEqual(self.git(path, "status", "--porcelain"), before)
+        self.assertTrue(path.exists())
+
+    def test_inventory_ownership_failure_explicit(self):
+        self.fake(Path(self.env["AKAGENT_BIN"]), "import sys; sys.exit(1)")
+        result = self.tool("inventory", ok=False)
+        self.assertEqual(result.returncode, 1)
+        value = json.loads(result.stdout)
+        self.assertFalse(value["complete"])
+        self.assertTrue(value["errors"])
+
     def open_and_commit(self, task_id, text="report\n"):
         path = Path(self.tool("open", task_id).stdout.strip())
         (path / f"{task_id}.md").write_text(text)
