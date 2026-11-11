@@ -292,6 +292,7 @@ hidden behind an abstraction layer. When changing durable defaults, check the co
 
 - Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
 - opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; work-only Atlassian MCP servers live in the adjacent `work.jsonc` fragment.
+- OpenCode's full V2 TUI discovers a local tmux-status plugin and, when installed, Herdr's own TUI plugin. The tmux badge is window-scoped and is disabled in multi-pane windows; it is not a task-completion record. The minimal `mini` client does not load these TUI plugins. Use a standalone OpenCode server for task-bound execution when server process environment carries task identity: a shared service cannot provide a distinct process environment per client.
 - Pi's work-only MCP servers mirror that configuration in `templates/dot_pi/agent/mcp.json`, rendered to `~/.pi/agent/mcp.json` only when `MACHINE_CLASS=work`.
 - Pi's agent-level retry defaults are managed in `templates/dot_pi/agent/settings.json`: retries are enabled with up to 8 attempts and a 2-second base delay, while provider-level retries remain disabled.
 - Canonical Pi extensions live in the notes repo `agents/pi-extensions` directory and are symlinked into `~/.pi/agent/extensions`. The `disable-animations.ts` extension replaces the default animated working spinner with a static indicator. The local `pi-event-monitor.ts` copy auto-approves only shell monitor starts so unattended CI monitors are not lost to an idle prompt.

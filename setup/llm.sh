@@ -893,6 +893,19 @@ eval_template \
   '$OPENCODE_WORK_CONFIG'
 unset OPENCODE_WORK_CONFIG
 
+# V2 discovers TUI plugins as directories, independently of server plugins.
+# Keep Herdr's managed implementation untouched and do not replace user files.
+mkdir -p "$HOME/.config/opencode/plugins/dots-tmux-agent-state"
+eval_template \
+  "$DOTS_REPO/templates/dot_config/opencode/tmux-agent-state/tui.js" \
+  "$HOME/.config/opencode/plugins/dots-tmux-agent-state/tui.js" \
+  ''
+if [[ -f "$HOME/.config/opencode/herdr-opencode/tui.js" ]] && \
+   [[ ! -e "$HOME/.config/opencode/plugins/herdr-opencode" ]] && \
+   [[ ! -L "$HOME/.config/opencode/plugins/herdr-opencode" ]]; then
+  ln -s ../herdr-opencode "$HOME/.config/opencode/plugins/herdr-opencode"
+fi
+
 # Pi settings contain user-managed providers, model lists, and UI preferences.
 # Seed defaults only for a new installation; never overwrite an existing file.
 # Empty substitution list: settings.json must never expand shell variables.
