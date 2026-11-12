@@ -30,7 +30,7 @@ mkdir -p "$notes_repo/agents/pi-agents"
 printf 'bounded profile\n' > "$notes_repo/agents/pi-agents/bounded-investigator.md"
 
 common_skills=(agent-feedback-guidance akagent agent-liaison agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
-work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring preprod-asap-testing querying-bbc-core-reporting-db sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
+work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring preprod-asap-testing querying-bbc-core-reporting-db reading-non-hello-jira sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 # Use a real retired skill source so an accidental surviving symlink cannot
 # pass an absence check merely because its target is missing.
 for skill_name in "${common_skills[@]}" "${work_skills[@]}" managing-1password-cli; do
