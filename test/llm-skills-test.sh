@@ -237,6 +237,20 @@ test "$(jq -r .customSetting "$home/.pi/agent/subagents.json")" = preserve-me
 
 echo 'role switch cleanup and Pi profile/settings preservation passed'
 
+python3 - "$repo_root/setup/llm.sh" <<'PY'
+from pathlib import Path
+import sys
+
+setup = Path(sys.argv[1]).read_text()
+expected = '''  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    echo "→ Installing upstream unslop skill..."
+    install_agent_skill "unslop" "$HOME/.agents/skills/unslop" mshumer/unslop --skill unslop --universal || true
+  fi
+'''
+if expected not in setup:
+    raise SystemExit("unslop must use the upstream source with global-universal install inside the work-only setup branch")
+PY
+
 rm "$home/.config/opencode/skills/akagent"
 if run_verify >"$tmpdir/verify-output" 2>&1; then
   echo 'verification unexpectedly passed with a missing configured skill' >&2

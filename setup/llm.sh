@@ -266,6 +266,10 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   install_pi_extension "Pi event monitor" "git:github.com/Helmi/pi-event-monitor@v0.1.0" || true
   echo "→ Installing Pi subagents..."
   install_pi_extension "Pi subagents" "npm:@gotgenes/pi-subagents@23.4.0" || true
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    echo "→ Installing upstream unslop skill..."
+    install_agent_skill "unslop" "$HOME/.agents/skills/unslop" mshumer/unslop --skill unslop --universal || true
+  fi
   echo "→ Installing gh-axi skill..."
   install_agent_skill "gh-axi" "$HOME/.agents/skills/gh-axi" kunchenguid/gh-axi --skill gh-axi || true
   # TypeSafe uses one install method per agent: the vendor plugin for Claude
