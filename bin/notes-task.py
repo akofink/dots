@@ -20,6 +20,10 @@ untracked changes, no akagent task in a non-terminal state owns it, no tmux pane
 is inside it, and it has been idle for --idle-hours. A live task protects its
 own <task-id> worktree and its newest notes resource. Ignored files (task tmp/
 evidence) are moved to the canonical checkout's tmp/<worktree-name>/ first.
+Prune also removes orphans: unregistered directories under the worktree root
+(typically left when macOS recreated .DS_Store during an earlier removal) whose
+every file is OS cruft or a blob reachable from origin/main. One item's failure
+is reported on stderr without stopping the pass.
 """
 import argparse
 try:
@@ -381,6 +385,31 @@ def blob_id(path):
     return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
 
 
+def leftovers(path, accepts):
+    """Files other than OS cruft and the .git pointer that `accepts(rel, blob)` rejects."""
+    rejected = []
+    for file in [p for p in path.rglob("*") if p.is_file() or p.is_symlink()]:
+        rel = file.relative_to(path).as_posix()
+        if file.name in OS_CRUFT or rel == ".git":
+            continue
+        if not accepts(rel, blob_id(file)):
+            rejected.append(file)
+    return rejected
+
+
+def finish_removal(path, accepts, basis):
+    """Delete an unregistered directory whose leftovers `accepts`, retrying the .DS_Store race."""
+    for _ in range(5):
+        if not path.exists():
+            return
+        rejected = leftovers(path, accepts)
+        if rejected:
+            raise SystemExit(f"notes-task: partial removal left {rejected[0]} that differs from {basis}; "
+                             "preserving the directory for inspection")
+        shutil.rmtree(path, ignore_errors=True)
+    raise SystemExit(f"notes-task: unable to finish removing {path}; leftovers match {basis} and are preserved")
+
+
 def remove_worktree(path, tip):
     """`git worktree remove` without force, finishing a partial removal only when safe.
 
@@ -400,18 +429,51 @@ def remove_worktree(path, tip):
     for line in git("ls-tree", "-r", "--full-tree", tip).splitlines():
         meta, rel = line.split("\t", 1)
         committed[rel] = meta.split()[2]
-    for _ in range(5):
-        if not path.exists():
-            return
-        for file in [p for p in path.rglob("*") if p.is_file() or p.is_symlink()]:
-            rel = file.relative_to(path).as_posix()
-            if file.name in OS_CRUFT or rel == ".git":
-                continue
-            if committed.get(rel) != blob_id(file):
-                raise SystemExit(f"notes-task: partial removal left {file} that differs from {tip}; "
-                                 "preserving the directory for inspection")
-        shutil.rmtree(path, ignore_errors=True)
-    raise SystemExit(f"notes-task: unable to finish removing {path}; leftovers match {tip} and are preserved")
+    finish_removal(path, lambda rel, blob: committed.get(rel) == blob, tip)
+
+
+def orphans():
+    """Directories under ROOT that no configured notes clone registers as a worktree."""
+    registered = set()
+    original = NOTES
+    try:
+        for repo in {NOTES, AGENT_NOTES}:
+            if repo.is_dir():
+                globals()["NOTES"] = repo
+                registered.update(Path(e["worktree"]).resolve() for e in worktrees())
+    finally:
+        globals()["NOTES"] = original
+    found = []
+    for path in sorted(ROOT.iterdir()) if ROOT.is_dir() else []:
+        if path.is_symlink() or not path.is_dir() or path.resolve() in registered:
+            continue
+        pointer = path / ".git"
+        if pointer.is_dir() or pointer.is_symlink():
+            continue  # a standalone repository, not a worktree leftover
+        if pointer.is_file():
+            target = pointer.read_text(errors="replace").strip().removeprefix("gitdir:").strip()
+            if target and Path(target).exists():
+                continue  # registered by a clone this tool does not manage
+        found.append(path.resolve())
+    return found
+
+
+def published_blobs():
+    """Objects reachable from either configured clone's local origin/main (they share one remote)."""
+    found = set()
+    for repo in {NOTES, AGENT_NOTES}:
+        if repo.is_dir() and ref_exists_in(repo, "refs/remotes/origin/main"):
+            found.update(line.split(" ", 1)[0] for line in git("rev-list", "--objects", "origin/main", cwd=repo).splitlines())
+    return found
+
+
+def ref_exists_in(repo, ref):
+    return subprocess.run(["git", "-C", str(repo), "rev-parse", "--verify", "--quiet", ref],
+                          capture_output=True).returncode == 0
+
+
+def newest_mtime(path):
+    return max([path.lstat().st_mtime] + [p.lstat().st_mtime for p in path.rglob("*") if p.name not in OS_CRUFT])
 
 
 def cmd_park(args):
@@ -492,7 +554,7 @@ def cmd_prune(args):
     claimed_paths, claimed_branches = live_claims()
     panes = pane_paths()
     cutoff = time.time() - args.idle_hours * 3600
-    checked_out = set()
+    checked_out, failed = set(), False
     for entry in worktrees():
         path = Path(entry["worktree"]).resolve()
         branch = entry.get("branch", "").removeprefix("refs/heads/")
@@ -518,9 +580,14 @@ def cmd_prune(args):
         print(f"{'would remove' if args.dry_run else 'remove'} worktree {path.name} ({branch})")
         if args.dry_run:
             continue
-        move_ignored(path)
-        remove_worktree(path, git("rev-parse", f"refs/heads/{branch}"))
-        git("branch", "-D", branch)
+        try:
+            move_ignored(path)
+            remove_worktree(path, git("rev-parse", f"refs/heads/{branch}"))
+            git("branch", "-D", branch)
+        except SystemExit as error:
+            print(f"keep {path.name}: {error}", file=sys.stderr)
+            failed = True
+            continue
         checked_out.discard(branch)
     for branch in git("for-each-ref", "--format=%(refname:short)", "refs/heads/docs/").splitlines():
         if branch in checked_out or branch in claimed_branches or not published(branch):
@@ -532,6 +599,26 @@ def cmd_prune(args):
         if not args.dry_run:
             git("branch", "-D", branch)
     git("worktree", "prune")
+    blobs = None
+    for path in orphans():
+        if str(path) in claimed_paths or any(p == path or path in p.parents for p in panes) or \
+                newest_mtime(path) > cutoff:
+            continue
+        blobs = published_blobs() if blobs is None else blobs
+        rejected = leftovers(path, lambda rel, blob: blob in blobs)
+        if rejected:
+            print(f"keep orphan {path.name}: {rejected[0].relative_to(path)} is not on origin/main", file=sys.stderr)
+            failed = True
+            continue
+        print(f"{'would remove' if args.dry_run else 'remove'} orphan {path.name}")
+        if args.dry_run:
+            continue
+        try:
+            finish_removal(path, lambda rel, blob: blob in blobs, "origin/main")
+        except SystemExit as error:
+            print(f"keep orphan {path.name}: {error}", file=sys.stderr)
+            failed = True
+    return 1 if failed else 0
 
 
 def retention_inventory(task_ids=(), idle_hours=2.0):
@@ -572,6 +659,23 @@ def retention_inventory(task_ids=(), idle_hours=2.0):
                     holds.append("recent")
                 result["items"].append({"task_id": task_id, "path": str(path), "branch": branch,
                                         "repository": str(repo), "holds": holds})
+        NOTES = original
+        blobs = None
+        for path in orphans():
+            if task_ids and path.name not in task_ids:
+                continue
+            blobs = published_blobs() if blobs is None else blobs
+            holds = ["orphan"]
+            if str(path) in paths:
+                holds.append("live_owner")
+            if any(p == path or path in p.parents for p in panes):
+                holds.append("pane")
+            if leftovers(path, lambda rel, blob: blob in blobs):
+                holds.append("unpublished")
+            if newest_mtime(path) > time.time() - idle_hours * 3600:
+                holds.append("recent")
+            result["items"].append({"task_id": path.name, "path": str(path), "branch": "",
+                                    "repository": "", "holds": holds})
     except (SystemExit, OSError, ValueError, subprocess.SubprocessError) as error:
         result["complete"] = False
         result["errors"].append(str(error))

@@ -280,11 +280,12 @@ fi
 notes_status=0
 sync_repo "$notes_repo" merge || notes_status=$?
 (( notes_status == 0 )) || sync_status=$notes_status
-# Deterministic notes task cleanup; never fails the sync itself.
+# Deterministic notes task cleanup; never fails the sync itself. Quiet mode still
+# reports retained leftovers and errors on stderr so they are not silently left behind.
 notes_task="$dots_repo/bin/notes-task.py"
 if (( notes_status == 0 )) && [[ -d "$notes_repo/.git" && -f "$notes_task" ]]; then
   if [[ $quiet -eq 1 ]]; then
-    NOTES_REPO="$notes_repo" python3 "$notes_task" prune >/dev/null 2>&1 || :
+    NOTES_REPO="$notes_repo" python3 "$notes_task" prune >/dev/null || printf 'Notes task prune incomplete (exit %d)\n' "$?" >&2
   else
     NOTES_REPO="$notes_repo" python3 "$notes_task" prune || printf 'Notes task prune skipped (exit %d)\n' "$?" >&2
   fi

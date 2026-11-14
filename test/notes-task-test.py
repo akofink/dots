@@ -518,7 +518,7 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertIn("refusing to overwrite", result.stderr)
         self.assertTrue(path.exists())
 
-    def partial_removal(self, leftover):
+    def partial_removal(self, leftover, only=""):
         """Make `git worktree remove` behave like the macOS .DS_Store race: remove, leave files, fail."""
         real = shutil.which("git")
         wrap = self.root / "gitwrap"
@@ -526,7 +526,7 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.fake(wrap / "git", f"""
 import os, sys, subprocess
 args = sys.argv[1:]
-if "worktree" in args and "remove" in args:
+if "worktree" in args and "remove" in args and args[-1].endswith({only!r}):
     path = args[-1]
     subprocess.check_call([{real!r}, *args])
     os.makedirs(os.path.join(path, "sub"), exist_ok=True)
@@ -563,6 +563,55 @@ os.execv({real!r}, [{real!r}, *args])
         self.park("r3")
         self.assertFalse(path.exists())
         self.assertIn("docs/r3", self.branches())
+
+    def orphan(self, name, files):
+        """An unregistered leftover whose .git pointer names a removed admin directory."""
+        path = self.wt_root / name
+        path.mkdir(parents=True)
+        (path / ".git").write_text(f"gitdir: {self.root / 'gone' / name}\n")
+        (path / ".DS_Store").write_text("cruft")
+        for rel, text in files.items():
+            (path / rel).parent.mkdir(parents=True, exist_ok=True)
+            (path / rel).write_text(text)
+        return path
+
+    def test_prune_sweeps_published_orphans_and_reports_unique_ones(self):
+        self.open_and_commit("o1", text="published\n")
+        self.tool("publish", "o1")
+        registered = self.open_and_commit("o2", text="unpublished\n")
+        swept = self.orphan("old-race", {"o1.md": "published\n", "README.md": "notes\n"})
+        unique = self.orphan("old-unique", {"o1.md": "never committed\n"})
+        claimed = self.orphan("live-orphan", {"README.md": "notes\n"})
+        self.tasks.write_text(json.dumps({"tasks": [{"id": "live-orphan", "status": "active"}]}))
+        dry = self.tool("prune", "--dry-run", "--idle-hours", "0", ok=False)
+        self.assertIn("would remove orphan old-race", dry.stdout)
+        self.assertTrue(swept.exists())
+        inventory = {i["task_id"]: i["holds"] for i in json.loads(self.tool("inventory", "--idle-hours", "0").stdout)["items"]}
+        self.assertEqual(inventory["old-race"], ["orphan"])
+        self.assertEqual(inventory["old-unique"], ["orphan", "unpublished"])
+        self.assertEqual(inventory["live-orphan"], ["orphan", "live_owner"])
+        self.assertNotIn("orphan", inventory["o2"])
+        result = self.tool("prune", "--idle-hours", "0", ok=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("keep orphan old-unique: o1.md is not on origin/main", result.stderr)
+        self.assertFalse(swept.exists())
+        self.assertEqual((unique / "o1.md").read_text(), "never committed\n")
+        self.assertTrue(claimed.exists())
+        self.assertEqual((registered / "o2.md").read_text(), "unpublished\n")
+
+    def test_prune_reports_failed_removal_and_continues(self):
+        kept = self.open_and_commit("f1", text="committed\n")
+        self.tool("publish", "f1")
+        later = self.open_and_commit("f2", text="later\n")
+        self.tool("publish", "f2")
+        self.partial_removal({"f1.md": "diverged\n"}, only="/f1")
+        result = self.tool("prune", "--idle-hours", "0", ok=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("keep f1:", result.stderr)
+        self.assertEqual((kept / "f1.md").read_text(), "diverged\n")
+        self.assertIn("docs/f1", self.branches())
+        self.assertFalse(later.exists())
+        self.assertNotIn("docs/f2", self.branches())
 
     def test_prune_refuses_without_akagent(self):
         self.env["AKAGENT_BIN"] = str(self.root / "missing")
