@@ -348,6 +348,30 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertEqual(self.git(self.notes, "status", "--porcelain"), "")
         self.assertTrue(path.exists())
 
+    def test_publish_reports_nonconflict_merge_failure(self):
+        self.open_and_commit("signing")
+        bin_dir = Path(self.env["AKAGENT_BIN"]).parent
+        wrapper = bin_dir / "git"
+        real_git = shutil.which("git")
+        self.fake(wrapper, f"""
+import os, subprocess, sys
+args = sys.argv[1:]
+if args[:2] == ["-C", {str(self.notes.resolve())!r}] and "merge" in args and "--abort" not in args:
+    args.insert(args.index("merge") + 1, "--no-commit")
+    subprocess.run([{real_git!r}, *args], check=True)
+    print("configured signer failed", file=sys.stderr)
+    sys.exit(1)
+os.execv({real_git!r}, [{real_git!r}, *args])
+""")
+        self.env["PATH"] = f"{bin_dir}:{self.env['PATH']}"
+
+        result = self.tool("publish", "signing", ok=False)
+
+        self.assertIn("merge failed without content conflicts", result.stderr)
+        self.assertIn("configured signer failed", result.stderr)
+        self.assertEqual(self.git(self.notes, "status", "--porcelain"), "")
+        self.assertFalse(self.sync_calls.exists())
+
     def test_shared_guidance_conflict_aborts_without_preference_resolution(self):
         path = Path(self.tool("open", "guidance").stdout.strip())
         guidance = path / "agents/skills/example/SKILL.md"

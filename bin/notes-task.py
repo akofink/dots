@@ -335,6 +335,10 @@ def cmd_publish_locked(branch, path):
             if any(path in {"AGENTS.md", "agents"} or path.startswith("agents/") for path in conflicts):
                 raise SystemExit(f"notes-task: {branch} conflicts in shared agent guidance; integration was aborted. "
                                  "Preserve both sides and report the conflict to the primary; do not resolve by preference.")
+            if not conflicts:
+                detail = merged.stderr.strip() or f"git merge exited {merged.returncode} without conflicted paths"
+                raise SystemExit(f"notes-task: {branch} merge failed without content conflicts; integration was aborted: "
+                                 f"{detail}")
             raise SystemExit(f"notes-task: {branch} conflicts with main; integration was aborted. "
                              f"In the task worktree run `git merge origin/main`, resolve, and publish again.")
 
