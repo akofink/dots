@@ -32,7 +32,7 @@ with tempfile.TemporaryDirectory(prefix='attended-stage-', dir=os.environ.get('W
     switch.parent.mkdir(parents=True)
     switch.write_text(json.dumps({'schema': 1, 'staged': True, 'enabled': False}))
     assert run().returncode == 0
-    assert launcher.is_symlink() and launcher.resolve() == launcher_source
+    assert launcher.is_symlink() and launcher.resolve() == launcher_source.resolve()
     assert module.read_text().startswith('// dots-managed attended inbox stage\n')
     assert module.stat().st_mode & 0o777 == 0o600
     before = module.stat().st_mtime_ns
