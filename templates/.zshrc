@@ -162,6 +162,19 @@ fi
 if [ -d "$HOME/.opencode/bin" ]; then
   export PATH="$HOME/.opencode/bin:$PATH"
 fi
+# Host-local activation selects fresh attended clients only. Missing/off leaves
+# native OpenCode unchanged; the managed launcher also preserves explicit opt-out.
+opencode() {
+  local switch="$HOME/.config/agent-workflow/opencode-attended.json"
+  local launcher="$HOME/.local/bin/opencode-attended"
+  if [[ -x "$launcher" && -f "$switch" && ! -L "$switch" ]] &&
+    command -v jq >/dev/null 2>&1 &&
+    command jq -e '.schema == 1 and .enabled == true' "$switch" >/dev/null 2>&1; then
+    "$launcher" "$@"
+  else
+    command opencode "$@"
+  fi
+}
 
 # grok
 if [ -d "$HOME/.grok/bin" ]; then

@@ -802,6 +802,43 @@ sync_codex_agent_inbox() {
   fi
 }
 
+# Stage only with an explicit host-local switch. The TUI module cannot activate
+# preexisting clients: a fresh managed process must prove its own PID/birth token.
+# Enabling the shell default is separate from staging this inert module.
+sync_opencode_attended_stage() {
+  local switch="$HOME/.config/agent-workflow/opencode-attended.json"
+  [[ -f "$switch" && ! -L "$switch" ]] || return 0
+  jq -e '.schema == 1 and (.staged == true or .enabled == true)' "$switch" >/dev/null 2>&1 || return 0
+  local scripts launcher module marker tmp
+  scripts=$(dirname "$(agent_inbox_adapter)")
+  launcher="$HOME/.local/bin/opencode-attended"
+  module="$HOME/.config/opencode/plugins/dots-attended-inbox/tui.js"
+  marker='// dots-managed attended inbox stage'
+  [[ -x "$scripts/opencode-attended" && -f "$scripts/opencode-attended-plugin/tui.js" ]] ||
+    { warn "Attended OpenCode source unavailable; leaving setup unchanged"; return 1; }
+  if [[ -e "$launcher" || -L "$launcher" ]]; then
+    [[ -L "$launcher" && "$(readlink "$launcher")" == "$scripts/opencode-attended" ]] ||
+      { warn "Preserving unmanaged attended OpenCode launcher"; return 1; }
+  fi
+  if [[ -e "$module" || -L "$module" ]]; then
+    [[ ! -L "$module" && "$(head -n 1 "$module")" == "$marker" ]] ||
+      { warn "Preserving unmanaged attended OpenCode TUI module"; return 1; }
+  fi
+  mkdir -p "$HOME/.local/bin" "$(dirname "$module")"
+  [[ -L "$launcher" ]] || ln -s "$scripts/opencode-attended" "$launcher"
+  tmp=$(mktemp "${module}.XXXXXX") || return 1
+  {
+    printf '%s\n' "$marker"
+    printf 'export { default } from %s;\n' "$(jq -Rn --arg path "$scripts/opencode-attended-plugin/tui.js" '$path')"
+  } >"$tmp"
+  chmod 600 "$tmp"
+  if [[ -f "$module" ]] && cmp -s "$tmp" "$module"; then
+    rm -f "$tmp"
+  else
+    mv -f "$tmp" "$module"
+  fi
+}
+
 if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
   status=0
   if [[ "$has_notes_agents" -eq 1 ]]; then
@@ -829,6 +866,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       sync_claude_work_settings
       sync_claude_agent_inbox
       sync_codex_agent_inbox
+      sync_opencode_attended_stage
 
       if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
         install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
@@ -896,6 +934,7 @@ eval_template \
   "$HOME/.config/opencode/opencode.jsonc" \
   '$OPENCODE_WORK_CONFIG'
 unset OPENCODE_WORK_CONFIG
+sync_opencode_attended_stage
 
 # V2 discovers TUI plugins as directories, independently of server plugins.
 # Keep Herdr's managed implementation untouched and do not replace user files.

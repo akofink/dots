@@ -28,6 +28,7 @@ test:
 	bash test/zshenv-nvm-default-test.sh
 	python3 test/pi-mcp-config-test.py
 	bash test/codex-rules-test.sh
+	python3 test/opencode-attended-stage-test.py
 	python3 test/claude-work-settings-test.py
 	python3 test/windows-claude-setup-test.py
 	bash test/dots-backups-test.sh
