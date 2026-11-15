@@ -46,12 +46,13 @@ def main():
         before = run(tmux, "show-options", "-wqv", "-t", window, "@agent_state")
         state = sys.argv[1]
         after = "" if state in ("working", "idle") else state
+        # A hook run takes the badge over from any task heartbeat: drop its ownership marker even when the
+        # value is unchanged, in the same tmux command as the write so a heartbeat cannot interleave.
+        write = (["set-option", "-w", "-t", window, "@agent_state", after] if after
+                 else ["set-option", "-wu", "-t", window, "@agent_state"])
+        run(tmux, *write, ";", "set-option", "-wu", "-t", window, "@agent_state_task")
         if before == after:
             return 0
-        if after:
-            run(tmux, "set-option", "-w", "-t", window, "@agent_state", after)
-        else:
-            run(tmux, "set-option", "-wu", "-t", window, "@agent_state")
         if after in ("blocked", "waiting", "done"):
             label = run(tmux, "display-message", "-p", "-t", pane, "#{window_name}")
             notify(after, label or "Agent")

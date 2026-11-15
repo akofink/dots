@@ -40,12 +40,32 @@ class SignalsTest(unittest.TestCase):
              patch.object(module, "notify") as notification, \
              patch.object(sys, "argv", ["state", "done"]):
             self.assertEqual(module.main(), 0)
-            self.assertIn(("tmux", "set-option", "-w", "-t", "@1", "@agent_state", "done"), calls)
+            self.assertIn(("tmux", "set-option", "-w", "-t", "@1", "@agent_state", "done",
+                           ";", "set-option", "-wu", "-t", "@1", "@agent_state_task"), calls)
             notification.assert_called_once_with("done", "task")
         calls.clear()
         with patch.dict(os.environ, {}, clear=True):
             module.main()
         self.assertEqual(calls, [])
+
+    def test_hook_drops_task_marker_even_when_value_unchanged(self):
+        module = load("state")
+        calls = []
+        def fake(*args):
+            calls.append(args)
+            if args[1] == "display-message":
+                return "@1"
+            if args[1] == "show-options":
+                return "waiting"
+            return ""
+        with patch.dict(os.environ, {"TMUX_PANE": "%1"}, clear=True), \
+             patch.object(module, "run", side_effect=fake), \
+             patch.object(module, "notify") as notification, \
+             patch.object(sys, "argv", ["state", "waiting"]):
+            self.assertEqual(module.main(), 0)
+        self.assertIn(("tmux", "set-option", "-w", "-t", "@1", "@agent_state", "waiting",
+                       ";", "set-option", "-wu", "-t", "@1", "@agent_state_task"), calls)
+        notification.assert_not_called()
 
     def test_claude_event_mapping_and_subagent_guard(self):
         module = load("claude")
