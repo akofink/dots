@@ -270,7 +270,13 @@ def last_activity(worktree):
 def register(task_id, branch, path):
     detail = akagent_json("task", "inspect", task_id)
     if detail is None:
-        print(f"notes-task: akagent task {task_id} not found; resource not registered", file=sys.stderr)
+        # Interactive opens have no dispatcher-created task; create the caller-owned record first.
+        created = subprocess.run([AKAGENT, "task", "create", "--title", task_id.replace("-", " "),
+                                  "--task-id", task_id], capture_output=True, text=True)
+        detail = akagent_json("task", "inspect", task_id) if created.returncode == 0 else None
+    if detail is None:
+        print(f"notes-task: akagent task {task_id} could not be created or inspected; resource not registered",
+              file=sys.stderr)
         return
     if any(r.get("worktree_path") == str(path) for r in detail.get("resources") or []):
         return

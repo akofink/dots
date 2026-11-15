@@ -38,6 +38,10 @@ elif args[:2] == ["task", "inspect"]:
     if task is None:
         sys.exit(1)
     print(json.dumps({{"task": task, "resources": task.get("resources", [])}}))
+elif args[:2] == ["task", "create"]:
+    tid = args[args.index("--task-id") + 1]
+    data["tasks"].append({{"id": tid, "resources": []}})
+    open({str(self.tasks)!r}, "w").write(json.dumps(data))
 elif args[:3] == ["task", "resource", "create"]:
     open({str(self.root / "registered")!r}, "a").write(" ".join(args) + "\\n")
 """)
@@ -151,6 +155,13 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertEqual(Path(self.git(path, "rev-parse", "--path-format=absolute", "--git-common-dir")),
                          (self.notes / ".git").resolve())
         self.assertEqual(Path(self.tool("open", "t1").stdout.strip()), path)
+
+    def test_open_creates_missing_akagent_task_before_registering(self):
+        path = Path(self.tool("open", "fresh-task-akwin-20261115").stdout.strip())
+        tasks = json.loads(self.tasks.read_text())["tasks"]
+        self.assertIn("fresh-task-akwin-20261115", [t["id"] for t in tasks])
+        registered = (self.root / "registered").read_text()
+        self.assertIn("--worktree " + str(path), registered)
 
     def test_new_registration_declares_local_publication_contract(self):
         self.tasks.write_text(json.dumps({"tasks": [{"id": "contract", "resources": []}]}))
