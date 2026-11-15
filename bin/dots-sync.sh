@@ -2,6 +2,19 @@
 
 quiet=0
 warmup_child=0
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  cat <<'EOF'
+Usage: syncdots [--quiet | --warmup-child | -h | --help]
+
+Syncs the dots and notes repositories: pulls with rebase (notes merges), then
+pushes. Running it is a side-effecting sync; --help only prints this text.
+
+  --quiet         Run the sync with minimal output.
+  --warmup-child  Internal: run the post-sync warmup child.
+  -h, --help      Print this usage and exit without syncing.
+EOF
+  exit 0
+fi
 if [[ "${1:-}" == "--quiet" ]]; then
   quiet=1
 elif [[ "${1:-}" == "--warmup-child" ]]; then
