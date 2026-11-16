@@ -121,6 +121,21 @@ It is also launched asynchronously at most once every six hours when a managed z
 Missing repositories remain harmless no-ops, but Git, lock, and skill-link failures are reported.
 If another sync is already running, `syncdots` waits up to five one-second retries before failing; run it manually to see the full Git output.
 
+Use `syncdots --no-prune` when task resources or ignored evidence must remain in place.
+It skips only managed notes-task pruning for that invocation, including notes-only syncs;
+Git synchronization, locks, signing, conflict handling, skill links and warmup behavior stay unchanged.
+Without the flag, successful notes syncs still run managed pruning. The flag does not release
+retention holds or prove evidence was unchanged by an earlier sync.
+For task publication, use `notes-task publish <task-id> --no-prune`; it forwards the option
+and refuses before integration if the selected sync script does not advertise support.
+
+When validating an uninstalled version, the existing `SYNCDOTS_BIN` override can select a
+matching, reviewed candidate sync script while invoking that candidate's `notes-task.py`.
+Check both candidates' help, tests and committed revisions first. This runs the same publication
+and sync guards; it is not an installation, a way to merge a dots task branch into main, or
+a substitute for resolving publication authority. Do not point it at an older sync script
+that silently ignores unknown arguments.
+
 If you are iterating on setup scripts in the same shell, clear the exported setup state first:
 
 ```sh

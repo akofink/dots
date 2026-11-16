@@ -312,7 +312,7 @@ def cmd_open(args):
     print(path)
 
 
-def cmd_publish_locked(branch, path):
+def cmd_publish_locked(branch, path, no_prune=False):
     if not ref_exists(f"refs/heads/{branch}"):
         raise SystemExit(f"notes-task: expected task branch {branch} does not exist; refusing to publish")
     if not clean(path):
@@ -351,7 +351,10 @@ def cmd_publish_locked(branch, path):
     sync_env = None
     if NOTES == AGENT_NOTES:
         sync_env = {**os.environ, "NOTES_REPO": str(NOTES), "DOTS_SYNC_NOTES_ONLY": "1"}
-    result = subprocess.run([SYNCDOTS, "--quiet"], env=sync_env)
+    sync_command = [SYNCDOTS, "--quiet"]
+    if no_prune:
+        sync_command.append("--no-prune")
+    result = subprocess.run(sync_command, env=sync_env)
     if result.returncode != 0:
         raise SystemExit("notes-task: syncdots failed; integration checkout keeps the local merge for retry")
     if not published(branch):
@@ -364,10 +367,15 @@ def cmd_publish(args):
     branch, path = f"docs/{args.task_id}", ROOT / args.task_id
     require_task_worktree(args.task_id, path, branch)
     NOTES = repository_for_worktree(path)
+    if args.no_prune:
+        support = subprocess.run([SYNCDOTS, "--help"], capture_output=True, text=True)
+        if support.returncode != 0 or "--no-prune" not in support.stdout:
+            raise SystemExit("notes-task: syncdots does not advertise --no-prune; refusing before integration. "
+                             "Use a matching verified syncdots implementation.")
     descriptor = publisher_lock()
     try:
         require_task_worktree(args.task_id, path, branch)
-        cmd_publish_locked(branch, path)
+        cmd_publish_locked(branch, path, no_prune=args.no_prune)
     finally:
         release_publisher_lock(descriptor)
 
@@ -706,6 +714,9 @@ def main():
     for name in ("open", "publish"):
         p = sub.add_parser(name)
         p.add_argument("task_id")
+        if name == "publish":
+            p.add_argument("--no-prune", action="store_true",
+                           help="skip managed pruning during this publication; preserve task resources and evidence")
     p = sub.add_parser("prune")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--verbose", action="store_true")

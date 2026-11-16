@@ -23,6 +23,7 @@ class NotesTaskTest(unittest.TestCase):
         self.tasks = self.root / "tasks.json"
         self.panes = self.root / "panes.txt"
         self.sync_calls = self.root / "sync-calls"
+        self.sync_args = self.root / "sync-args"
         self.tasks.write_text(json.dumps({"tasks": []}))
         self.panes.write_text("")
         bin_dir = self.root / "bin"
@@ -48,7 +49,11 @@ elif args[:3] == ["task", "resource", "create"]:
         self.fake(bin_dir / "tmux", f"print(open({str(self.panes)!r}).read(), end='')")
         # Stand-in for syncdots: integrate the selected checkout by merge, then push.
         self.fake(bin_dir / "syncdots", f"""
-import os, subprocess, sys
+import json, os, subprocess, sys
+if sys.argv[1:] == ["--help"]:
+    print("Usage: syncdots [--quiet] [--no-prune]")
+    sys.exit(0)
+open({str(self.sync_args)!r}, "a").write(json.dumps(sys.argv[1:]) + "\\n")
 repo = os.environ["NOTES_REPO"]
 open({str(self.sync_calls)!r}, "a").write(repo + "\\t" + os.environ.get("DOTS_SYNC_NOTES_ONLY", "0") + "\\n")
 fail_once = os.environ.get("FAKE_SYNCDOTS_FAIL_ONCE")
@@ -286,6 +291,55 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.git(path, "commit", "--quiet", "-am", "docs: update")
         self.tool("publish", "t1")
         self.assertEqual((self.notes / "t1.md").read_text(), "report v2\n")
+
+    def test_publish_no_prune_forwards_only_when_requested_in_both_lanes(self):
+        for legacy in (False, True):
+            task = "legacy-preserve" if legacy else "agent-preserve"
+            if legacy:
+                self.git(self.operator_notes, "branch", f"docs/{task}")
+            self.open_and_commit(task)
+            self.tool("publish", task, "--no-prune")
+            self.assertEqual(json.loads(self.sync_args.read_text().splitlines()[-1]),
+                             ["--quiet", "--no-prune"])
+            self.tool("publish", task)
+            self.assertEqual(json.loads(self.sync_args.read_text().splitlines()[-1]), ["--quiet"])
+
+    def test_publish_no_prune_refuses_old_sync_before_integration(self):
+        self.open_and_commit("old-sync")
+        before = self.git(self.notes, "rev-parse", "HEAD")
+        old_sync = self.root / "bin/old-sync"
+        self.fake(old_sync, 'import sys\nprint("Usage: syncdots [--quiet]")\nsys.exit(0)\n')
+        self.env["SYNCDOTS_BIN"] = str(old_sync)
+        result = self.tool("publish", "old-sync", "--no-prune", ok=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("refusing before integration", result.stderr)
+        self.assertEqual(self.git(self.notes, "rev-parse", "HEAD"), before)
+        self.assertFalse(self.sync_calls.exists())
+
+    def test_publish_no_prune_with_real_sync_skips_prune_hook(self):
+        self.open_and_commit("real-sync-preserve")
+        dots = self.root / "dots-tools"
+        (dots / "bin").mkdir(parents=True)
+        marker = self.root / "prune-was-called"
+        (dots / "bin/notes-task.py").write_text(
+            f"from pathlib import Path\nPath({str(marker)!r}).write_text('pruned')\n")
+        self.env["DOTS_REPO"] = str(dots)
+        self.env["SYNCDOTS_BIN"] = str(TOOL.parent / "dots-sync.sh")
+        result = self.tool("publish", "real-sync-preserve", "--no-prune")
+        self.assertIn("pruning skipped (--no-prune)", result.stderr)
+        self.assertFalse(marker.exists())
+        self.git(self.notes, "merge-base", "--is-ancestor", "docs/real-sync-preserve", "origin/main")
+        # Omission keeps the real sync's existing default prune hook.
+        self.tool("publish", "real-sync-preserve")
+        self.assertEqual(marker.read_text(), "pruned")
+
+    def test_publish_no_prune_still_refuses_dirty_task(self):
+        path = self.open_and_commit("dirty-preserve")
+        (path / "dirty-preserve.md").write_text("uncommitted\n")
+        result = self.tool("publish", "dirty-preserve", "--no-prune", ok=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("uncommitted changes", result.stderr)
+        self.assertFalse(self.sync_calls.exists())
 
     def test_agent_publish_preserves_dirty_operator_checkout_and_only_pushes_agent_history(self):
         path = self.open_and_commit("t1")

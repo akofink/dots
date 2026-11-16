@@ -2,25 +2,30 @@
 
 quiet=0
 warmup_child=0
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+no_prune=0
+for arg in "$@"; do
+case "$arg" in
+-h|--help)
   cat <<'EOF'
-Usage: syncdots [--quiet | --warmup-child | -h | --help]
+Usage: syncdots [--quiet] [--no-prune] [--warmup-child] [-h | --help]
 
 Syncs the dots and notes repositories: pulls with rebase (notes merges), then
 pushes. Running it is a side-effecting sync; --help only prints this text.
 
   --quiet         Run the sync with minimal output.
+  --no-prune      Preserve all notes task worktrees, branches, and ignored evidence;
+                  skip managed pruning for this invocation only.
   --warmup-child  Internal: run the post-sync warmup child.
   -h, --help      Print this usage and exit without syncing.
 EOF
   exit 0
-fi
-if [[ "${1:-}" == "--quiet" ]]; then
-  quiet=1
-elif [[ "${1:-}" == "--warmup-child" ]]; then
-  quiet=1
-  warmup_child=1
-fi
+  ;;
+--quiet) quiet=1 ;;
+--no-prune) no_prune=1 ;;
+--warmup-child) quiet=1; warmup_child=1 ;;
+*) printf 'Unknown syncdots argument: %s\n' "$arg" >&2; exit 2 ;;
+esac
+done
 
 dots_repo=${DOTS_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/dots"}
 notes_repo=${NOTES_REPO:-"${DEV_REPOS:-"$HOME/dev/repos"}/notes"}
@@ -297,7 +302,9 @@ sync_repo "$notes_repo" merge || notes_status=$?
 # reports retained leftovers and errors on stderr so they are not silently left behind.
 notes_task="$dots_repo/bin/notes-task.py"
 if (( notes_status == 0 )) && [[ -d "$notes_repo/.git" && -f "$notes_task" ]]; then
-  if [[ $quiet -eq 1 ]]; then
+  if [[ "$no_prune" -eq 1 ]]; then
+    printf 'Notes task pruning skipped (--no-prune); retained resources are unchanged by cleanup\n' >&2
+  elif [[ $quiet -eq 1 ]]; then
     NOTES_REPO="$notes_repo" python3 "$notes_task" prune >/dev/null || printf 'Notes task prune incomplete (exit %d)\n' "$?" >&2
   else
     NOTES_REPO="$notes_repo" python3 "$notes_task" prune || printf 'Notes task prune skipped (exit %d)\n' "$?" >&2

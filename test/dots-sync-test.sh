@@ -96,6 +96,40 @@ DOTS_SYNC_NOTES_ONLY=1 XDG_STATE_HOME="$notes_only_state" DOTS_REPO="$dots_repo"
 [[ ! -e "$notes_repo/.sync-linked" ]]
 [[ ! -e "$notes_only_state/dots-sync/warmup.log" ]]
 
+# Explicit preservation skips only pruning, regardless of flag order or notes-only lane.
+mkdir -p "$dots_repo/bin"
+cat > "$dots_repo/bin/notes-task.py" <<'EOF'
+import os, sys
+from pathlib import Path
+assert sys.argv[1:] == ['prune']
+Path(os.environ['PRUNE_LOG_FILE']).write_text('pruned')
+EOF
+prune_log="$tmpdir/prune.log"
+for order in '--quiet --no-prune' '--no-prune --quiet'; do
+  # Intentional splitting: test both orders of these two fixed flags.
+  # shellcheck disable=SC2086
+  skip_output=$(PRUNE_LOG_FILE="$prune_log" DOTS_SYNC_NOTES_ONLY=1 XDG_STATE_HOME="$tmpdir/preserve-state" \
+    DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" "$script" $order 2>&1)
+  [[ "$skip_output" == *'pruning skipped (--no-prune)'* ]]
+  [[ ! -e "$prune_log" ]]
+done
+PRUNE_LOG_FILE="$prune_log" DOTS_SYNC_NOTES_ONLY=1 XDG_STATE_HOME="$tmpdir/default-prune-state" \
+  DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" "$script" --quiet
+[[ $(<"$prune_log") == pruned ]]
+rm "$prune_log"
+PRUNE_LOG_FILE="$prune_log" XDG_STATE_HOME="$tmpdir/full-preserve-state" \
+  DOTS_REPO="$dots_repo" NOTES_REPO="$notes_repo" "$script" --no-prune --quiet
+[[ ! -e "$prune_log" ]]
+[[ -f "$notes_repo/.sync-linked" ]]
+# Unknown options fail before state or Git mutation, not silently ignore a misspelled safety flag.
+if XDG_STATE_HOME="$tmpdir/unknown-state" "$script" --no-prun >/dev/null 2>&1; then
+  echo 'unknown preservation flag was accepted' >&2; exit 1
+fi
+[[ ! -e "$tmpdir/unknown-state" ]]
+help_output=$(XDG_STATE_HOME="$tmpdir/help-state" "$script" --no-prune --help)
+[[ "$help_output" == *'--no-prune'* && ! -e "$tmpdir/help-state" ]]
+rm "$dots_repo/bin/notes-task.py"
+
 lock_state="$tmpdir/lock-tests"
 lock_dir="$lock_state/dots-sync/lock"
 lock_host=$(hostname)
