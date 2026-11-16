@@ -118,6 +118,7 @@ The shared index and branch are locked during the final checks, push, and checko
 This dirty-checkout path requires Python 3. A deferred sync returns nonzero but still tries the other repository and reapplies skill links.
 After synchronization, it reapplies the configured notes-backed agent skill links without rerunning CLI installers.
 It is also launched asynchronously at most once every six hours when a managed zsh shell starts, so it never delays shell startup.
+On `MACHINE_CLASS=work`, this automatic invocation passes `--no-prune` to preserve task worktrees and ignored evidence. Explicit manual invocations and automatic sync on other machine classes keep their existing defaults.
 Missing repositories remain harmless no-ops, but Git, lock, and skill-link failures are reported.
 If another sync is already running, `syncdots` waits up to five one-second retries before failing; run it manually to see the full Git output.
 

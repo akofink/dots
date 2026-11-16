@@ -27,10 +27,13 @@ dots_sync_state="${XDG_STATE_HOME:-$HOME/.local/state}/dots-sync"
 dots_sync_stamp="$dots_sync_state/last-attempt"
 if [[ -x "$HOME/dev/repos/dots/bin/dots-sync.sh" ]] && { [[ ! -f "$dots_sync_stamp" ]] || (( EPOCHSECONDS - $(<"$dots_sync_stamp") >= 21600 )); }; then
   if mkdir -p "$dots_sync_state" 2>/dev/null; then
-    "$HOME/dev/repos/dots/bin/dots-sync.sh" --quiet </dev/null >>"$dots_sync_state/sync.log" 2>&1 &!
+    dots_sync_args=(--quiet)
+    # Automatic work sync must preserve task worktrees and ignored evidence.
+    [[ "${MACHINE_CLASS:-personal}" == work ]] && dots_sync_args+=(--no-prune)
+    "$HOME/dev/repos/dots/bin/dots-sync.sh" "${dots_sync_args[@]}" </dev/null >>"$dots_sync_state/sync.log" 2>&1 &!
   fi
 fi
-unset dots_sync_state dots_sync_stamp
+unset dots_sync_state dots_sync_stamp dots_sync_args
 
 # Report deferred or failed background warmup once; routine success stays quiet.
 [[ -x "$HOME/.local/bin/dots-warmup-report" ]] && "$HOME/.local/bin/dots-warmup-report"
