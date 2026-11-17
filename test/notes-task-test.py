@@ -38,7 +38,11 @@ elif args[:2] == ["task", "inspect"]:
     task = next((t for t in data["tasks"] if t["id"] == args[2]), None)
     if task is None:
         sys.exit(1)
-    print(json.dumps({{"task": task, "resources": task.get("resources", [])}}))
+    detail = {{"task": task, "resources": task.get("resources", [])}}
+    if task.get("executions"):
+        # Like the real akagent, the key is absent for a task with no execution.
+        detail["executions"] = task["executions"]
+    print(json.dumps(detail))
 elif args[:2] == ["task", "create"]:
     tid = args[args.index("--task-id") + 1]
     data["tasks"].append({{"id": tid, "resources": []}})
@@ -701,6 +705,169 @@ os.execv({real!r}, [{real!r}, *args])
         self.assertIn("docs/f1", self.branches())
         self.assertFalse(later.exists())
         self.assertNotIn("docs/f2", self.branches())
+
+    def prune_all(self, *args, ok=True, env=None):
+        """Prune as syncdots does for the operator checkout: NOTES_REPO is the operator clone."""
+        result = subprocess.run(["python3", str(TOOL), "prune", *args], env=env or self.env,
+                                text=True, capture_output=True)
+        if ok:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return result
+
+    def open_legacy(self, task_id):
+        """A task worktree attached to the operator (legacy) clone, committed and published."""
+        self.git(self.operator_notes, "branch", f"docs/{task_id}")
+        path = Path(self.tool("open", task_id).stdout.strip())
+        (path / f"{task_id}.md").write_text("legacy\n")
+        self.git(path, "add", "--all")
+        self.git(path, "commit", "--quiet", "-m", f"docs: {task_id}")
+        self.tool("publish", task_id)
+        return path
+
+    def test_prune_walks_operator_and_agent_repositories_and_summarizes(self):
+        agent = self.open_and_commit("agent-task")
+        self.tool("publish", "agent-task")
+        legacy = self.open_legacy("legacy-task")
+        result = self.prune_all("--idle-hours", "0")
+        self.assertFalse(agent.exists())
+        self.assertFalse(legacy.exists())
+        self.assertIn("scanned 2 repositories (operator-notes, agent-notes), 2 task worktrees: removed 2 worktrees",
+                      result.stdout)
+        self.assertEqual(self.git(self.notes, "for-each-ref", "refs/heads/docs/"), "")
+        self.assertEqual(self.git(self.operator_notes, "for-each-ref", "refs/heads/docs/"), "")
+
+    def test_prune_summarizes_even_when_nothing_is_removed(self):
+        empty = self.prune_all()
+        self.assertIn("scanned 2 repositories (operator-notes, agent-notes), 0 task worktrees: removed 0 worktrees, "
+                      "0 extra branches, 0 orphans; kept 0; 0 failed", empty.stdout)
+        path = self.open_and_commit("recent")
+        self.tool("publish", "recent")
+        kept = self.prune_all()
+        self.assertTrue(path.exists())
+        self.assertIn("removed 0 worktrees", kept.stdout)
+        self.assertIn("kept 1 (recently active: 1)", kept.stdout)
+        dry = self.prune_all("--idle-hours", "0", "--dry-run")
+        self.assertIn("would remove 1 worktree", dry.stdout)
+        self.assertIn("dry run: nothing changed", dry.stdout)
+        self.assertTrue(path.exists())
+
+    def test_prune_single_configured_repository_is_not_double_counted(self):
+        self.open_and_commit("solo")
+        self.tool("publish", "solo")
+        result = self.prune_all("--idle-hours", "0", env={**self.env, "NOTES_REPO": str(self.notes)})
+        self.assertIn("scanned 1 repository (agent-notes), 1 task worktree: removed 1 worktree", result.stdout)
+
+    def test_prune_skips_unreachable_repository_and_continues(self):
+        path = self.open_and_commit("reachable")
+        self.tool("publish", "reachable")
+        self.git(self.operator_notes, "remote", "set-url", "origin", str(self.root / "gone.git"))
+        result = self.prune_all("--idle-hours", "0", ok=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("skipped operator-notes", result.stderr)
+        self.assertFalse(path.exists())
+        self.assertIn("1 failed", result.stdout)
+
+    def begin_state(self, task_id, status="created", executions=None, resources=None):
+        task = {"id": task_id, "status": status}
+        if executions:
+            task["executions"] = executions
+        self.tasks.write_text(json.dumps({"tasks": [task]}))
+
+    def test_prune_retires_never_begun_created_task_once_otherwise_eligible(self):
+        path = self.open_and_commit("nb1")
+        self.tool("publish", "nb1")
+        self.begin_state("nb1")
+        recent = self.prune_all()
+        self.assertTrue(path.exists(), "the idle window still protects a fresh never-begun worktree")
+        self.prune_all("--idle-hours", "0")
+        self.assertFalse(path.exists())
+        self.assertNotIn("docs/nb1", self.branches())
+        # The akagent task is left as it was; prune never archives it.
+        self.assertEqual(json.loads(self.tasks.read_text())["tasks"][0]["status"], "created")
+
+    def test_prune_keeps_created_task_with_an_execution(self):
+        path = self.open_and_commit("nb2")
+        self.tool("publish", "nb2")
+        self.begin_state("nb2", executions=[{"id": "nb2-exec-01", "status": "active"}])
+        result = self.prune_all("--idle-hours", "0")
+        self.assertTrue(path.exists())
+        self.assertIn("owned by a live task: 1", result.stdout)
+
+    def test_prune_keeps_never_begun_task_when_any_other_gate_holds(self):
+        dirty = self.open_and_commit("nb-dirty")
+        self.tool("publish", "nb-dirty")
+        (dirty / "edit.md").write_text("edit\n")
+        unpublished = self.open_and_commit("nb-unpublished")
+        occupied = self.open_and_commit("nb-occupied")
+        self.tool("publish", "nb-occupied")
+        self.panes.write_text(f"{occupied}\n")
+        self.tasks.write_text(json.dumps({"tasks": [{"id": i, "status": "created"}
+                                                    for i in ("nb-dirty", "nb-unpublished", "nb-occupied")]}))
+        self.prune_all("--idle-hours", "0")
+        for path in (dirty, unpublished, occupied):
+            self.assertTrue(path.exists(), path.name)
+        self.assertEqual((dirty / "edit.md").read_text(), "edit\n")
+
+    def test_prune_keeps_other_live_statuses_without_executions(self):
+        path = self.open_and_commit("waiting-one")
+        self.tool("publish", "waiting-one")
+        for status in ("active", "waiting", "blocked"):
+            self.begin_state("waiting-one", status=status)
+            self.prune_all("--idle-hours", "0")
+            self.assertTrue(path.exists(), status)
+
+    def test_never_begun_requires_a_readable_record_without_executions(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("notes_task_under_test", TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        created = {"id": "t", "status": "created"}
+        self.assertTrue(module.never_begun(created, {"task": created, "resources": []}))
+        self.assertTrue(module.never_begun(created, {"task": created, "executions": []}))
+        self.assertFalse(module.never_begun(created, None), "an unreadable record is treated as owned")
+        self.assertFalse(module.never_begun(created, {"executions": [{"id": "e"}]}))
+        self.assertFalse(module.never_begun({"id": "t", "status": "active"}, {"task": {}}))
+
+    def test_inventory_marks_never_begun_without_a_live_owner_hold(self):
+        path = self.open_and_commit("nb3")
+        self.tool("publish", "nb3")
+        begun = self.open_and_commit("nb4")
+        self.tool("publish", "nb4")
+        self.tasks.write_text(json.dumps({"tasks": [
+            {"id": "nb3", "status": "created"},
+            {"id": "nb4", "status": "created", "executions": [{"id": "nb4-exec-01"}]}]}))
+        items = {i["task_id"]: i for i in
+                 json.loads(self.tool("inventory", "--idle-hours", "0").stdout)["items"]}
+        self.assertEqual(items["nb3"]["holds"], [])
+        self.assertEqual(items["nb3"]["markers"], ["never_begun"])
+        self.assertEqual(items["nb4"]["holds"], ["live_owner"])
+        self.assertNotIn("markers", items["nb4"])
+        self.assertTrue(path.exists())
+
+    def test_inventory_still_reports_content_holds_for_never_begun_task(self):
+        path = self.open_and_commit("nb5")
+        (path / "dirty.md").write_text("preserve\n")
+        self.tasks.write_text(json.dumps({"tasks": [{"id": "nb5", "status": "created"}]}))
+        item = json.loads(self.tool("inventory", "--idle-hours", "0").stdout)["items"][0]
+        self.assertEqual(set(item["holds"]), {"dirty", "unpublished"})
+        self.assertEqual(item["markers"], ["never_begun"])
+
+    def test_inventory_covers_operator_and_agent_repositories(self):
+        self.open_and_commit("inv-agent")
+        self.open_legacy("inv-legacy")
+        items = json.loads(self.tool("inventory", "--idle-hours", "0").stdout)["items"]
+        repositories = {i["task_id"]: Path(i["repository"]).name for i in items}
+        self.assertEqual(repositories, {"inv-agent": "agent-notes", "inv-legacy": "operator-notes"})
+
+    def test_park_allows_never_begun_task_but_not_one_with_an_execution(self):
+        path = self.open_and_commit("nb6")
+        self.begin_state("nb6", executions=[{"id": "nb6-exec-01"}])
+        refused = self.park("nb6", ok=False)
+        self.assertNotEqual(refused.returncode, 0)
+        self.assertTrue(path.exists())
+        self.begin_state("nb6")
+        self.park("nb6")
+        self.assertFalse(path.exists())
 
     def test_prune_refuses_without_akagent(self):
         self.env["AKAGENT_BIN"] = str(self.root / "missing")

@@ -18,7 +18,12 @@ Prune removes a worktree or docs/* branch only when every commit is already on
 origin/main (by ancestry or patch equivalence), the worktree has no tracked or
 untracked changes, no akagent task in a non-terminal state owns it, no tmux pane
 is inside it, and it has been idle for --idle-hours. A live task protects its
-own <task-id> worktree and its newest notes resource. Ignored files (task tmp/
+own <task-id> worktree and its newest notes resource. A task still `created` with no
+execution (its worker never ran `akagent task begin`) is not a live owner; every
+other gate, including the idle window, still applies, and the task is not archived.
+Prune walks every configured notes clone (NOTES_REPO and NOTES_AGENT_REPO, as
+inventory does) and always prints a one-line summary, even when nothing changed.
+Ignored files (task tmp/
 evidence) are moved to the canonical checkout's tmp/<worktree-name>/ first.
 Prune also removes orphans: unregistered directories under the worktree root
 (typically left when macOS recreated .DS_Store during an earlier removal) whose
@@ -26,6 +31,7 @@ every file is OS cruft or a blob reachable from origin/main. One item's failure
 is reported on stderr without stopping the pass.
 """
 import argparse
+import collections
 try:
     import fcntl
 except ImportError:  # Windows uses the standard-library byte-range lock.
@@ -205,8 +211,30 @@ def akagent_json(*args):
         return None
 
 
-def live_claims(*, strict=False):
-    """Worktree paths and branches owned by akagent tasks that are not terminal."""
+def configured_repos():
+    """Existing notes clones, de-duplicated, in a stable order (NOTES_REPO first)."""
+    repos = []
+    for repo in (NOTES, AGENT_NOTES):
+        if repo.is_dir() and repo not in repos:
+            repos.append(repo)
+    return repos
+
+
+def never_begun(task, detail):
+    """True for a `created` task whose worker never began an execution.
+
+    Needs a successful inspection that carries no executions; an unreadable or
+    unexpected record is treated as owned.
+    """
+    return task.get("status") == "created" and detail is not None and not detail.get("executions")
+
+
+def live_claims(*, strict=False, unbegun=None):
+    """Worktree paths and branches owned by akagent tasks that are not terminal.
+
+    A never-begun `created` task owns nothing; the paths and branches it would
+    have claimed are added to `unbegun` (when given) so inventory can report them.
+    """
     paths, branches = set(), set()
     listing = akagent_json("task", "list")
     if listing is None:
@@ -214,11 +242,15 @@ def live_claims(*, strict=False):
     for task in listing.get("tasks", []):
         if task.get("status") not in LIVE_TASK:
             continue
-        paths.add(str(ROOT / task["id"]))
-        branches.add(f"docs/{task['id']}")
         detail = akagent_json("task", "inspect", task["id"])
         if detail is None and strict:
             raise SystemExit("notes-task: task ownership inspection unavailable")
+        if never_begun(task, detail):
+            claim_paths = claim_branches = unbegun if unbegun is not None else set()
+        else:
+            claim_paths, claim_branches = paths, branches
+        claim_paths.add(str(ROOT / task["id"]))
+        claim_branches.add(f"docs/{task['id']}")
         detail = detail or {}
         # Long-lived tasks accumulate resources they cannot archive while live;
         # protect only the newest (IDs sort by creation time). Older ones still
@@ -226,9 +258,9 @@ def live_claims(*, strict=False):
         notes = [r for r in detail.get("resources") or [] if r.get("repository") == "notes"]
         for resource in sorted(notes, key=lambda r: r.get("id", ""))[-1:]:
             if resource.get("worktree_path"):
-                paths.add(str(Path(resource["worktree_path"]).resolve()))
+                claim_paths.add(str(Path(resource["worktree_path"]).resolve()))
             if resource.get("branch"):
-                branches.add(resource["branch"])
+                claim_branches.add(resource["branch"])
     return paths, branches
 
 
@@ -567,12 +599,11 @@ def cmd_park(args):
         release_publisher_lock(descriptor)
 
 
-def cmd_prune(args):
-    git("fetch", "--quiet", "origin")
-    claimed_paths, claimed_branches = live_claims()
-    panes = pane_paths()
-    cutoff = time.time() - args.idle_hours * 3600
+def prune_repo(args, claimed_paths, claimed_branches, panes, cutoff, stats):
+    """Prune one notes clone (the global NOTES); returns True when an item could not be handled."""
+    verb = "would remove" if args.dry_run else "remove"
     checked_out, failed = set(), False
+    git("fetch", "--quiet", "origin")
     for entry in worktrees():
         path = Path(entry["worktree"]).resolve()
         branch = entry.get("branch", "").removeprefix("refs/heads/")
@@ -580,6 +611,7 @@ def cmd_prune(args):
             checked_out.add(branch)
         if path.parent != ROOT or not branch.startswith("docs/"):
             continue
+        stats["worktrees_seen"] += 1
         reason = None
         if str(path) in claimed_paths or branch in claimed_branches:
             reason = "owned by a live task"
@@ -592,11 +624,13 @@ def cmd_prune(args):
         elif last_activity(path) > cutoff:
             reason = "recently active"
         if reason:
+            stats["kept"][reason] += 1
             if args.verbose:
                 print(f"keep {path.name}: {reason}")
             continue
-        print(f"{'would remove' if args.dry_run else 'remove'} worktree {path.name} ({branch})")
+        print(f"{verb} worktree {path.name} ({branch})")
         if args.dry_run:
+            stats["worktrees"] += 1
             continue
         try:
             move_ignored(path)
@@ -604,8 +638,10 @@ def cmd_prune(args):
             git("branch", "-D", branch)
         except SystemExit as error:
             print(f"keep {path.name}: {error}", file=sys.stderr)
+            stats["failed"] += 1
             failed = True
             continue
+        stats["worktrees"] += 1
         checked_out.discard(branch)
     for branch in git("for-each-ref", "--format=%(refname:short)", "refs/heads/docs/").splitlines():
         if branch in checked_out or branch in claimed_branches or not published(branch):
@@ -616,7 +652,33 @@ def cmd_prune(args):
         print(f"{'would delete' if args.dry_run else 'delete'} branch {branch}")
         if not args.dry_run:
             git("branch", "-D", branch)
+        stats["branches"] += 1
     git("worktree", "prune")
+    return failed
+
+
+def cmd_prune(args):
+    global NOTES
+    original = NOTES
+    claimed_paths, claimed_branches = live_claims()
+    panes = pane_paths()
+    cutoff = time.time() - args.idle_hours * 3600
+    verb = "would remove" if args.dry_run else "removed"
+    stats = {"worktrees_seen": 0, "worktrees": 0, "branches": 0, "orphans": 0, "failed": 0,
+             "kept": collections.Counter()}
+    repos = configured_repos()
+    failed = False
+    try:
+        for repo in repos:
+            NOTES = repo
+            try:
+                failed |= prune_repo(args, claimed_paths, claimed_branches, panes, cutoff, stats)
+            except SystemExit as error:
+                print(f"notes-task: skipped {repo.name}: {error}", file=sys.stderr)
+                stats["failed"] += 1
+                failed = True
+    finally:
+        NOTES = original
     blobs = None
     for path in orphans():
         if str(path) in claimed_paths or any(p == path or path in p.parents for p in panes) or \
@@ -626,35 +688,54 @@ def cmd_prune(args):
         rejected = leftovers(path, lambda rel, blob: blob in blobs)
         if rejected:
             print(f"keep orphan {path.name}: {rejected[0].relative_to(path)} is not on origin/main", file=sys.stderr)
+            stats["failed"] += 1
             failed = True
             continue
         print(f"{'would remove' if args.dry_run else 'remove'} orphan {path.name}")
         if args.dry_run:
+            stats["orphans"] += 1
             continue
         try:
             finish_removal(path, lambda rel, blob: blob in blobs, "origin/main")
         except SystemExit as error:
             print(f"keep orphan {path.name}: {error}", file=sys.stderr)
+            stats["failed"] += 1
             failed = True
+            continue
+        stats["orphans"] += 1
+    kept = sum(stats["kept"].values())
+    reasons = ", ".join(f"{reason}: {count}" for reason, count in sorted(stats["kept"].items()))
+    print(f"notes-task: prune scanned {len(repos)} {'repository' if len(repos) == 1 else 'repositories'} "
+          f"({', '.join(repo.name for repo in repos) or 'none'}), {stats['worktrees_seen']} task "
+          f"{'worktree' if stats['worktrees_seen'] == 1 else 'worktrees'}: {verb} {stats['worktrees']} "
+          f"{'worktree' if stats['worktrees'] == 1 else 'worktrees'}, {stats['branches']} extra "
+          f"{'branch' if stats['branches'] == 1 else 'branches'}, {stats['orphans']} "
+          f"{'orphan' if stats['orphans'] == 1 else 'orphans'}; kept {kept}"
+          f"{f' ({reasons})' if reasons else ''}; {stats['failed']} failed"
+          f"{' (dry run: nothing changed)' if args.dry_run else ''}")
     return 1 if failed else 0
 
 
 def retention_inventory(task_ids=(), idle_hours=2.0):
-    """Read-only local retention view; no fetch, Git mutation, or deletion authority."""
+    """Read-only local retention view; no fetch, Git mutation, or deletion authority.
+
+    `holds` lists exactly what keeps prune from removing an item. `markers` is an
+    additive note: `never_begun` means the owning akagent task is still `created`
+    with no execution, so it is not a `live_owner` hold.
+    """
     global NOTES
     original = NOTES
     result = {"schema": 1, "complete": True, "items": [], "errors": [],
               "publication_basis": "local origin/main; no network refresh"}
     try:
-        paths, branches = live_claims(strict=True)
+        unbegun = set()
+        paths, branches = live_claims(strict=True, unbegun=unbegun)
         pane_result = subprocess.run([TMUX, "list-panes", "-a", "-F", "#{pane_current_path}"],
                                      text=True, capture_output=True, timeout=10)
         if pane_result.returncode:
             raise ValueError("tmux pane inventory unavailable")
         panes = [Path(p).resolve() for p in pane_result.stdout.splitlines() if p]
-        for repo in sorted({NOTES, AGENT_NOTES}):
-            if not repo.is_dir():
-                continue
+        for repo in configured_repos():
             NOTES = repo
             for entry in worktrees():
                 path = Path(entry["worktree"]).resolve()
@@ -675,8 +756,12 @@ def retention_inventory(task_ids=(), idle_hours=2.0):
                     holds.append("unpublished")
                 if last_activity(path) > time.time() - idle_hours * 3600:
                     holds.append("recent")
-                result["items"].append({"task_id": task_id, "path": str(path), "branch": branch,
-                                        "repository": str(repo), "holds": holds})
+                item = {"task_id": task_id, "path": str(path), "branch": branch,
+                        "repository": str(repo), "holds": holds}
+                if "live_owner" not in holds and (str(path) in unbegun or branch in unbegun):
+                    # Informational only: prune treats this task as unowned, so it is not a hold.
+                    item["markers"] = ["never_begun"]
+                result["items"].append(item)
         NOTES = original
         blobs = None
         for path in orphans():
