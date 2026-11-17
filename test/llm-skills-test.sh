@@ -9,7 +9,8 @@ trap 'rm -rf "$tmpdir"' EXIT
 notes_repo="$tmpdir/notes"
 home="$tmpdir/home"
 mkdir -p "$notes_repo/agents/skills" "$notes_repo/agents/guidance" "$notes_repo/agents/pi-extensions" "$home/dev" "$home/.claude" "$home/.pi/agent"
-printf '{"theme":"light","permissions":{"allow":["Bash(git status *)"]}}\n' > "$home/.claude/settings.json"
+# Seeds rules the retired liaison-relay helper used to add; setup must converge them away.
+printf '{"theme":"light","permissions":{"allow":["Bash(git status *)","Bash(liaison-relay *)","Bash(~/.local/bin/liaison-relay *)","Bash(~/.claude/skills/agent-liaison/scripts/liaison-relay *)"]},"sandbox":{"excludedCommands":["liaison-relay *","~/.local/bin/liaison-relay *"]}}\n' > "$home/.claude/settings.json"
 printf '{"customPiSetting":"preserve-me"}\n' > "$home/.pi/agent/settings.json"
 # Setup must leave independently managed personal executables alone and must
 # never invoke op while configuring either machine role.
@@ -29,7 +30,7 @@ printf 'export default function () {}\n' > "$notes_repo/agents/pi-extensions/pi-
 mkdir -p "$notes_repo/agents/pi-agents"
 printf 'bounded profile\n' > "$notes_repo/agents/pi-agents/bounded-investigator.md"
 
-common_skills=(agent-feedback-guidance akagent agent-liaison agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring preprod-asap-testing querying-bbc-core-reporting-db reading-non-hello-jira sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 # Use a real retired skill source so an accidental surviving symlink cannot
 # pass an absence check merely because its target is missing.
@@ -37,26 +38,16 @@ for skill_name in "${common_skills[@]}" "${work_skills[@]}" managing-1password-c
   mkdir -p "$notes_repo/agents/skills/$skill_name"
   printf '%s\n' "$skill_name" > "$notes_repo/agents/skills/$skill_name/SKILL.md"
 done
-helper_scripts=(agent-orchestrator/scripts/wake-orchestrator agent-liaison/scripts/liaison-relay agent-liaison/scripts/liaison-replace)
+helper_scripts=(agent-orchestrator/scripts/wake-orchestrator)
 for helper in "${helper_scripts[@]}"; do
   mkdir -p "$notes_repo/agents/skills/${helper%/*}"
   printf '#!/bin/sh\n' > "$notes_repo/agents/skills/$helper"
 done
-relay_rules=(
-  'Bash(liaison-relay *)'
-  'Bash(~/.local/bin/liaison-relay *)'
-  "Bash($home/.local/bin/liaison-relay *)"
-  'Bash(~/.claude/skills/agent-liaison/scripts/liaison-relay *)'
-  "Bash($home/.claude/skills/agent-liaison/scripts/liaison-relay *)"
-)
-
-# Relays get exactly the helper rules, once each, after any user rules.
-assert_relay_rules() {
+# The retired liaison-relay helper's rules must stay gone and user rules must survive.
+assert_retired_rules() {
   local settings="$home/.claude/settings.json"
   test "$(jq -r '.permissions.allow[0]' "$settings")" = 'Bash(git status *)'
-  for rule in "${relay_rules[@]}"; do
-    test "$(jq --arg rule "$rule" '[.permissions.allow[] | select(. == $rule)] | length' "$settings")" = 1
-  done
+  test "$(jq '[.permissions.allow[] | select(test("liaison"))] | length' "$settings")" = 0
   test "$(jq '[.permissions.allow[] | select(test("send-keys|^Bash\\(tmux"))] | length' "$settings")" = 0
 }
 
@@ -77,6 +68,11 @@ done
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   ln -s "$notes_repo/agents/skills/herdr" "$home/$skill_root/herdr"
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
+  # Dangling on purpose: the retired skill's source no longer exists in the notes repo.
+  ln -s "$notes_repo/agents/skills/agent-liaison" "$home/$skill_root/agent-liaison"
+done
+for retired_helper in liaison-relay liaison-replace; do
+  ln -sf "$notes_repo/agents/skills/agent-liaison/scripts/$retired_helper" "$home/.local/bin/$retired_helper"
 done
 
 run_setup() {
@@ -110,6 +106,10 @@ for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/s
   test ! -L "$home/$skill_root/herdr"
   test ! -L "$home/$skill_root/managing-1password-cli"
   test ! -e "$home/$skill_root/managing-1password-cli"
+  test ! -L "$home/$skill_root/agent-liaison"
+done
+for retired_helper in liaison-relay liaison-replace; do
+  test ! -L "$home/.local/bin/$retired_helper"
 done
 
 for skill_root in "${obsolete_skill_roots[@]}"; do
@@ -122,7 +122,7 @@ test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
 test "$(jq -r .permissions.defaultMode "$home/.claude/settings.json")" = auto
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
-assert_relay_rules
+assert_retired_rules
 for helper in "${helper_scripts[@]}"; do
   test "$(readlink "$home/.local/bin/${helper##*/}")" = "$notes_repo/agents/skills/$helper"
 done
@@ -138,6 +138,11 @@ printf '{"maxConcurrent":7,"customSetting":"preserve-me"}\n' > "$home/.pi/agent/
 
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
+  # Dangling on purpose: the retired skill's source no longer exists in the notes repo.
+  ln -s "$notes_repo/agents/skills/agent-liaison" "$home/$skill_root/agent-liaison"
+done
+for retired_helper in liaison-relay liaison-replace; do
+  ln -sf "$notes_repo/agents/skills/agent-liaison/scripts/$retired_helper" "$home/.local/bin/$retired_helper"
 done
 
 mkdir -p "$home/.agents/skills/twg" "$home/.agents/skills/twg-jira" "$home/.agents/skills/unrelated-skill"
@@ -164,7 +169,7 @@ cmp "$tmpdir/op-original" "$home/.local/bin/op"
 test ! -e "$home/op-invoked"
 cmp -s "$repo_root/templates/dot_codex/rules/work.rules" "$home/.codex/rules/work.rules"
 jq -e '.sandbox.excludedCommands | index("tmux *")' "$home/.claude/settings.json" >/dev/null
-jq -e '.sandbox.excludedCommands | index("liaison-relay *")' "$home/.claude/settings.json" >/dev/null
+jq -e '(.sandbox.excludedCommands | index("liaison-relay *")) == null' "$home/.claude/settings.json" >/dev/null
 jq -e '.sandbox.filesystem.allowWrite | index("~/dev")' "$home/.claude/settings.json" >/dev/null
 test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-work.md"
 test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
@@ -186,6 +191,10 @@ test "$(cat "$home/.local/share/rovo/current/twg/skills/twg/SKILL.md")" = 'prese
 for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -L "$home/$skill_root/managing-1password-cli"
   test ! -e "$home/$skill_root/managing-1password-cli"
+  test ! -L "$home/$skill_root/agent-liaison"
+done
+for retired_helper in liaison-relay liaison-replace; do
+  test ! -L "$home/.local/bin/$retired_helper"
 done
 for root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   for skill in sfx-token-refresh work-investigation-tools work-agent-orchestrator work-coding-workflow work-pr-review; do
@@ -210,7 +219,7 @@ env \
 test ! -e "$home/.codex/rules/work.rules"
 test "$(jq -c .sandbox "$home/.claude/settings.json")" = null
 test "$(jq -r .theme "$home/.claude/settings.json")" = light
-assert_relay_rules
+assert_retired_rules
 test ! -e "$home/dev/AGENTS.bbc-core.md"
 test ! -e "$home/dev/AGENTS.dss.md"
 test ! -e "$home/.rovodev/AGENTS.md"
@@ -270,4 +279,4 @@ rm "$home/.claude/settings.json"
 run_setup
 test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
 test "$(jq -r .permissions.defaultMode "$home/.claude/settings.json")" = auto
-test "$(jq -c .permissions.allow "$home/.claude/settings.json")" = "$(printf '%s\n' "${relay_rules[@]}" | jq -Rsc 'split("\n")[:-1]')"
+test "$(jq -c .permissions.allow "$home/.claude/settings.json")" = '[]'

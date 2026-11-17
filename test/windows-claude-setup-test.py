@@ -16,10 +16,9 @@ class WindowsClaudeSetupTest(unittest.TestCase):
         self.assertIn('cp -RL -- "$source/."', script)
         self.assertNotIn("ln -s", script)
         for skill in (
-            "agent-feedback-guidance", "akagent", "agent-liaison",
-            "agent-orchestrator", "coding-workflow", "durable-work-notes",
-            "pr-review", "quota-axi", "skills-via-dots-notes",
-            "task-self-cleanup", "tmux",
+            "agent-feedback-guidance", "akagent", "agent-orchestrator",
+            "coding-workflow", "durable-work-notes", "pr-review",
+            "quota-axi", "skills-via-dots-notes", "task-self-cleanup", "tmux",
         ):
             self.assertIn(f"  {skill}\n", script)
 

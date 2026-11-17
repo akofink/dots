@@ -35,6 +35,7 @@ raise "agent.yml must remain an alias of ai.yml" unless File.symlink?(legacy_ali
   raise "unexpected root: #{config['root']}" unless config["root"] == expected_root
   raise "legacy alias rendered differently" unless render.call(legacy_alias) == config
 
+  raise "unexpected windows: #{config['windows'].inspect}" unless config.fetch("windows").map { |window| window.keys.first } == ["zsh", "🐙"]
   first_window = config.fetch("windows").first.fetch("zsh")
   expected_panes = [
     {"dev" => ["cd #{expected_root}"]},

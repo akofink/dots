@@ -33,7 +33,6 @@ mkdir -p "$claude_config/skills" "$codex_config/skills"
 common_skills=(
   agent-feedback-guidance
   akagent
-  agent-liaison
   agent-orchestrator
   coding-workflow
   durable-work-notes

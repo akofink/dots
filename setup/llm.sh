@@ -338,7 +338,12 @@ unlink_retired_agent_skills() {
     "$HOME/.pi/agent/skills" \
     "$HOME/.rovodev/skills" \
     "$HOME/dev/.rovodev/skills"; do
-    unlink_skill_set "$destination_root" managing-1password-cli
+    unlink_skill_set "$destination_root" managing-1password-cli agent-liaison
+  done
+  # The retired agent-liaison skill installed these helpers into ~/.local/bin.
+  local retired_helper
+  for retired_helper in liaison-relay liaison-replace; do
+    remove_symlink_if_points_to "$HOME/.local/bin/$retired_helper" "$notes_repo/agents/skills/agent-liaison"
   done
 }
 
@@ -527,7 +532,7 @@ unlink_notes_symlinks() {
   done
 }
 
-common_skills=(agent-feedback-guidance akagent agent-liaison agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
+common_skills=(agent-feedback-guidance akagent agent-orchestrator coding-workflow durable-work-notes pr-review quota-axi skills-via-dots-notes task-self-cleanup tmux)
 work_skills=(atlas-updates bbc-conversion-cohort-ops confluence-work-blog creating-switcheroo-gates elbow-pits-oncall jira-ticket-authoring preprod-asap-testing querying-bbc-core-reporting-db reading-non-hello-jira sfx-token-refresh slack-mcp work-agent-orchestrator work-coding-workflow work-identity work-investigation-tools work-pr-review)
 notes_skill_dests=(
   "$HOME/.agents/skills"
@@ -599,9 +604,7 @@ link_notes_skill_set() {
   local helper_src
   for helper_src in \
     "$notes_repo/agents/skills/agent-orchestrator/scripts/wake-orchestrator" \
-    "$notes_repo/agents/skills/agent-orchestrator/scripts/agent-workflow" \
-    "$notes_repo/agents/skills/agent-liaison/scripts/liaison-relay" \
-    "$notes_repo/agents/skills/agent-liaison/scripts/liaison-replace"; do
+    "$notes_repo/agents/skills/agent-orchestrator/scripts/agent-workflow"; do
     if [[ -f "$helper_src" ]]; then
       install_symlink "$helper_src" "$HOME/.local/bin/${helper_src##*/}" || failed=1
     fi
@@ -695,23 +698,22 @@ sync_claude_work_settings() {
 set_claude_base_settings() {
   local claude_settings="$HOME/.claude/settings.json"
   local claude_settings_tmp
-  local relay_rules
-  # The auto-mode classifier blocks liaison relays typed into the orchestrator
-  # pane. Allow only the helper that verifies that target and prefixes the
-  # message, never arbitrary tmux send-keys. Rules match command text, so list
-  # each spelling.
-  relay_rules=$(jq -nc --arg home "$HOME" '["liaison-relay", "~/.local/bin/liaison-relay",
+  local retired_rules
+  # Converge away the allow rules for the retired liaison-relay helper. Rules
+  # match command text, so each spelling was listed.
+  retired_rules=$(jq -nc --arg home "$HOME" '["liaison-relay", "~/.local/bin/liaison-relay",
     "\($home)/.local/bin/liaison-relay", "~/.claude/skills/agent-liaison/scripts/liaison-relay",
     "\($home)/.claude/skills/agent-liaison/scripts/liaison-relay"] | map("Bash(\(.) *)")') ||
-    fatal "Failed to build Claude relay rules"
+    fatal "Failed to build retired Claude rules"
   local base_filter='.autoMemoryEnabled = false | .permissions.defaultMode = "auto"
-    | .permissions.allow = ((.permissions.allow // []) as $allow | $allow + ($relay - $allow))'
+    | if (.permissions.allow | type) == "array" then .permissions.allow -= $retired else . end
+    | if (.sandbox.excludedCommands? | type) == "array" then .sandbox.excludedCommands -= ["liaison-relay *", "~/.local/bin/liaison-relay *"] else . end'
   mkdir -p "$(dirname -- "$claude_settings")"
   claude_settings_tmp=$(mktemp "${claude_settings}.XXXXXX") || fatal "Failed to create Claude settings temp file"
   if [[ -f "$claude_settings" ]]; then
-    jq --argjson relay "$relay_rules" "$base_filter" "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude base settings"
+    jq --argjson retired "$retired_rules" "$base_filter" "$claude_settings" > "$claude_settings_tmp" || fatal "Failed to update Claude base settings"
   else
-    jq -n --argjson relay "$relay_rules" "{} | $base_filter" > "$claude_settings_tmp" || fatal "Failed to create Claude base settings"
+    jq -n --argjson retired "$retired_rules" "{} | $base_filter" > "$claude_settings_tmp" || fatal "Failed to create Claude base settings"
   fi
   chmod 600 "$claude_settings_tmp"
   mv -f "$claude_settings_tmp" "$claude_settings"
