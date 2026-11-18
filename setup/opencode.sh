@@ -11,6 +11,14 @@ if [[ -z "${UTIL_SETUP_COMPLETE:-}" ]]; then
   source "$script_dir/util.sh"
 fi
 
+# All setup entry points, including llm and direct module invocation, pass
+# through here. Work machines must not download or run the installer.
+if [[ "${MACHINE_CLASS:-}" == work ]]; then
+  echo "Skipping opencode installation on work machines"
+  export OPENCODE_SETUP_COMPLETE=1
+  return 0
+fi
+
 opencode_install_dir="$HOME/.opencode/bin"
 legacy_opencode_bin="/usr/local/bin/opencode"
 

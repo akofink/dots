@@ -172,7 +172,7 @@ Atlassian CLI (`acli`) is not installed by dots on any machine class.
 
 #### opencode module
 
-`bash setup/opencode.sh` installs opencode using the official installer from `https://opencode.ai/v2/install`.
+On personal machines, `bash setup/opencode.sh` installs opencode using the official installer from `https://opencode.ai/v2/install`. Work-machine setup skips the installation, including when this module is invoked directly.
 The installer places the binary in `~/.opencode/bin`; the managed shell templates already add that
 directory to `PATH`, so the setup script runs the installer with `--no-modify-path`.
 The setup script invokes the official installer on each run so stale or broken binaries can be repaired.
