@@ -555,6 +555,54 @@ os.execv({real_git!r}, [{real_git!r}, *args])
         resumed = Path(self.tool("open", "p1").stdout.strip())
         self.assertEqual(self.git(resumed, "rev-parse", "HEAD"), tip)
 
+    def test_legacy_park_requires_exact_branch_and_preserves_history(self):
+        path = self.open_and_commit("custom")
+        branch = "legacy/custom"
+        self.git(path, "branch", "-m", branch)
+        tip = self.git(path, "rev-parse", "HEAD")
+        self.assertIn("not on a docs/* branch", self.park("custom", ok=False).stderr)
+        self.assertIn("does not match", self.park("custom", "--legacy-branch", "other", ok=False).stderr)
+        flag = ("--legacy-branch", branch)
+        ref = "refs/notes-task/parked/custom"
+        before = self.git(self.notes, "for-each-ref")
+        plan = json.loads(self.park("custom", *flag, "--dry-run").stdout)["would_park"]
+        self.assertEqual(plan["head"], tip)
+        self.assertEqual(self.git(self.notes, "for-each-ref"), before)
+        self.assertTrue(path.exists())
+        self.park("custom", *flag)
+        self.assertFalse(path.exists())
+        self.assertEqual(self.git(self.notes, "rev-parse", branch), tip)
+        self.assertEqual(self.git(self.notes, "rev-parse", ref), tip)
+
+    def test_legacy_park_refuses_older_live_binding_and_other_holds(self):
+        path = self.open_and_commit("custom")
+        branch = "legacy/custom"
+        self.git(path, "branch", "-m", branch)
+        flag = ("--legacy-branch", branch)
+        self.tasks.write_text(json.dumps({"tasks": [{"id": "different", "status": "waiting", "resources": [
+            {"id": "1", "repository": "notes", "branch": branch, "worktree_path": str(path)},
+            {"id": "2", "repository": "notes", "branch": "docs/newer"},
+        ]}]}))
+        self.assertIn("owned by a live task", self.park("custom", *flag, ok=False).stderr)
+        self.tasks.write_text('{"tasks": []}')
+        self.panes.write_text(f"{path}/sub\n")
+        self.assertIn("tmux pane is inside", self.park("custom", *flag, ok=False).stderr)
+        self.panes.write_text("")
+        self.assertIn("recently active", self.tool("park", "custom", "--reason", "test", *flag, ok=False).stderr)
+        self.git(self.notes, "worktree", "lock", str(path))
+        self.assertIn("not an unlocked", self.park("custom", *flag, ok=False).stderr)
+        self.git(self.notes, "worktree", "unlock", str(path))
+        dirty = path / "scratch.md"
+        dirty.write_text("unfinished\n")
+        self.assertIn("uncommitted changes", self.park("custom", *flag, ok=False).stderr)
+        self.assertIn("no checkpoint", self.park("custom", *flag, "--checkpoint-dirty", ok=False).stderr)
+        self.assertEqual(dirty.read_text(), "unfinished\n")
+        dirty.unlink()
+        self.fake(Path(self.env["TMUX_BIN"]), "raise SystemExit(1)")
+        self.assertIn("pane inspection unavailable", self.park("custom", *flag, ok=False).stderr)
+        self.assertTrue(path.exists())
+        self.assertEqual(self.git(self.notes, "for-each-ref", "refs/notes-task/parked/"), "")
+
     def test_park_refuses_live_owner_pane_recent_and_dirty_without_mutation(self):
         live = self.open_and_commit("live")
         occupied = self.open_and_commit("occupied")

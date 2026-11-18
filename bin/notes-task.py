@@ -9,6 +9,7 @@ Agents call this instead of running git worktree or git branch in the notes repo
   notes-task park <name> --reason <text>
                                  retire an idle, unowned, unpublished worktree; keep its branch and pin
                                  refs/notes-task/parked/<name> (--checkpoint-dirty commits edits first)
+                                 use --legacy-branch <exact-branch> for a clean custom-branch checkout
 
 New tasks use the separate NOTES_AGENT_REPO clone by default. Existing task worktrees and
 branches in NOTES_REPO remain attached to that legacy checkout until their owners finish.
@@ -229,7 +230,7 @@ def never_begun(task, detail):
     return task.get("status") == "created" and detail is not None and not detail.get("executions")
 
 
-def live_claims(*, strict=False, unbegun=None):
+def live_claims(*, strict=False, unbegun=None, all_notes_resources=False):
     """Worktree paths and branches owned by akagent tasks that are not terminal.
 
     A never-begun `created` task owns nothing; the paths and branches it would
@@ -256,7 +257,7 @@ def live_claims(*, strict=False, unbegun=None):
         # protect only the newest (IDs sort by creation time). Older ones still
         # need the clean, published, idle, and no-pane checks before removal.
         notes = [r for r in detail.get("resources") or [] if r.get("repository") == "notes"]
-        for resource in sorted(notes, key=lambda r: r.get("id", ""))[-1:]:
+        for resource in notes if all_notes_resources else sorted(notes, key=lambda r: r.get("id", ""))[-1:]:
             if resource.get("worktree_path"):
                 claim_paths.add(str(Path(resource["worktree_path"]).resolve()))
             if resource.get("branch"):
@@ -264,9 +265,11 @@ def live_claims(*, strict=False, unbegun=None):
     return paths, branches
 
 
-def pane_paths():
+def pane_paths(*, strict=False):
     result = subprocess.run([TMUX, "list-panes", "-a", "-F", "#{pane_current_path}"],
                             text=True, capture_output=True)
+    if strict and result.returncode != 0:
+        raise SystemExit("notes-task: tmux pane inspection unavailable; refusing to park")
     return [Path(p).resolve() for p in result.stdout.splitlines() if p] if result.returncode == 0 else []
 
 
@@ -531,31 +534,41 @@ def cmd_park(args):
 
     The branch and its history stay; the tip is also pinned under
     refs/notes-task/parked/<name> with the reason in the reflog. Only the
-    worktree checkout is removed (never forced). `notes-task open` on the
-    branch's task ID resumes it.
+    worktree checkout is removed (never forced). `notes-task open` resumes
+    standard docs/* branches; a legacy branch is retained under its old name.
     """
     global NOTES
     reason = " ".join(args.reason.split())
     if not reason:
         raise SystemExit("notes-task: park requires a non-empty --reason")
     path = ROOT / args.name
-    if path.parent != ROOT or not path.is_dir():
+    if path.parent != ROOT or path.is_symlink() or not path.is_dir():
         raise SystemExit(f"notes-task: {path} is not a notes task worktree")
     NOTES = repository_for_worktree(path)
-    entry = next((e for e in worktrees() if Path(e["worktree"]).resolve() == path.resolve()), None)
-    branch = (entry or {}).get("branch", "").removeprefix("refs/heads/")
-    if not branch.startswith("docs/"):
-        raise SystemExit(f"notes-task: {path} is not on a docs/* branch; refusing to park")
+    legacy = args.legacy_branch is not None
     descriptor = publisher_lock()
     try:
-        claimed_paths, claimed_branches = live_claims(strict=True)
-        if str(path.resolve()) in claimed_paths or branch in claimed_branches:
+        entry = next((e for e in worktrees() if Path(e["worktree"]).resolve() == path), {})
+        branch = entry.get("branch", "").removeprefix("refs/heads/")
+        if legacy:
+            if not branch or branch.startswith("docs/") or branch != args.legacy_branch:
+                raise SystemExit(f"notes-task: {path} does not match the requested legacy branch")
+            if path == NOTES or not (path / ".git").is_file() or "locked" in entry:
+                raise SystemExit(f"notes-task: {path} is not an unlocked linked worktree")
+            if args.checkpoint_dirty:
+                raise SystemExit("notes-task: --legacy-branch requires a clean checkout; no checkpoint allowed")
+        elif not branch.startswith("docs/"):
+            raise SystemExit(f"notes-task: {path} is not on a docs/* branch; refusing to park")
+        claimed_paths, claimed_branches = live_claims(strict=True, all_notes_resources=legacy)
+        if str(path) in claimed_paths or branch in claimed_branches:
             raise SystemExit(f"notes-task: {args.name} is owned by a live task; its owner must finish first")
-        if any(p == path or path in p.parents for p in pane_paths()):
+        if any(p == path or path in p.parents for p in pane_paths(strict=legacy)):
             raise SystemExit(f"notes-task: a tmux pane is inside {path}; refusing to park")
         if last_activity(path) > time.time() - args.idle_hours * 3600:
             raise SystemExit(f"notes-task: {args.name} was recently active; refusing to park")
         dirty = not clean(path)
+        if legacy and dirty:
+            raise SystemExit(f"notes-task: {path} has uncommitted changes; refusing to park")
         if dirty and not args.checkpoint_dirty:
             raise SystemExit(f"notes-task: {path} has uncommitted changes; pass --checkpoint-dirty to commit them "
                              "to its branch before parking")
@@ -564,6 +577,8 @@ def cmd_park(args):
         planned = {"name": args.name, "path": str(path), "branch": branch, "ref": ref,
                    "head": git("rev-parse", "HEAD", cwd=path), "checkpoint": None,
                    "evidence": None, "reason": reason}
+        if legacy and existing and existing != planned["head"]:
+            raise SystemExit(f"notes-task: {ref} already pins {existing}; refusing to overwrite")
         if args.dry_run:
             print(json.dumps({"would_park": planned, "dirty": dirty}))
             return 0
@@ -812,6 +827,8 @@ def main():
     p = sub.add_parser("park", help="Remove an idle unowned worktree, keeping its branch and a pinned parked ref")
     p.add_argument("name", help="worktree directory name under the notes worktree root")
     p.add_argument("--reason", required=True)
+    p.add_argument("--legacy-branch", metavar="BRANCH",
+                   help="require this exact non-docs branch on a clean linked worktree; keep the branch")
     p.add_argument("--checkpoint-dirty", action="store_true",
                    help="commit uncommitted changes to the branch before parking")
     p.add_argument("--dry-run", action="store_true")
