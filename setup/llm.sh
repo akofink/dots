@@ -609,6 +609,9 @@ link_notes_skill_set() {
       install_symlink "$helper_src" "$HOME/.local/bin/${helper_src##*/}" || failed=1
     fi
   done
+  if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
+    install_symlink "$DOTS_REPO/bin/ai-proxy" "$HOME/.local/bin/ai-proxy" || failed=1
+  fi
   return "$failed"
 }
 

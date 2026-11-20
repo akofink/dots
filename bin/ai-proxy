@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Launch Claude Code or Codex through the Internal AI Proxy for this process only.
+# Work machines only (MACHINE_CLASS=work). Never edits ~/.claude/settings.json or
+# ~/.codex/config.toml, so running sessions and normal launches are unaffected.
+# Requires the API-key helper installed by the proxy's HOWTO setup script.
+set -euo pipefail
+
+if [[ "${MACHINE_CLASS:-personal}" != work ]]; then
+  echo "ai-proxy: work machines only" >&2
+  exit 2
+fi
+tool="${1:-}"
+[[ -n "$tool" ]] || { echo "usage: ai-proxy claude|codex [tool args...]" >&2; exit 2; }
+shift
+url="${INTERNAL_AI_PROXY_URL:-https://internal-ai-proxy.us-east-1.prod.atl-paas.net}"
+helper="${INTERNAL_AI_PROXY_HELPER:-$HOME/.local/bin/internal-ai-proxy-api-key-helper}"
+[[ -x "$helper" ]] || { echo "ai-proxy: helper missing: $helper" >&2; exit 1; }
+
+case "$tool" in
+  claude)
+    settings="$(mktemp "${TMPDIR:-/tmp}/ai-proxy-claude.XXXXXX")"
+    trap 'rm -f "$settings"' EXIT
+    jq -n --arg u "$url" --arg h "$helper" \
+      '{env:{ANTHROPIC_BASE_URL:$u,CLAUDE_CODE_GATEWAY_HINT_HEADERS:"1"},apiKeyHelper:$h}' >"$settings"
+    unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN
+    claude --settings "$settings" "$@"
+    ;;
+  codex)
+    p='model_providers.internal-ai-proxy'
+    exec codex \
+      -c 'model_provider="internal-ai-proxy"' \
+      -c "$p.name=\"Internal AI Proxy\"" -c "$p.base_url=\"$url/v1\"" -c "$p.wire_api=\"responses\"" \
+      -c "$p.auth.command=\"$helper\"" -c "$p.auth.args=[\"--base-url\",\"$url\"]" -c "$p.auth.timeout_ms=35000" "$@"
+    ;;
+  *) echo "ai-proxy: unknown tool '$tool'" >&2; exit 2 ;;
+esac
