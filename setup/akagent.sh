@@ -44,49 +44,40 @@ install_aka_link() {
   fi
 }
 
-tmp_build_dir=$(mktemp -d) || fatal "Failed to create temporary build directory for akagent"
-
 mkdir -p "$DEV_REPOS"
 if [[ ! -d "$akagent_repo/.git" ]]; then
-  git clone -q "$akagent_remote" "$akagent_repo" || {
-    rm -rf "$tmp_build_dir"
-    fatal "Failed to clone akagent"
-  }
+  git clone -q "$akagent_remote" "$akagent_repo" || fatal "Failed to clone akagent"
 else
   if [[ -n "$(git -C "$akagent_repo" status --porcelain)" ]]; then
-    rm -rf "$tmp_build_dir"
     fatal "Refusing to update dirty akagent checkout at $akagent_repo"
   fi
   if [[ "$(git -C "$akagent_repo" branch --show-current)" != "main" ]]; then
-    rm -rf "$tmp_build_dir"
     fatal "Refusing to update akagent checkout not on main at $akagent_repo"
   fi
-  git -C "$akagent_repo" fetch -q origin || {
-    rm -rf "$tmp_build_dir"
-    fatal "Failed to fetch akagent"
-  }
-  git -C "$akagent_repo" merge -q --ff-only origin/main || {
-    rm -rf "$tmp_build_dir"
-    fatal "Failed to fast-forward akagent main to origin/main"
-  }
-fi
-
-if ! (
-  cd "$akagent_repo" || exit 1
-  go build -o "$tmp_build_dir/akagent" ./cmd/akagent
-); then
-  rm -rf "$tmp_build_dir"
-  fatal "Failed to build akagent"
+  git -C "$akagent_repo" fetch -q origin || fatal "Failed to fetch akagent"
+  git -C "$akagent_repo" merge -q --ff-only origin/main || fatal "Failed to fast-forward akagent main to origin/main"
 fi
 
 mkdir -p "$akagent_bin_dir"
-tmp_install="$akagent_bin_dir/.akagent-install.$$"
-if ! install -m 0755 "$tmp_build_dir/akagent" "$tmp_install" || ! mv -f "$tmp_install" "$akagent_bin_dir/akagent"; then
-  rm -f "$tmp_install"
-  rm -rf "$tmp_build_dir"
-  fatal "Failed to install akagent to $akagent_bin_dir/akagent"
+akagent_bin="$akagent_bin_dir/akagent"
+
+# Bootstrap with one plain build only when no binary exists yet; every later run
+# uses the supported `akagent update`, which embeds build_revision.
+if [[ ! -x "$akagent_bin" ]]; then
+  tmp_install="$akagent_bin_dir/.akagent-install.$$"
+  if ! (cd "$akagent_repo" && go build -o "$tmp_install" ./cmd/akagent) || ! mv -f "$tmp_install" "$akagent_bin"; then
+    rm -f "$tmp_install"
+    fatal "Failed to bootstrap akagent at $akagent_bin"
+  fi
 fi
-rm -rf "$tmp_build_dir"
+
+if ! update_output=$("$akagent_bin" update --source "$akagent_repo" 2>&1); then
+  printf '%s\n' "$update_output" >&2
+  fatal "akagent update failed"
+fi
+if [[ "$update_output" == *"source_changed: true"* ]]; then
+  printf '%s\n' "$update_output"
+fi
 install_aka_link
 
 export AKAGENT_SETUP_COMPLETE=1
