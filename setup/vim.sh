@@ -4,6 +4,9 @@ if [[ -n "${VIM_SETUP_COMPLETE:-}" ]]; then
   return
 fi
 
+# Upstream tag to build, e.g. v9.2.1383 (patch level 1383).
+VIM_VERSION=${VIM_VERSION:-v9.2.1383}
+
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ -z "${REPOS_SETUP_COMPLETE:-}" ]]; then
@@ -25,8 +28,8 @@ if [[ ! -d "$HOME/dev/repos/vim" ]]; then
   git clone -q https://github.com/vim/vim.git "$HOME/dev/repos/vim"
 fi
 
-# Pull latest vim
-(cd "$HOME/dev/repos/vim" && git pull -q --ff-only)
+# Fetch upstream tags; the build checks out the pinned VIM_VERSION tag.
+(cd "$HOME/dev/repos/vim" && git fetch -q --tags origin)
 
 vim_needs_rebuild() {
   local vim_path="$HOME/.local/bin/vim"
@@ -36,10 +39,11 @@ vim_needs_rebuild() {
     return 0
   fi
 
-  # Build when the executable is older than roughly one week.
-  local is_week_old
-  is_week_old=$(find "$vim_path" -mtime +6 -print -quit 2>/dev/null || true)
-  if [[ -n "$is_week_old" ]]; then
+  # Build when the installed patch level differs from the pinned tag.
+  local installed_patch wanted_patch
+  installed_patch=$("$vim_path" --version 2>/dev/null | sed -n 's/^Included patches: 1-\([0-9]*\).*/\1/p')
+  wanted_patch=${VIM_VERSION##*.}
+  if [[ "$installed_patch" != "$wanted_patch" ]]; then
     return 0
   fi
 
@@ -92,6 +96,7 @@ build_vim() {
     
     "${PKG_INSTALL[@]}" "${build_deps[@]}"
     cd "$HOME/dev/repos/vim" || exit 1
+    git checkout -q "$VIM_VERSION"
 
     # Start from a clean tree so configure picks up new flags.
     make distclean >/dev/null 2>&1 || true

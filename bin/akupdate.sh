@@ -38,6 +38,27 @@ update_npm_globals() {
   npm update -g --no-fund --no-audit
 }
 
+update_uv_tools() {
+  command -v uv >/dev/null 2>&1 || return 0
+  uv tool upgrade --all
+}
+
+update_rustup() {
+  command -v rustup >/dev/null 2>&1 || return 0
+  rustup update
+}
+
+update_cargo_crates() {
+  command -v cargo >/dev/null 2>&1 || return 0
+  local crates
+  # `cargo install --list` prints "name vX.Y.Z:" for registry crates; skip
+  # path/git installs, which cannot be refreshed from the registry by name.
+  crates=$(cargo install --list | sed -n 's/^\([^ ]*\) v[^ ]*:$/\1/p')
+  [[ -n "$crates" ]] || return 0
+  # shellcheck disable=SC2086
+  cargo install --locked $crates
+}
+
 update_llm_clis() {
   local result=0
   pi update --all || result=1
@@ -65,6 +86,9 @@ main() {
         run_step "Homebrew packages" update_brew
         run_step "APT packages" update_apt
         run_step "npm globals" update_npm_globals
+        run_step "uv tools" update_uv_tools
+        run_step "Rust toolchains" update_rustup
+        run_step "Cargo crates" update_cargo_crates
       fi
       print_summary
       return "$failed"
@@ -75,6 +99,9 @@ main() {
       ;;
   esac
   run_step "Homebrew packages" update_brew
+  run_step "uv tools" update_uv_tools
+  run_step "Rust toolchains" update_rustup
+  run_step "Cargo crates" update_cargo_crates
   run_step "Pi and extensions" pi update --all
   run_step "Claude Code" claude update
   run_step "Codex" codex update

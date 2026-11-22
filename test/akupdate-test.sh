@@ -16,13 +16,22 @@ fi
 STUB
   chmod +x "$tmp/bin/$command"
 done
-for command in sudo apt-get npm; do
+for command in sudo apt-get npm uv rustup; do
   cat > "$tmp/bin/$command" <<'STUB'
 #!/usr/bin/env bash
 printf '%s %s\n' "$(basename "$0")" "$*" >> "$CALL_LOG"
 STUB
   chmod +x "$tmp/bin/$command"
 done
+
+cat > "$tmp/bin/cargo" <<'STUB'
+#!/usr/bin/env bash
+printf '%s %s\n' "$(basename "$0")" "$*" >> "$CALL_LOG"
+if [[ "$1 $2" == "install --list" ]]; then
+  printf 'mdbook v0.5.4:\n    mdbook\nripgrep v13.0.0:\n    rg\nlocal v0.1.0 (/src/local):\n    local\n'
+fi
+STUB
+chmod +x "$tmp/bin/cargo"
 
 export CALL_LOG="$tmp/calls"
 export PATH="$tmp/bin:$PATH"
@@ -34,6 +43,9 @@ grep -q '^pi update --all$' "$CALL_LOG"
 grep -q '^claude update$' "$CALL_LOG"
 grep -q '^codex update$' "$CALL_LOG"
 ! grep -q '^atlas ' "$CALL_LOG"
+grep -q '^uv tool upgrade --all$' "$CALL_LOG"
+grep -q '^rustup update$' "$CALL_LOG"
+grep -q '^cargo install --locked mdbook ripgrep$' "$CALL_LOG"
 grep -q 'Pi and extensions: OK' "$tmp/personal.out"
 
 : > "$CALL_LOG"
@@ -55,5 +67,8 @@ MACHINE_CLASS=personal bash "$repo_root/bin/akupdate.sh" --warmup-weekly > "$tmp
 grep -q '^brew update$' "$CALL_LOG"
 grep -q '^sudo -n apt-get update$' "$CALL_LOG"
 grep -q '^npm update -g --no-fund --no-audit$' "$CALL_LOG"
+grep -q '^uv tool upgrade --all$' "$CALL_LOG"
+grep -q '^rustup update$' "$CALL_LOG"
+grep -q '^cargo install --locked mdbook ripgrep$' "$CALL_LOG"
 
 echo 'akupdate tests passed'
