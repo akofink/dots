@@ -54,6 +54,7 @@ ROOT = Path(os.environ.get("NOTES_WORKTREE_ROOT", HOME / "dev/worktrees/notes"))
 PUBLISH_LOCK = Path(os.environ.get("XDG_STATE_HOME", HOME / ".local/state")) / "notes-task" / "publish.lock"
 AKAGENT = os.environ.get("AKAGENT_BIN", "akagent")
 TMUX = os.environ.get("TMUX_BIN", "tmux")
+HC = os.environ.get("HC_BIN", "hc")
 SYNCDOTS = os.environ.get("SYNCDOTS_BIN", "syncdots")
 LIVE_TASK = {"created", "active", "waiting", "blocked"}
 
@@ -266,11 +267,28 @@ def live_claims(*, strict=False, unbegun=None, all_notes_resources=False):
 
 
 def pane_paths(*, strict=False):
-    result = subprocess.run([TMUX, "list-panes", "-a", "-F", "#{pane_current_path}"],
-                            text=True, capture_output=True)
-    if strict and result.returncode != 0:
+    """Working directories of live tmux panes and, under hc, live hc terminals.
+
+    With `strict`, at least one source must answer; otherwise unreadable sources are empty.
+    """
+    paths, answered = [], False
+    tmux = subprocess.run([TMUX, "list-panes", "-a", "-F", "#{pane_current_path}"],
+                          text=True, capture_output=True, timeout=10)
+    if tmux.returncode == 0:
+        answered = True
+        paths += [Path(p).resolve() for p in tmux.stdout.splitlines() if p]
+    if os.environ.get("HC_TERMINAL_ID"):
+        try:
+            hc = subprocess.run([HC, "ls", "--json"], text=True, capture_output=True, timeout=10)
+            terminals = json.loads(hc.stdout)["terminals"] if hc.returncode == 0 else None
+        except (OSError, subprocess.SubprocessError, ValueError, KeyError):
+            terminals = None
+        if terminals is not None:
+            answered = True
+            paths += [Path(t["cwd"]).resolve() for t in terminals if t.get("cwd")]
+    if strict and not answered:
         raise SystemExit("notes-task: tmux pane inspection unavailable; refusing to park")
-    return [Path(p).resolve() for p in result.stdout.splitlines() if p] if result.returncode == 0 else []
+    return paths
 
 
 def worktrees():
@@ -745,11 +763,7 @@ def retention_inventory(task_ids=(), idle_hours=2.0):
     try:
         unbegun = set()
         paths, branches = live_claims(strict=True, unbegun=unbegun)
-        pane_result = subprocess.run([TMUX, "list-panes", "-a", "-F", "#{pane_current_path}"],
-                                     text=True, capture_output=True, timeout=10)
-        if pane_result.returncode:
-            raise ValueError("tmux pane inventory unavailable")
-        panes = [Path(p).resolve() for p in pane_result.stdout.splitlines() if p]
+        panes = pane_paths(strict=True)
         for repo in configured_repos():
             NOTES = repo
             for entry in worktrees():

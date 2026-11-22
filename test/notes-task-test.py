@@ -71,6 +71,7 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
                     "NOTES_REPO": str(self.operator_notes), "NOTES_AGENT_REPO": str(self.notes),
                     "NOTES_WORKTREE_ROOT": str(self.wt_root), "XDG_STATE_HOME": str(self.root / "state"),
                     "NOTES_REPO_URL": "", "FAKE_SYNCDOTS_FAIL_ONCE": "",
+                    "HC_TERMINAL_ID": "", "HC_BIN": str(bin_dir / "hc"),
                     "AKAGENT_BIN": str(bin_dir / "akagent"), "TMUX_BIN": str(bin_dir / "tmux"),
                     "SYNCDOTS_BIN": str(bin_dir / "syncdots")}
         remote = self.root / "remote.git"
@@ -122,6 +123,19 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertEqual(set(value["items"][0]["holds"]), {"live_owner", "pane", "dirty", "unpublished", "recent"})
         self.assertEqual(self.git(path, "status", "--porcelain"), before)
         self.assertTrue(path.exists())
+
+    def test_inventory_complete_under_hc_without_tmux(self):
+        path = self.open_and_commit("inventory-hc")
+        self.tasks.write_text(json.dumps({"tasks": []}))
+        self.fake(Path(self.env["TMUX_BIN"]), "raise SystemExit(1)")
+        terminals = {"terminals": [{"address": "t1", "cwd": str(path) + "/sub"}, {"address": "t2"}]}
+        self.fake(Path(self.env["HC_BIN"]), f"import json; print(json.dumps({terminals!r}))")
+        self.env["HC_TERMINAL_ID"] = "t9"
+        value = json.loads(self.tool("inventory", "--task-id", "inventory-hc").stdout)
+        self.assertTrue(value["complete"])
+        self.assertIn("pane", value["items"][0]["holds"])
+        self.env["HC_TERMINAL_ID"] = ""
+        self.assertFalse(json.loads(self.tool("inventory", ok=False).stdout)["complete"])
 
     def test_inventory_ownership_failure_explicit(self):
         self.fake(Path(self.env["AKAGENT_BIN"]), "import sys; sys.exit(1)")
