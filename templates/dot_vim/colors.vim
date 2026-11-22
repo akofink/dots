@@ -1,6 +1,9 @@
 " Syntax Highlighting
 set t_Co=256
 set background=light
+" Use the fixed 256-color solarized palette so it does not depend on the
+" terminal's ANSI palette being solarized (e.g. Herdr's default theme).
+let g:solarized_termcolors = 256
 colorscheme solarized
 
 " Highlighting Tweaks
