@@ -21,6 +21,11 @@ run_step() {
 
 update_brew() {
   if ! command -v brew >/dev/null 2>&1; then
+    # Linux machines normally use apt instead of Homebrew.
+    if [[ "$(uname -s)" == Linux ]]; then
+      echo "Homebrew not installed; skipping"
+      return 0
+    fi
     echo "Homebrew is not installed or not on PATH" >&2
     return 1
   fi
@@ -99,6 +104,7 @@ main() {
       ;;
   esac
   run_step "Homebrew packages" update_brew
+  run_step "APT packages" update_apt
   run_step "uv tools" update_uv_tools
   run_step "Rust toolchains" update_rustup
   run_step "Cargo crates" update_cargo_crates
