@@ -117,7 +117,7 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.tasks.write_text(json.dumps({"tasks": [{"id": "inventory-one", "status": "active"}]}))
         self.panes.write_text(str(path) + "\n")
         before = self.git(path, "status", "--porcelain")
-        value = json.loads(self.tool("inventory", "--task-id", "inventory-one").stdout)
+        value = json.loads(self.tool("inventory", "--task-id", "inventory-one", "--idle-hours", "2").stdout)
         self.assertTrue(value["complete"])
         self.assertEqual(len(value["items"]), 1)
         self.assertEqual(set(value["items"][0]["holds"]), {"live_owner", "pane", "dirty", "unpublished", "recent"})
@@ -136,6 +136,21 @@ subprocess.check_call(["git", "-C", repo, "push", "--quiet"])
         self.assertIn("pane", value["items"][0]["holds"])
         self.env["HC_TERMINAL_ID"] = ""
         self.assertFalse(json.loads(self.tool("inventory", ok=False).stdout)["complete"])
+
+    def test_pane_hold_sees_hc_foreground_cwd(self):
+        path = self.open_and_commit("inventory-fg")
+        self.tasks.write_text(json.dumps({"tasks": []}))
+        self.fake(Path(self.env["TMUX_BIN"]), "raise SystemExit(1)")
+        self.fake(Path(self.env["HC_BIN"]), """import json, sys
+if sys.argv[1] == "get":
+    print(json.dumps({"cwd": "/elsewhere", "foreground": {"cwd": %r}}))
+else:
+    print(json.dumps({"terminals": [{"address": "t1", "cwd": "/elsewhere"}]}))
+""" % (str(path) + "/sub"))
+        self.env["HC_TERMINAL_ID"] = "t9"
+        item = json.loads(self.tool("inventory", "--task-id", "inventory-fg").stdout)["items"][0]
+        self.assertIn("pane", item["holds"])
+        self.assertNotIn("recent", item["holds"], "inventory defaults to a 0 idle window")
 
     def test_inventory_ownership_failure_explicit(self):
         self.fake(Path(self.env["AKAGENT_BIN"]), "import sys; sys.exit(1)")
@@ -527,8 +542,10 @@ os.execv({real_git!r}, [{real_git!r}, *args])
     def test_prune_respects_idle_window(self):
         path = self.open_and_commit("t1")
         self.tool("publish", "t1")
-        self.tool("prune")
+        self.tool("prune", "--idle-hours", "2")
         self.assertTrue(path.exists())
+        self.tool("prune")
+        self.assertFalse(path.exists(), "the default idle window is 0 during the trial")
 
     def test_prune_deletes_rebased_but_published_branch(self):
         path = self.open_and_commit("t1")
@@ -799,12 +816,12 @@ os.execv({real!r}, [{real!r}, *args])
         self.assertEqual(self.git(self.operator_notes, "for-each-ref", "refs/heads/docs/"), "")
 
     def test_prune_summarizes_even_when_nothing_is_removed(self):
-        empty = self.prune_all()
+        empty = self.prune_all("--idle-hours", "2")
         self.assertIn("scanned 2 repositories (operator-notes, agent-notes), 0 task worktrees: removed 0 worktrees, "
                       "0 extra branches, 0 orphans; kept 0; 0 failed", empty.stdout)
         path = self.open_and_commit("recent")
         self.tool("publish", "recent")
-        kept = self.prune_all()
+        kept = self.prune_all("--idle-hours", "2")
         self.assertTrue(path.exists())
         self.assertIn("removed 0 worktrees", kept.stdout)
         self.assertIn("kept 1 (recently active: 1)", kept.stdout)
@@ -839,7 +856,7 @@ os.execv({real!r}, [{real!r}, *args])
         path = self.open_and_commit("nb1")
         self.tool("publish", "nb1")
         self.begin_state("nb1")
-        recent = self.prune_all()
+        recent = self.prune_all("--idle-hours", "2")
         self.assertTrue(path.exists(), "the idle window still protects a fresh never-begun worktree")
         self.prune_all("--idle-hours", "0")
         self.assertFalse(path.exists())

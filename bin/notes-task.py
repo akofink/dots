@@ -18,7 +18,9 @@ The isolated lane publishes without refreshing links into the operator checkout.
 Prune removes a worktree or docs/* branch only when every commit is already on
 origin/main (by ancestry or patch equivalence), the worktree has no tracked or
 untracked changes, no akagent task in a non-terminal state owns it, no tmux pane
-is inside it, and it has been idle for --idle-hours. A live task protects its
+is inside it, and it has been idle for --idle-hours (default 0: a trial that disables the
+idle window for prune and inventory; restore it with --idle-hours 2, and watch for a worktree
+removed under a still-working agent). A live task protects its
 own <task-id> worktree and its newest notes resource. A task still `created` with no
 execution (its worker never ran `akagent task begin`) is not a live owner; every
 other gate, including the idle window, still applies, and the task is not archived.
@@ -285,7 +287,16 @@ def pane_paths(*, strict=False):
             terminals = None
         if terminals is not None:
             answered = True
-            paths += [Path(t["cwd"]).resolve() for t in terminals if t.get("cwd")]
+            for t in terminals:
+                # `hc ls` reports only the launch folder; the live folder is foreground.cwd.
+                cwds = [t.get("cwd")]
+                if t.get("address"):
+                    try:
+                        got = subprocess.run([HC, "get", t["address"]], text=True, capture_output=True, timeout=10)
+                        cwds.append((json.loads(got.stdout).get("foreground") or {}).get("cwd"))
+                    except (OSError, subprocess.SubprocessError, ValueError, AttributeError):
+                        pass
+                paths += [Path(c).resolve() for c in cwds if c]
     if strict and not answered:
         raise SystemExit("notes-task: tmux pane inspection unavailable; refusing to park")
     return paths
@@ -749,7 +760,7 @@ def cmd_prune(args):
     return 1 if failed else 0
 
 
-def retention_inventory(task_ids=(), idle_hours=2.0):
+def retention_inventory(task_ids=(), idle_hours=0.0):
     """Read-only local retention view; no fetch, Git mutation, or deletion authority.
 
     `holds` lists exactly what keeps prune from removing an item. `markers` is an
@@ -834,10 +845,12 @@ def main():
     p = sub.add_parser("prune")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--verbose", action="store_true")
-    p.add_argument("--idle-hours", type=float, default=2.0)
+    p.add_argument("--idle-hours", type=float, default=0.0,
+                   help="idle window in hours; 0 is a trial default, use 2 to restore the old window")
     p = sub.add_parser("inventory", help="Read-only structured retention inventory using local refs")
     p.add_argument("--task-id", action="append", default=[])
-    p.add_argument("--idle-hours", type=float, default=2.0)
+    p.add_argument("--idle-hours", type=float, default=0.0,
+                   help="idle window in hours; 0 is a trial default, use 2 to restore the old window")
     p = sub.add_parser("park", help="Remove an idle unowned worktree, keeping its branch and a pinned parked ref")
     p.add_argument("name", help="worktree directory name under the notes worktree root")
     p.add_argument("--reason", required=True)
