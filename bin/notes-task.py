@@ -833,12 +833,21 @@ def cmd_inventory(args):
     return 0 if result["complete"] else 1
 
 
+def task_id_arg(value):
+    # The id becomes both the worktree directory name and the `docs/<id>` branch suffix,
+    # so a separator or a pre-applied `docs/` prefix nests the worktree where prune cannot see it.
+    if not value or value in (".", "..") or "/" in value or "\\" in value or value.startswith("-"):
+        raise argparse.ArgumentTypeError(
+            f"invalid task id {value!r}: use a single path segment without '/' (the docs/ branch prefix is added for you)")
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser(prog="notes-task", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("open", "publish"):
         p = sub.add_parser(name)
-        p.add_argument("task_id")
+        p.add_argument("task_id", type=task_id_arg)
         if name == "publish":
             p.add_argument("--no-prune", action="store_true",
                            help="skip managed pruning during this publication; preserve task resources and evidence")

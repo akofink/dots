@@ -194,6 +194,14 @@ else:
                          (self.notes / ".git").resolve())
         self.assertEqual(Path(self.tool("open", "t1").stdout.strip()), path)
 
+    def test_open_and_publish_reject_task_ids_with_path_separators(self):
+        for command in ("open", "publish"):
+            for bad in ("docs/t1", "a/b", "../t1", ".."):
+                result = self.tool(command, bad, ok=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("invalid task id", result.stderr)
+        self.assertFalse((self.wt_root / "docs").exists())
+
     def test_open_creates_missing_akagent_task_before_registering(self):
         path = Path(self.tool("open", "fresh-task-akwin-20261115").stdout.strip())
         tasks = json.loads(self.tasks.read_text())["tasks"]
