@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Switch the managed Pi PATH link without modifying the managed launcher."""
+
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+
+def main():
+    if len(sys.argv) != 2 or sys.argv[1] not in {"on", "off"}:
+        sys.exit("Usage: pi-work-proxy-link on|off")
+    enable = sys.argv[1] == "on"
+    home = Path.home()
+    link = home / ".local/bin/pi"
+    managed = home / ".pi/agent/bin/pi"
+    proxy = Path(__file__).resolve().with_name("pi-work-proxy")
+    if enable:
+        if os.environ.get("MACHINE_CLASS") != "work":
+            sys.exit("Pi work proxy can only be enabled on work machines.")
+        if not (home / ".config/dots/pi-work-proxy-url").is_file():
+            sys.exit("Provision ~/.config/dots/pi-work-proxy-url first.")
+        if not os.access(home / ".local/bin/internal-ai-proxy-api-key-helper", os.X_OK):
+            sys.exit("Provision the short-lived credential helper first.")
+    if not os.access(managed, os.X_OK):
+        sys.exit("The managed Pi launcher is not executable.")
+    old, new = (managed, proxy) if enable else (proxy, managed)
+    try:
+        target = link.readlink()
+    except OSError:
+        sys.exit("Refusing to replace ~/.local/bin/pi; expected a managed symlink.")
+    if target == new:
+        return
+    if target != old:
+        sys.exit("Refusing to replace ~/.local/bin/pi; it points to a different launcher.")
+    with tempfile.TemporaryDirectory(prefix=".pi-link-", dir=link.parent) as temp:
+        staged = Path(temp) / "pi"
+        staged.symlink_to(new)
+        staged.replace(link)
+
+
+if __name__ == "__main__":
+    main()

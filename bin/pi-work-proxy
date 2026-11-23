@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Work-only PATH shim. Keep the official managed launcher intact.
+pi="$HOME/.pi/agent/bin/pi"
+if [[ "${MACHINE_CLASS:-}" != work || "${PI_DIRECT:-}" == 1 ]] || [[ "${1:-}" == --direct ]]; then
+  if [[ "${1:-}" == --direct ]]; then shift; fi
+  exec "$pi" "$@"
+fi
+
+fail() { printf 'pi: %s\n' "$*" >&2; exit 2; }
+model=gpt-6.2-sol
+provider=work-responses-proxy
+# Commands Pi handles before starting a model session.
+case "${1:-}" in
+  -h|--help|--version|--export|install|remove|uninstall|config|update|mcp|auth)
+    exec "$pi" "$@" ;;
+esac
+
+args=()
+requested_provider=''
+requested_model=''
+while (( $# )); do
+  arg=$1
+  shift
+  case "$arg" in
+    --) args+=("$arg" "$@"); break ;;
+    --provider|--model)
+      (( $# )) || fail "$arg requires a value"
+      if [[ "$arg" == --provider ]]; then requested_provider=$1; else requested_model=$1; fi
+      shift ;;
+    --provider=*|--model=*|--models|--models=*|--api-key*|--session-dir*|--session|--session=*|--fork|--fork=*)
+      fail "$arg is not supported in work proxy mode; use pi --direct for the original arguments" ;;
+    *) args+=("$arg") ;;
+  esac
+done
+case "$requested_model" in
+  ''|"$model"|"$provider/$model") ;;
+  *) fail "work proxy mode only supports $model; use pi --direct for other models" ;;
+esac
+case "$requested_provider" in
+  ''|"$provider") ;;
+  # Existing Sol dispatch templates name the direct Codex provider. Route
+  # those launches to the work proxy unless the caller explicitly opts out.
+  openai-codex) [[ "$requested_model" == "$model" ]] || fail "use pi --direct for openai-codex" ;;
+  *) fail "use pi --direct for other providers" ;;
+esac
+
+proxy_url="${INTERNAL_AI_PROXY_URL:-}"
+if [[ -z "$proxy_url" ]]; then
+  url_file="$HOME/.config/dots/pi-work-proxy-url"
+  [[ -r "$url_file" ]] || fail "work proxy endpoint is not configured ($url_file); use pi --direct to opt out"
+  proxy_url=$(<"$url_file")
+fi
+proxy_url=${proxy_url%/}
+if [[ ! "$proxy_url" =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ && ! "$proxy_url" =~ ^http://127\.0\.0\.1:[0-9]+$ ]]; then
+  fail 'work proxy URL must be an HTTPS origin (HTTP loopback is supported for tests)'
+fi
+helper="${INTERNAL_AI_PROXY_HELPER:-$HOME/.local/bin/internal-ai-proxy-api-key-helper}"
+[[ "$helper" == /* && -x "$helper" ]] || fail 'work proxy credential helper is missing or not executable'
+
+# Resolve the extension next to this source, not next to the installed symlink.
+launcher=${BASH_SOURCE[0]}
+while [[ -L "$launcher" ]]; do
+  target=$(readlink "$launcher")
+  case "$target" in /*) launcher=$target ;; *) launcher=${launcher%/*}/$target ;; esac
+done
+extension="${launcher%/*}/../pi/work-responses-proxy.ts"
+[[ -r "$extension" ]] || fail 'work proxy extension is missing'
+export PI_WORK_PROXY_ORIGIN="$proxy_url" PI_WORK_PROXY_HELPER="$helper"
+# Never mix direct and proxy session history. Leave the usual Pi profile's
+# work tools, guidance, and MCP configuration available in either launch mode.
+proxy_sessions="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/work-proxy-sessions"
+exec "$pi" -e "$extension" --provider "$provider" --model "$model" \
+  --models "$provider/$model" --session-dir "$proxy_sessions" "${args[@]}"

@@ -110,6 +110,20 @@ managed installation uses `pi update --all` to update Pi and its packages; this 
 `MACHINE_CLASS=work` machines `akupdate` also runs the Atlas CLI and plugin update commands. Each
 updater is reported separately, and the command returns nonzero if any step fails.
 
+#### Pi work proxy
+
+On a provisioned work machine, put the approved proxy origin (without `/v1`) in
+`~/.config/dots/pi-work-proxy-url` and install the official short-lived credential helper at
+`~/.local/bin/internal-ai-proxy-api-key-helper`. Keep that configuration local.
+Run `bin/pi-work-proxy-link on` from the canonical checkout to route new `pi` sessions launched
+through `~/.local/bin/pi` to GPT-6.2 Sol via OpenAI Responses. The managed Pi binary, settings,
+and running sessions are not changed. An explicit Sol selection from an existing Codex-based
+launch template is also routed to the proxy.
+
+Use `pi --direct` (first argument) or `PI_DIRECT=1 pi` to use the original Pi launch behavior,
+including other models or direct session history. Proxy sessions have their own history and fail
+rather than retrying against a direct provider. To undo the default, run `bin/pi-work-proxy-link off`.
+
 #### Repository sync
 
 `syncdots` pulls with rebase and pushes the dots and notes repositories.
