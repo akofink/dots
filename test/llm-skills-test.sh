@@ -156,6 +156,12 @@ printf 'preserved legacy vendor source\n' > "$home/.local/share/rovo/current/twg
 ln -s "$home/.local/share/rovo/current/twg/skills/twg" "$home/.codex/skills/twg"
 ln -s "$home/.local/share/rovo/current/twg/skills/twg" "$home/.pi/agent/skills/twg-old"
 
+# Seed a provisioned proxy helper and an existing Codex model before switching roles.
+mkdir -p "$home/.codex"
+printf 'model = "previous-model"\n' > "$home/.codex/config.toml"
+printf '#!/bin/sh\nexit 97\n' > "$home/.local/bin/internal-ai-proxy-api-key-helper"
+chmod +x "$home/.local/bin/internal-ai-proxy-api-key-helper"
+
 env \
   HOME="$home" \
   DOTS_REPO="$repo_root" \
@@ -168,6 +174,12 @@ env \
 cmp "$tmpdir/op-original" "$home/.local/bin/op"
 test ! -e "$home/op-invoked"
 cmp -s "$repo_root/templates/dot_codex/rules/work.rules" "$home/.codex/rules/work.rules"
+jq -e --arg helper "$home/.local/bin/internal-ai-proxy-api-key-helper" '
+  .model == "claude-sonnet-5-5" and .apiKeyHelper == $helper and
+  (.env.ANTHROPIC_BASE_URL | startswith("https://"))
+' "$home/.claude/settings.json" >/dev/null
+rg -Fx 'model = "gpt-6.2-sol"' "$home/.codex/config.toml" >/dev/null
+rg -Fx 'model_provider = "internal-ai-proxy"' "$home/.codex/config.toml" >/dev/null
 jq -e '.sandbox.excludedCommands | index("tmux *")' "$home/.claude/settings.json" >/dev/null
 jq -e '(.sandbox.excludedCommands | index("liaison-relay *")) == null' "$home/.claude/settings.json" >/dev/null
 jq -e '.sandbox.filesystem.allowWrite | index("~/dev")' "$home/.claude/settings.json" >/dev/null
@@ -274,6 +286,8 @@ fi
 
 run_setup
 run_verify
+jq -e 'has("model") | not' "$home/.claude/settings.json" >/dev/null
+test "$(cat "$home/.codex/config.toml")" = 'model = "previous-model"'
 
 rm "$home/.claude/settings.json"
 run_setup

@@ -698,6 +698,29 @@ sync_claude_work_settings() {
     "$DOTS_REPO/templates/dot_claude/work-settings.json" "$HOME/.claude/settings.json"
 }
 
+# Use the proxy on work hosts with the API-key helper provisioned.
+sync_work_ai_proxy_settings() {
+  local action=remove fragment status=0
+  local url="${INTERNAL_AI_PROXY_URL:-https://internal-ai-proxy.us-east-1.prod.atl-paas.net}"
+  local helper="${INTERNAL_AI_PROXY_HELPER:-$HOME/.local/bin/internal-ai-proxy-api-key-helper}"
+  if [[ "${MACHINE_CLASS:-personal}" == work && -x "$helper" ]]; then
+    action=apply
+  fi
+
+  fragment=$(mktemp) || return 1
+  jq -n --arg url "$url" --arg helper "$helper" '{
+    model: "claude-sonnet-5-5",
+    apiKeyHelper: $helper,
+    env: {ANTHROPIC_BASE_URL: $url, CLAUDE_CODE_GATEWAY_HINT_HEADERS: "1"}
+  }' > "$fragment" &&
+    python3 "$DOTS_REPO/bin/claude-work-settings.py" "$action" \
+      "$fragment" "$HOME/.claude/settings.json" || status=1
+  rm -f "$fragment"
+  python3 "$DOTS_REPO/bin/codex-ai-proxy-settings.py" "$HOME/.codex/config.toml" \
+    "$action" "$url" "$helper" || status=1
+  return "$status"
+}
+
 set_claude_base_settings() {
   local claude_settings="$HOME/.claude/settings.json"
   local claude_settings_tmp
@@ -869,6 +892,7 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       link_development_guidance
       set_claude_base_settings
       sync_claude_work_settings
+      sync_work_ai_proxy_settings || status=$?
       sync_claude_agent_inbox
       sync_codex_agent_inbox
       sync_opencode_attended_stage
@@ -976,6 +1000,7 @@ remove_symlink_if_points_to "$HOME/.claude/AGENTS.md" "$notes_repo"
 
 set_claude_base_settings
 sync_claude_work_settings
+sync_work_ai_proxy_settings || fatal "Failed to synchronize work AI proxy settings"
 sync_claude_agent_inbox
 
 if [[ $has_notes_agents -eq 1 ]]; then
