@@ -55,7 +55,7 @@ obsolete_skill_roots=(
   .agents/skills
   .claude/skills
   .codex/skills
-  .config/opencode/skills
+ 
   .pi/skills
   .pi/agent/skills
   .rovodev/skills
@@ -65,7 +65,7 @@ for skill_root in "${obsolete_skill_roots[@]}"; do
   mkdir -p "$home/$skill_root/no-mistakes.old.260706081004"
   printf 'obsolete skill\n' > "$home/$skill_root/no-mistakes.old.260706081004/SKILL.md"
 done
-for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+for skill_root in .agents/skills .claude/skills .codex/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   ln -s "$notes_repo/agents/skills/herdr" "$home/$skill_root/herdr"
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
   # Dangling on purpose: the retired skill's source no longer exists in the notes repo.
@@ -102,7 +102,7 @@ test ! -e "$home/.codex/rules/work.rules"
 cmp "$tmpdir/op-original" "$home/.local/bin/op"
 test ! -e "$home/op-invoked"
 
-for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+for skill_root in .agents/skills .claude/skills .codex/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -L "$home/$skill_root/herdr"
   test ! -L "$home/$skill_root/managing-1password-cli"
   test ! -e "$home/$skill_root/managing-1password-cli"
@@ -136,7 +136,7 @@ test "$(jq -r .midRunUpdates "$home/.pi/agent/subagents.json")" = false
 jq -e '.excludedExtensionPackages | index("npm:@gotgenes/pi-subagents@23.4.0")' "$home/.pi/agent/subagents.json" >/dev/null
 printf '{"maxConcurrent":7,"customSetting":"preserve-me"}\n' > "$home/.pi/agent/subagents.json"
 
-for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+for skill_root in .agents/skills .claude/skills .codex/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   ln -s "$notes_repo/agents/skills/managing-1password-cli" "$home/$skill_root/managing-1password-cli"
   # Dangling on purpose: the retired skill's source no longer exists in the notes repo.
   ln -s "$notes_repo/agents/skills/agent-liaison" "$home/$skill_root/agent-liaison"
@@ -188,7 +188,7 @@ test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
 test "$(readlink "$home/dev/AGENTS.bbc-core.md")" = "$notes_repo/agents/guidance/bitbucket-core.md"
 test "$(readlink "$home/dev/AGENTS.dss.md")" = "$notes_repo/agents/guidance/dss.md"
 test "$(readlink "$home/.pi/agent/skills/work-identity")" = "$notes_repo/agents/skills/work-identity"
-for skill_root in .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills; do
+for skill_root in .claude/skills .codex/skills .pi/agent/skills; do
   test "$(readlink "$home/$skill_root/twg")" = "$home/.agents/skills/twg"
   test "$(readlink "$home/$skill_root/twg-jira")" = "$home/.agents/skills/twg-jira"
   cmp -s "$home/.agents/skills/twg/SKILL.md" "$home/$skill_root/twg/SKILL.md"
@@ -200,7 +200,7 @@ test ! -L "$home/.pi/agent/skills/twg-old"
 test ! -L "$home/.agents/skills/twg"
 test -f "$home/.agents/skills/twg/SKILL.md"
 test "$(cat "$home/.local/share/rovo/current/twg/skills/twg/SKILL.md")" = 'preserved legacy vendor source'
-for skill_root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+for skill_root in .agents/skills .claude/skills .codex/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   test ! -L "$home/$skill_root/managing-1password-cli"
   test ! -e "$home/$skill_root/managing-1password-cli"
   test ! -L "$home/$skill_root/agent-liaison"
@@ -208,7 +208,7 @@ done
 for retired_helper in liaison-relay liaison-replace; do
   test ! -L "$home/.local/bin/$retired_helper"
 done
-for root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+for root in .agents/skills .claude/skills .codex/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   for skill in sfx-token-refresh work-investigation-tools work-agent-orchestrator work-coding-workflow work-pr-review; do
     test "$(readlink "$home/$root/$skill")" = "$notes_repo/agents/skills/$skill"
   done
@@ -238,12 +238,12 @@ test ! -e "$home/.rovodev/AGENTS.md"
 test ! -e "$home/.rovodev/config.yml"
 test ! -e "$home/.agents/skills/atlas-updates"
 test ! -e "$home/.pi/agent/skills/work-identity"
-for skill_root in .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills; do
+for skill_root in .claude/skills .codex/skills .pi/agent/skills; do
   test ! -e "$home/$skill_root/twg"
   test ! -e "$home/$skill_root/twg-jira"
 done
 test ! -L "$home/.pi/agent/skills/twg-old"
-for root in .agents/skills .claude/skills .codex/skills .config/opencode/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
+for root in .agents/skills .claude/skills .codex/skills .pi/agent/skills .rovodev/skills dev/.rovodev/skills; do
   for skill in sfx-token-refresh work-investigation-tools work-agent-orchestrator work-coding-workflow work-pr-review; do
     test ! -e "$home/$root/$skill"
   done
@@ -272,7 +272,7 @@ if expected not in setup:
     raise SystemExit("unslop must use the upstream source with global-universal install inside the work-only setup branch")
 PY
 
-rm "$home/.config/opencode/skills/akagent"
+rm "$home/.pi/agent/skills/akagent"
 if run_verify >"$tmpdir/verify-output" 2>&1; then
   echo 'verification unexpectedly passed with a missing configured skill' >&2
   exit 1

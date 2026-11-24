@@ -27,9 +27,9 @@ assert_missing() {
 
 home_one="$tmp_root/home-one"
 backup_root="$tmp_root/dots/.backups"
-mkdir -p "$tmp_root/dots" "$home_one/.config/opencode" "$home_one/.agents" "$home_one/.pi/agent"
+mkdir -p "$tmp_root/dots" "$home_one/.config/glow" "$home_one/.agents" "$home_one/.pi/agent"
 printf 'current\n' > "$home_one/.zshrc"
-printf 'config\n' > "$home_one/.config/opencode/opencode.jsonc"
+printf 'config\n' > "$home_one/.config/glow/glow.yml"
 printf 'agents\n' > "$home_one/.agents/AGENTS.md"
 printf 'pi agents\n' > "$home_one/.pi/agent/AGENTS.md"
 # Keep recognizing backups made by older dots versions that lived beside the destination.
@@ -48,8 +48,8 @@ write_backup() {
 
 write_backup "$home_one/.zshrc" 240101000000 current
 write_backup "$home_one/.zshrc" 240102000000 current
-write_backup "$home_one/.config/opencode/opencode.jsonc" 240101000000 config
-write_backup "$home_one/.config/opencode/opencode.jsonc" 240102000000 config
+write_backup "$home_one/.config/glow/glow.yml" 240101000000 config
+write_backup "$home_one/.config/glow/glow.yml" 240102000000 config
 write_backup "$home_one/.agents/AGENTS.md" 240101000000 agents
 write_backup "$home_one/.agents/AGENTS.md" 240102000000 agents
 write_backup "$home_one/.pi/agent/AGENTS.md" 240101000000 'pi agents'
@@ -62,7 +62,7 @@ audit_output=$(HOME="$home_one" DOTS_REPO="$tmp_root/dots" "$script" --root "$ho
 [[ "$audit_output" != *"private.old"* ]] || fail "audit reported an unrelated backup"
 
 config_output=$(HOME="$home_one" DOTS_REPO="$tmp_root/dots" "$script" --root "$home_one/.config")
-[[ "$config_output" == *"WOULD DELETE $backup_root/${home_one#/}/.config/opencode/opencode.jsonc.old.240101000000"* ]] || fail "scoped .config audit did not report known backup"
+[[ "$config_output" == *"WOULD DELETE $backup_root/${home_one#/}/.config/glow/glow.yml.old.240101000000"* ]] || fail "scoped .config audit did not report known backup"
 [[ "$config_output" != *".zshrc.old"* ]] || fail "scoped .config audit reported top-level backup"
 [[ "$config_output" != *"private.old"* ]] || fail "scoped .config audit reported unrelated backup"
 

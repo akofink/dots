@@ -7,13 +7,12 @@ import os
 from pathlib import Path
 import sys
 
-MODULES = ("http", "aws", "vim", "tmux", "zsh", "llm", "opencode", "rbenv", "go", "tmuxinator", "glow", "ghostty", "akagent")
+MODULES = ("http", "aws", "vim", "tmux", "zsh", "llm", "rbenv", "go", "tmuxinator", "glow", "ghostty", "akagent")
 DEPENDENCIES = {
     "zsh": ("bin/dots-warmup-report.sh",),
     "tmuxinator": ("setup/rbenv.sh",),
     "glow": ("setup/go.sh",),
     "akagent": ("setup/go.sh",),
-    "llm": ("setup/opencode.sh",),
 }
 
 

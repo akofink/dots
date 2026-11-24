@@ -278,12 +278,6 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   install_claude_plugin typesafe@typesafe-ai typesafe-ai/skills || true
   install_agent_skill "TypeSafe" "$HOME/.pi/agent/skills/typesafe-ai" typesafe-ai/skills --skill typesafe-ai --agent pi || true
 
-  if [[ -z "${OPENCODE_SETUP_COMPLETE:-}" ]]; then
-    # opencode.sh returns non-zero (without setting its guard) when the install is
-    # skipped or fails; tolerate that so the config linking below still runs.
-    # shellcheck source=setup/opencode.sh
-    source "$script_dir/opencode.sh" || true
-  fi
 fi
 
 notes_repo="$NOTES_REPO"
@@ -334,7 +328,6 @@ unlink_retired_agent_skills() {
     "$HOME/.agents/skills" \
     "$HOME/.claude/skills" \
     "$HOME/.codex/skills" \
-    "$HOME/.config/opencode/skills" \
     "$HOME/.pi/agent/skills" \
     "$HOME/.rovodev/skills" \
     "$HOME/dev/.rovodev/skills"; do
@@ -365,7 +358,6 @@ remove_obsolete_agent_skills() {
     "$HOME/.agents/skills" \
     "$HOME/.claude/skills" \
     "$HOME/.codex/skills" \
-    "$HOME/.config/opencode/skills" \
     "$HOME/.pi/skills" \
     "$HOME/.pi/agent/skills" \
     "$HOME/.rovodev/skills" \
@@ -499,7 +491,6 @@ unlink_notes_symlinks() {
   remove_symlink_if_points_to "$HOME/.claude/CLAUDE.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/.claude/agents/test-writer.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/.codex/AGENTS.md" "$notes_repo"
-  remove_symlink_if_points_to "$HOME/.config/opencode/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/.pi/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/.pi/agent/AGENTS.md" "$notes_repo"
   remove_symlink_if_points_to "$HOME/dev/AGENTS.md" "$notes_repo"
@@ -511,7 +502,6 @@ unlink_notes_symlinks() {
   unlink_skill_set "$HOME/.agents/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.claude/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.codex/skills" "${common_skills[@]}" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.config/opencode/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/.pi/agent/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_retired_agent_skills
   unlink_pi_extensions
@@ -520,7 +510,6 @@ unlink_notes_symlinks() {
   unlink_skill_set "$HOME/.agents/skills" herdr
   unlink_skill_set "$HOME/.claude/skills" herdr
   unlink_skill_set "$HOME/.codex/skills" herdr
-  unlink_skill_set "$HOME/.config/opencode/skills" herdr
   unlink_skill_set "$HOME/.pi/agent/skills" herdr
   unlink_skill_set "$HOME/.rovodev/skills" herdr
   unlink_skill_set "$HOME/dev/.rovodev/skills" herdr
@@ -538,7 +527,6 @@ notes_skill_dests=(
   "$HOME/.agents/skills"
   "$HOME/.claude/skills"
   "$HOME/.codex/skills"
-  "$HOME/.config/opencode/skills"
   "$HOME/.pi/agent/skills"
 )
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
@@ -684,7 +672,6 @@ sync_codex_work_rules() {
 twg_skill_dests=(
   "$HOME/.claude/skills"
   "$HOME/.codex/skills"
-  "$HOME/.config/opencode/skills"
   "$HOME/.pi/agent/skills"
 )
 discover_twg_skills
@@ -830,43 +817,6 @@ sync_codex_agent_inbox() {
   fi
 }
 
-# Stage only with an explicit host-local switch. The TUI module cannot activate
-# preexisting clients: a fresh managed process must prove its own PID/birth token.
-# Enabling the shell default is separate from staging this inert module.
-sync_opencode_attended_stage() {
-  local switch="$HOME/.config/agent-workflow/opencode-attended.json"
-  [[ -f "$switch" && ! -L "$switch" ]] || return 0
-  jq -e '.schema == 1 and (.staged == true or .enabled == true)' "$switch" >/dev/null 2>&1 || return 0
-  local scripts launcher module marker tmp
-  scripts=$(dirname "$(agent_inbox_adapter)")
-  launcher="$HOME/.local/bin/opencode-attended"
-  module="$HOME/.config/opencode/plugins/dots-attended-inbox/tui.js"
-  marker='// dots-managed attended inbox stage'
-  [[ -x "$scripts/opencode-attended" && -f "$scripts/opencode-attended-plugin/tui.js" ]] ||
-    { warn "Attended OpenCode source unavailable; leaving setup unchanged"; return 1; }
-  if [[ -e "$launcher" || -L "$launcher" ]]; then
-    [[ -L "$launcher" && "$(readlink "$launcher")" == "$scripts/opencode-attended" ]] ||
-      { warn "Preserving unmanaged attended OpenCode launcher"; return 1; }
-  fi
-  if [[ -e "$module" || -L "$module" ]]; then
-    [[ ! -L "$module" && "$(head -n 1 "$module")" == "$marker" ]] ||
-      { warn "Preserving unmanaged attended OpenCode TUI module"; return 1; }
-  fi
-  mkdir -p "$HOME/.local/bin" "$(dirname "$module")"
-  [[ -L "$launcher" ]] || ln -s "$scripts/opencode-attended" "$launcher"
-  tmp=$(mktemp "${module}.XXXXXX") || return 1
-  {
-    printf '%s\n' "$marker"
-    printf 'export { default } from %s;\n' "$(jq -Rn --arg path "$scripts/opencode-attended-plugin/tui.js" '$path')"
-  } >"$tmp"
-  chmod 600 "$tmp"
-  if [[ -f "$module" ]] && cmp -s "$tmp" "$module"; then
-    rm -f "$tmp"
-  else
-    mv -f "$tmp" "$module"
-  fi
-}
-
 if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
   status=0
   if [[ "$has_notes_agents" -eq 1 ]]; then
@@ -881,7 +831,6 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
       install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
       install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
-      install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
       install_symlink "$agents_template" "$HOME/.pi/agent/AGENTS.md"
       sync_codex_work_rules
       if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
@@ -895,7 +844,6 @@ if [[ "${LLM_VERIFY_ONLY:-0}" == 1 || "${LLM_LINK_ONLY:-0}" == 1 ]]; then
       sync_work_ai_proxy_settings || status=$?
       sync_claude_agent_inbox
       sync_codex_agent_inbox
-      sync_opencode_attended_stage
 
       if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
         install_symlink "$agents_template" "$HOME/.rovodev/AGENTS.md"
@@ -943,7 +891,6 @@ mkdir -p \
   "$HOME/.claude" \
   "$HOME/.codex" \
   "$HOME/.codex/rules" \
-  "$HOME/.config/opencode" \
   "$HOME/.pi" \
   "$HOME/.pi/agent"
 
@@ -952,26 +899,6 @@ sync_codex_work_rules
 eval_template "$DOTS_REPO/templates/dot_codex/config.toml" "$HOME/.codex/config.toml"
 sync_codex_agent_inbox
 eval_template "$DOTS_REPO/templates/dot_codex/rules/dots.rules" "$HOME/.codex/rules/dots.rules" ''
-OPENCODE_WORK_CONFIG=''
-if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
-  OPENCODE_WORK_CONFIG=$(< "$DOTS_REPO/templates/dot_config/opencode/work.jsonc")
-fi
-export OPENCODE_WORK_CONFIG
-# shellcheck disable=SC2016 # Pass the variable name to envsubst, not its value.
-eval_template \
-  "$DOTS_REPO/templates/dot_config/opencode/opencode.jsonc" \
-  "$HOME/.config/opencode/opencode.jsonc" \
-  '$OPENCODE_WORK_CONFIG'
-unset OPENCODE_WORK_CONFIG
-sync_opencode_attended_stage
-
-# V2 discovers TUI plugins as directories, independently of server plugins.
-mkdir -p "$HOME/.config/opencode/plugins/dots-tmux-agent-state"
-eval_template \
-  "$DOTS_REPO/templates/dot_config/opencode/tmux-agent-state/tui.js" \
-  "$HOME/.config/opencode/plugins/dots-tmux-agent-state/tui.js" \
-  ''
-
 # Pi settings contain user-managed providers, model lists, and UI preferences.
 # Seed defaults only for a new installation; never overwrite an existing file.
 # Empty substitution list: settings.json must never expand shell variables.
@@ -1007,7 +934,6 @@ if [[ $has_notes_agents -eq 1 ]]; then
   install_symlink "$agents_template" "$HOME/.agents/AGENTS.md"
   install_symlink "$agents_template" "$HOME/.claude/CLAUDE.md"
   install_symlink "$agents_template" "$HOME/.codex/AGENTS.md"
-  install_symlink "$agents_template" "$HOME/.config/opencode/AGENTS.md"
   install_symlink "$agents_template" "$HOME/.pi/agent/AGENTS.md"
 
   if [[ -f "$notes_repo/agents/claude/test-writer.md" ]]; then
@@ -1050,7 +976,6 @@ else
   unlink_skill_set "$HOME/.agents/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.claude/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.codex/skills" "${work_skills[@]}"
-  unlink_skill_set "$HOME/.config/opencode/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.pi/agent/skills" "${work_skills[@]}"
   unlink_skill_set "$HOME/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   unlink_skill_set "$HOME/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"

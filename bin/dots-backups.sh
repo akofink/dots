@@ -174,7 +174,6 @@ known_destinations() {
 
   add_destination "$home_root/.codex/config.toml"
   add_destination "$home_root/.codex/rules/dots.rules"
-  add_destination "$home_root/.config/opencode/opencode.jsonc"
   add_destination "$home_root/.pi/agent/settings.json"
   add_destination "$home_root/.rovodev/config.yml"
 
@@ -182,7 +181,6 @@ known_destinations() {
   add_destination "$home_root/.claude/CLAUDE.md"
   add_destination "$home_root/.claude/agents/test-writer.md"
   add_destination "$home_root/.codex/AGENTS.md"
-  add_destination "$home_root/.config/opencode/AGENTS.md"
   add_destination "$home_root/.pi/agent/AGENTS.md"
   add_destination "$home_root/.pi/agent/mcp.json"
   add_destination "$home_root/.rovodev/AGENTS.md"
@@ -194,7 +192,6 @@ known_destinations() {
   add_skill_destinations "$home_root/.agents/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.claude/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.codex/skills" "${common_skills[@]}" "${work_skills[@]}"
-  add_skill_destinations "$home_root/.config/opencode/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.pi/agent/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
   add_skill_destinations "$home_root/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"

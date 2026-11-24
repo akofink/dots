@@ -15,7 +15,7 @@ dry_run() {
     DOTS_MACHINE_ENV_FILE="$tmpdir/none" "$@" 2>&1 | grep -E '^(Would run|Error)'
 }
 
-full='Would run setup modules: http aws vim tmux zsh llm opencode rbenv go tmuxinator glow ghostty akagent'
+full='Would run setup modules: http aws vim tmux zsh llm rbenv go tmuxinator glow ghostty akagent'
 
 # Module selection is independent of machine class.
 [[ "$(dry_run MACHINE_CLASS=personal bash "$repo_root/setup.sh" --dry-run)" == "$full" ]]

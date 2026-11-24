@@ -19,7 +19,7 @@ c=$(python3 "$repo/bin/dots-setup-state.py" llm "$tmp/dots" "$tmp/notes")
 # --changed selection and --dry-run do not touch state or run modules.
 state="$tmp/dots-setup"
 mkdir -p "$state"
-for module in http aws vim tmux zsh llm opencode rbenv go tmuxinator glow ghostty akagent; do
+for module in http aws vim tmux zsh llm rbenv go tmuxinator glow ghostty akagent; do
   printf '%s\n' "$(python3 "$repo/bin/dots-setup-state.py" "$module" "$repo" "$tmp/notes")" > "$state/$module"
 done
 before=$(shasum -a 256 "$state"/* | shasum -a 256)
@@ -58,7 +58,7 @@ printf 'return 0\n' > "$fake_repo/setup/llm.sh"
 REPOS_SETUP_COMPLETE=1 DOTS_REPO="$fake_repo" NOTES_REPO="$tmp/notes" XDG_STATE_HOME="$tmp/pending-state" HOME="$tmp/home" MACHINE_CLASS=work \
   bash "$repo/setup.sh" --changed > "$tmp/pending.out"
 [[ -s "$tmp/pending-state/dots-setup/pending" ]]
-[[ $(<"$tmp/pending-state/dots-setup/pending") == 'http aws vim tmux zsh opencode rbenv go tmuxinator glow ghostty akagent' ]]
+[[ $(<"$tmp/pending-state/dots-setup/pending") == 'http aws vim tmux zsh rbenv go tmuxinator glow ghostty akagent' ]]
 mkdir -p "$tmp/pending-state/dots-warmup" "$tmp/actions"
 printf 'warmup.log\n' > "$tmp/pending-state/dots-warmup/failure"
 cat > "$tmp/actions/source.md" <<'MD'

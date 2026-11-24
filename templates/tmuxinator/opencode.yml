@@ -1,7 +1,0 @@
-name: opencode
-root: ~/dev
-
-windows:
-  - zsh:
-  - vim: vim
-  - ai: opencode

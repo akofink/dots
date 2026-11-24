@@ -10,7 +10,6 @@ module script individually.
 - tmux
 - zsh
 - llm
-- opencode
 - rbenv
 - go
 - tmuxinator
@@ -172,7 +171,7 @@ This intentionally resets the `*_SETUP_COMPLETE` flags and related exported setu
 `bash setup/<module>.sh` run does not no-op because of state leaked from an earlier sourced setup run.
 
 The top-level `setup.sh` orchestrates a curated subset of modules: `http`, `aws`, `vim`, `tmux`, `zsh`, `llm`,
-`opencode`, `rbenv`, `go`, `tmuxinator`, `glow`, and `akagent`. Feel free to tailor that list or run any other module
+`rbenv`, `go`, `tmuxinator`, `glow`, and `akagent`. Feel free to tailor that list or run any other module
 script directly.
 
 #### AWS CLI module
@@ -190,19 +189,9 @@ through the bundled `aws_completer` executable when it is available.
 - Pi Coding Agent from the managed installer at `https://pi.dev/install.sh`, which pins its dependencies and updates Pi with `pi update`
 - ACPX and the Pi ACP adapter from npm (`acpx` and `pi-acp`)
 - Pi web search from npm (`npm:pi-web-search@1.6.0`), using native search support for the selected provider when available
-- opencode via `setup/opencode.sh`
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.
 Atlassian CLI (`acli`) is not installed by dots on any machine class.
-
-#### opencode module
-
-On personal machines, `bash setup/opencode.sh` installs opencode using the official installer from `https://opencode.ai/v2/install`. Work-machine setup skips the installation, including when this module is invoked directly.
-The installer places the binary in `~/.opencode/bin`; the managed shell templates already add that
-directory to `PATH`, so the setup script runs the installer with `--no-modify-path`.
-The setup script invokes the official installer on each run so stale or broken binaries can be repaired.
-Set `OPENCODE_VERSION` to pin a specific upstream release when needed, for example
-`OPENCODE_VERSION=2.2.7 bash setup/opencode.sh`.
 
 #### go module
 
@@ -298,8 +287,6 @@ when `NOTES_REPO` is missing:
 - `~/.agents/AGENTS.md`
 - `~/.claude/CLAUDE.md`
 - `~/.claude/agents/test-writer.md` when the notes repo has the target file
-- `~/.config/opencode/AGENTS.md`
-- `~/.config/opencode/opencode.jsonc`
 - `~/.codex/config.toml`
 - `~/.codex/AGENTS.md`
 - `~/.codex/rules/dots.rules`
@@ -313,7 +300,6 @@ Codex reads its canonical global guidance from `~/.codex/AGENTS.md`; setup does 
 `instructions.md` layer.
 Run `bin/verify-llm-skills.sh` to check that every configured common skill is present and points to its canonical source.
 A missing configured skill or broken link makes the verification fail instead of being silently omitted.
-OpenCode loads global skills at session startup, so restart an existing OpenCode session after setup or synchronization changes before checking discovery.
 
 On work machines (`MACHINE_CLASS=work`) it additionally manages work-only dev and Rovo/RovoDev links:
 
@@ -332,8 +318,6 @@ The LLM tools do not expose one common config model, so tool-specific configurat
 hidden behind an abstraction layer. When changing durable defaults, check the corresponding tool config directly:
 
 - Codex model, reasoning, approval policy, sandbox mode, and TUI defaults live in `templates/dot_codex/config.toml`.
-- opencode global defaults live in `templates/dot_config/opencode/opencode.jsonc`; work-only Atlassian MCP servers live in the adjacent `work.jsonc` fragment.
-- OpenCode's full V2 TUI discovers a local tmux-status plugin. The tmux badge is window-scoped and is disabled in multi-pane windows; it is not a task-completion record. The minimal `mini` client does not load these TUI plugins. Use a standalone OpenCode server for task-bound execution when server process environment carries task identity: a shared service cannot provide a distinct process environment per client.
 - Pi's work-only MCP servers mirror that configuration in `templates/dot_pi/agent/mcp.json`, rendered to `~/.pi/agent/mcp.json` only when `MACHINE_CLASS=work`.
 - Pi's agent-level retry defaults are managed in `templates/dot_pi/agent/settings.json`: retries are enabled with up to 8 attempts and a 2-second base delay, while provider-level retries remain disabled.
 - Canonical Pi extensions live in the notes repo `agents/pi-extensions` directory and are symlinked into `~/.pi/agent/extensions`. The `disable-animations.ts` extension replaces the default animated working spinner with a static indicator. The local `pi-event-monitor.ts` copy auto-approves only shell monitor starts so unattended CI monitors are not lost to an idle prompt.
@@ -363,11 +347,11 @@ Common skills are linked for all machines; work-only skills such as Jira authori
 Pi 1.0 or newer is required for the built-in MCP configuration; update the active executable with `pi update` before using it with an older installation. The managed installer stores Pi under `~/.pi/agent/install` and links its launcher into `~/.local/bin`; setup leaves older npm/NVM executables and caches in place so running sessions are not disrupted, while fresh zsh launches prioritize the managed launcher over NVM bins. The installer uses a release-specific package lock and `npm ci`, pinning the full dependency tree. Dots seeds `~/.pi/agent/settings.json` from its template only when it does not exist, preserving existing provider, model, and UI preferences. Pi auth, sessions, packages, extensions, skills, and MCP configuration remain in their normal user-data locations. No third-party MCP adapter package is installed.
 Use `/mcp` for session connections and `pi mcp list` to check the configured servers from a shell. Servers use Pi's default codemode exposure; scripts discover tools with `searchTools()` and `describeTool()` and call their exact discovered identifiers through `tools`. Long MCP identifiers may have hash suffixes.
 The template keeps `tuiMode: "regular"` for terminal scrollback even though Pi 1.0 defaults to fullscreen.
-Its work profile receives the same Atlassian MCP servers as OpenCode, while personal setup removes the dots-managed Pi MCP config.
+Its work profile receives the work Atlassian MCP servers, while personal setup removes the dots-managed Pi MCP config.
 
 TWG installs its canonical global skill bundle under `~/.agents/skills/`. On
 `MACHINE_CLASS=work` machines, Dots symlinks only the `twg` and `twg-*` skills
-from that install into Claude, Codex, OpenCode, and Pi's agent skill roots, so
+from that install into Claude, Codex, and Pi's agent skill roots, so
 these tools use the same current bundle. Rovo/RovoDev load their skills natively.
 The names are discovered at runtime, and links are removed on personal machines
 or when the canonical TWG install is absent.
