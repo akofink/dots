@@ -21,6 +21,7 @@ test:
 	python3 test/op-setup-policy-test.py
 	bash test/akupdate-test.sh
 	bash test/dots-warmup-test.sh
+	bash test/setup-modules-test.sh
 	bash test/akagent-test.sh
 	bash test/pi-settings-test.sh
 	python3 test/agent-workflow-defaults-test.py

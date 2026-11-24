@@ -30,6 +30,8 @@ run_env() {
 
 run_env work
 run_env personal MACHINE_CLASS=personal
+run_env agent MACHINE_CLASS=agent
+if run_env bogus MACHINE_CLASS=bogus 2>/dev/null; then exit 1; fi
 
 rm "$machine_env"
 run_env personal

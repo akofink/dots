@@ -297,6 +297,9 @@ fi
 agents_template="$notes_repo/agents/global-personal.md"
 if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
   agents_template="$notes_repo/agents/global-work.md"
+elif [[ "${MACHINE_CLASS:-personal}" == "agent" && -f "$notes_repo/agents/global-agent.md" ]]; then
+  # Agent machines fall back to the personal guidance until global-agent.md exists.
+  agents_template="$notes_repo/agents/global-agent.md"
 fi
 has_notes_agents=1
 if [[ ! -f "$agents_template" ]]; then
@@ -619,6 +622,8 @@ link_development_guidance() {
   local dev_agents_template="$notes_repo/agents/guidance/dev-root-personal.md"
   if [[ "${MACHINE_CLASS:-personal}" == "work" ]]; then
     dev_agents_template="$notes_repo/agents/guidance/dev-root-work.md"
+  elif [[ "${MACHINE_CLASS:-personal}" == "agent" && -f "$notes_repo/agents/guidance/dev-root-agent.md" ]]; then
+    dev_agents_template="$notes_repo/agents/guidance/dev-root-agent.md"
   fi
   if [[ -f "$dev_agents_template" ]]; then
     install_symlink "$dev_agents_template" "$HOME/dev/AGENTS.md"
