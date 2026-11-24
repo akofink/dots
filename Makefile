@@ -32,6 +32,7 @@ test:
 	python3 test/claude-work-settings-test.py
 	python3 test/windows-claude-setup-test.py
 	bash test/dots-backups-test.sh
+	bash test/cloud-closeout-test.sh
 	bash test/dots-sync-test.sh
 	python3 test/notes-task-test.py
 	bash test/llm-skills-test.sh

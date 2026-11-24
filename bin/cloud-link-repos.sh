@@ -2,7 +2,7 @@
 # Cloud-session setup: link repos attached at /home/user/<repo> into ~/dev/repos,
 # build akagent from the attached akagent-cli, and expose notes-task/syncdots.
 # Idempotent. Refuses to replace a duplicate clone that is dirty, off main or has
-# commits not on origin. Run bin/cloud-preflight.sh afterwards to verify.
+# commits not on origin. Run bin/cloud-preflight.sh afterwards to verify. At the end of a session run bin/cloud-closeout.sh.
 # Usage: cloud-link-repos.sh [attach-root]   (default: /home/user)
 set -euo pipefail
 
