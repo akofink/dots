@@ -20,7 +20,10 @@ printf '#!/bin/sh\nprintf stale\\n\n' > "$nvm_dir/versions/node/v24.14.1/bin/pi"
 printf '#!/bin/sh\nprintf managed\\n\n' > "$home/.local/bin/pi"
 chmod +x "$nvm_dir/versions/node/v24.14.1/bin/pi" "$home/.local/bin/pi"
 
-zsh_bin=$(command -v zsh)
+if ! zsh_bin=$(command -v zsh); then
+  printf 'zshenv-nvm-default-test: skipped (zsh not installed)\n'
+  exit 0
+fi
 readback=$(env -i \
   HOME="$home" \
   NVM_DIR="$nvm_dir" \

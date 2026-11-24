@@ -272,6 +272,8 @@ if [[ "${LLM_LINK_ONLY:-0}" != 1 && "${LLM_VERIFY_ONLY:-0}" != 1 ]]; then
   fi
   echo "→ Installing gh-axi skill..."
   install_agent_skill "gh-axi" "$HOME/.agents/skills/gh-axi" kunchenguid/gh-axi --skill gh-axi || true
+  echo "→ Installing Lavish skill..."
+  install_agent_skill "Lavish" "$HOME/.agents/skills/lavish" kunchenguid/lavish-axi --skill lavish || true
   # TypeSafe uses one install method per agent: the vendor plugin for Claude
   # and a Pi-only skills.sh copy, so neither agent loads a duplicate.
   echo "→ Installing TypeSafe skill..."

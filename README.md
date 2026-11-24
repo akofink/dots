@@ -188,6 +188,7 @@ through the bundled `aws_completer` executable when it is available.
 - Codex from `https://chatgpt.com/codex/install.sh` with `CODEX_NON_INTERACTIVE=1`
 - Pi Coding Agent from the managed installer at `https://pi.dev/install.sh`, which pins its dependencies and updates Pi with `pi update`
 - ACPX and the Pi ACP adapter from npm (`acpx` and `pi-acp`)
+- The `gh-axi` and `lavish` skills through `npx skills add kunchenguid/<repo> --skill <name> -g` (the Lavish skill is a stub that runs the CLI on demand with `npx -y lavish-axi`, so no global npm install is needed)
 - Pi web search from npm (`npm:pi-web-search@1.6.0`), using native search support for the selected provider when available
 
 Rovo/RovoDev is configuration-only; setup does not auto-install it.

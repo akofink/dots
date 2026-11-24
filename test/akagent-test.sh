@@ -50,7 +50,15 @@ while [[ $# -gt 0 ]]; do
     shift
   fi
 done
-printf 'fake akagent\n' > "$output"
+cat > "$output" <<'BIN'
+#!/usr/bin/env bash
+if [[ "${1:-}" == update ]]; then
+  printf 'source_changed: false\n'
+  exit 0
+fi
+printf 'fake akagent\n'
+BIN
+chmod +x "$output"
 EOF
 chmod +x "$fake_bin/go"
 
@@ -71,7 +79,7 @@ run_installer
 [[ -L "$aka" ]]
 [[ "$(readlink "$aka")" == 'akagent' ]]
 [[ -x "$aka" ]]
-[[ "$(cat "$aka")" == 'fake akagent' ]]
+[[ "$("$aka")" == 'fake akagent' ]]
 
 run_installer
 [[ "$(readlink "$aka")" == 'akagent' ]]
