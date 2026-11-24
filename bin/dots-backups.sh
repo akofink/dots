@@ -197,7 +197,6 @@ known_destinations() {
   add_skill_destinations "$home_root/dev/.rovodev/skills" "${common_skills[@]}" "${work_skills[@]}"
 
   add_destination "$home_root/.config/tmuxinator"
-  add_destination "$home_root/.config/nvim"
 
   printf '%s\0' "${destinations[@]}"
 }

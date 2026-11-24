@@ -16,7 +16,7 @@ module script individually.
 - glow
 - akagent
 
-Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`, `nvim.sh`) and can be run directly.
+Additional helpers live under `setup/` (e.g., `git.sh`, `ssh.sh`) and can be run directly.
 
 Machine-role behavior is driven by shared environment detection in `setup/env.sh`. The
 `MACHINE_CLASS` variable identifies the role of the current machine and defaults to `work`
