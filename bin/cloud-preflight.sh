@@ -9,6 +9,19 @@ dev_repos=${DEV_REPOS:-"$HOME/dev/repos"}
 status=0
 
 printf 'HOME=%s user=%s\n' "$HOME" "$(id -un)"
+
+printf '\n## Environment\n'
+# Known markers: Claude Code cloud sessions set CLAUDE_CODE_REMOTE=true (with
+# CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE), CCR_AGENT_PROXY_ENABLED, and ship /root/.ccr.
+# Other providers (for example OpenAI cloud environments) are not characterized yet: the
+# variable names below (names only, never values) are what to record from a first session there.
+if [[ "${CLAUDE_CODE_REMOTE:-}" == true || -n "${CCR_AGENT_PROXY_ENABLED:-}" || -d /root/.ccr ]]; then
+  printf 'cloud: yes (claude-code cloud, environment type %s)\n' "${CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE:-unknown}"
+else
+  printf 'cloud: no known marker (unrecognized provider, or a local machine)\n'
+fi
+printf 'cwd=%s uname=%s\n' "$PWD" "$(uname -sr)"
+printf 'candidate env names: %s\n' "$(env | cut -d= -f1 | grep -Ei 'codex|openai|ccr|remote|cloud|sandbox|proxy|workspace' | sort | tr '\n' ' ')"
 printf '\n## Attached repos (%s)\n' "$attach_root"
 attached=()
 for dir in "$attach_root"/*/; do
