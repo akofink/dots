@@ -294,30 +294,3 @@ run_setup
 test "$(jq -r .autoMemoryEnabled "$home/.claude/settings.json")" = false
 test "$(jq -r .permissions.defaultMode "$home/.claude/settings.json")" = auto
 test "$(jq -c .permissions.allow "$home/.claude/settings.json")" = '[]'
-
-# Agent machines link agent-specific guidance when the notes repo provides it
-# and fall back to the personal guidance otherwise.
-run_agent_setup() {
-  env \
-    HOME="$home" \
-    DOTS_REPO="$repo_root" \
-    NOTES_REPO="$notes_repo" \
-    ENV_SETUP_COMPLETE=1 \
-    MACHINE_CLASS=agent \
-    LLM_LINK_ONLY=1 \
-    bash "$repo_root/setup/llm.sh"
-}
-
-run_agent_setup
-test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-personal.md"
-test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-personal.md"
-test ! -e "$home/.codex/rules/work.rules"
-
-printf 'agent development guidance\n' > "$notes_repo/agents/guidance/dev-root-agent.md"
-printf 'agent instructions\n' > "$notes_repo/agents/global-agent.md"
-run_agent_setup
-test "$(readlink "$home/dev/AGENTS.md")" = "$notes_repo/agents/guidance/dev-root-agent.md"
-test "$(readlink "$home/dev/CLAUDE.md")" = "$home/dev/AGENTS.md"
-test "$(readlink "$home/.pi/agent/AGENTS.md")" = "$notes_repo/agents/global-agent.md"
-test "$(readlink "$home/.claude/CLAUDE.md")" = "$notes_repo/agents/global-agent.md"
-test ! -e "$home/dev/AGENTS.bbc-core.md"

@@ -28,7 +28,7 @@ running setup to force a specific profile on a machine where auto-detection woul
 MACHINE_CLASS=personal ./setup.sh
 ```
 
-Current valid values are `work`, `personal`, and `agent`. The variable is the single place to gate
+Current valid values are `work` and `personal`. The variable is the single place to gate
 role-dependent behavior; do not add new logic that branches on `HAS_JAMF` directly.
 
 For a persistent machine-local override, create `~/.config/dots/machine.env`.
@@ -46,27 +46,15 @@ An explicitly supplied `MACHINE_CLASS` still wins for a one-off setup command or
 The tmux configuration and tmux setup both publish the value into the tmux global environment so non-zsh panes inherit it.
 Already-running processes keep their existing environment until a new shell or tmux server starts.
 
-##### Agent machines
+##### Targeted setup
 
-`MACHINE_CLASS=agent` marks an unattended agent machine such as a cloud container. It behaves like `personal`
-(no work-only tools or skills), but `./setup.sh` defaults to the small module set `llm`, `go`, and `akagent`
-instead of the full operator toolchain. When the notes repo provides `agents/global-agent.md` and
-`agents/guidance/dev-root-agent.md`, the agent machine links those instead of the personal guidance; until
-then it falls back to the personal files.
-
-Module selection, highest precedence first: `--only`, the `DOTS_SETUP_ONLY` environment variable (same
-comma-separated format, so it also works through `bootstrap.sh`, which runs `./setup.sh` without arguments),
-the `MACHINE_CLASS=agent` default, then every curated module.
-
-A cloud environment setup script needs only a clone and a targeted run. Persist the class so later shells,
-`syncdots`, and relinking agree with setup:
+`bootstrap.sh` forwards its arguments to `./setup.sh`, so any setup option works through it. Module
+selection is independent of `MACHINE_CLASS`, which still only separates work from personal behavior.
+A cloud environment setup script (for example a Claude Code remote environment) can run just the
+modules it needs, with the notes repository clone skipped when the session has no access to it:
 
 ```sh
-mkdir -p ~/dev/repos ~/.config/dots
-[ -d ~/dev/repos/dots/.git ] || git clone https://github.com/akofink/dots.git ~/dev/repos/dots
-printf '%s\n' 'export MACHINE_CLASS="${MACHINE_CLASS:-agent}"' > ~/.config/dots/machine.env
-(cd ~/dev/repos/dots && SETUP_NOTES_REPO=0 ./setup.sh)   # MACHINE_CLASS=agent selects llm,go,akagent
-cd ~/dev
+curl -fsSL https://raw.githubusercontent.com/akofink/dots/main/bootstrap.sh | SETUP_NOTES_REPO=0 bash -s -- --only llm,go,akagent
 ```
 
 Operator policy and private context are separate from machine class.
@@ -364,13 +352,10 @@ Shared agent instructions intentionally diverge by machine role and are canonica
   Confluence, Rovo/RovoDev, and other corporate-only assumptions
 - work machines (`MACHINE_CLASS=work`) link to `~/dev/repos/notes/agents/global-work.md`, which includes
   Atlassian-specific agent guidance
-- agent machines (`MACHINE_CLASS=agent`) link to `~/dev/repos/notes/agents/global-agent.md` when it exists,
-  otherwise to the personal file
 
 The `~/dev/AGENTS.md` link follows the same split: personal machines link to
 `~/dev/repos/notes/agents/guidance/dev-root-personal.md`, while work machines link to
-`~/dev/repos/notes/agents/guidance/dev-root-work.md` and agent machines link to
-`~/dev/repos/notes/agents/guidance/dev-root-agent.md` (personal file if that is missing).
+`~/dev/repos/notes/agents/guidance/dev-root-work.md`.
 
 Skills are also symlinked from `~/dev/repos/notes/agents/skills/` into the tool-specific skill directories.
 Common skills are linked for all machines; work-only skills such as Jira authoring and on-call support are linked only when `MACHINE_CLASS=work`.

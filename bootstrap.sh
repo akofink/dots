@@ -49,10 +49,7 @@ fi
 export HAS_JAMF="${HAS_JAMF:-"$has_jamf_default"}"
 
 # MACHINE_CLASS identifies the role of this machine.
-# Current values: "work" | "personal" | "agent"
-# "agent" is an unattended agent machine (for example a cloud container). It
-# behaves like personal, but setup.sh defaults to a small module set and the
-# notes repo may supply agent-specific guidance.
+# Current values: "work" | "personal"
 # Defaults to "work" on Jamf-managed hosts; override before running setup
 # to force a specific class (e.g. MACHINE_CLASS=personal ./setup.sh).
 # Avoid adding new behavior gated directly on HAS_JAMF; use MACHINE_CLASS
@@ -62,10 +59,6 @@ if is_truthy "${HAS_JAMF}"; then
   _default_machine_class=work
 fi
 export MACHINE_CLASS="${MACHINE_CLASS:-"$_default_machine_class"}"
-case "$MACHINE_CLASS" in
-  work|personal|agent) ;;
-  *) fatal "Unknown MACHINE_CLASS '$MACHINE_CLASS' (expected work, personal, or agent)" ;;
-esac
 
 # Link-only synchronization needs the canonical machine classification without
 # refreshing packages or installing prerequisites.
@@ -529,4 +522,4 @@ eval_template "$DOTS_REPO/templates/.gitconfig" "$HOME/.gitconfig"
 source "$DOTS_REPO/setup/ssh.sh"
 
 export REPOS_SETUP_COMPLETE=1
-(cd "$DOTS_REPO" && ./setup.sh)
+(cd "$DOTS_REPO" && ./setup.sh "$@")

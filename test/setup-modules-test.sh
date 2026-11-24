@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Module selection: --only, DOTS_SETUP_ONLY, and the MACHINE_CLASS=agent default.
+# Module selection through setup.sh and argument forwarding through bootstrap.sh.
 
 set -euo pipefail
 
@@ -12,28 +12,18 @@ mkdir -p "$home"
 
 dry_run() {
   env -i HOME="$home" PATH="$PATH" DOTS_REPO="$repo_root" HAS_JAMF=0 \
-    DOTS_MACHINE_ENV_FILE="$tmpdir/none" "$@" \
-    bash "$repo_root/setup.sh" --dry-run 2>&1 | grep -E '^(Would run|Error)'
+    DOTS_MACHINE_ENV_FILE="$tmpdir/none" "$@" 2>&1 | grep -E '^(Would run|Error)'
 }
 
 full='Would run setup modules: http aws vim tmux zsh llm opencode rbenv go tmuxinator glow ghostty akagent'
-agent='Would run setup modules: llm go akagent'
 
-[[ "$(dry_run MACHINE_CLASS=personal)" == "$full" ]]
-[[ "$(dry_run MACHINE_CLASS=work)" == "$full" ]]
-[[ "$(dry_run MACHINE_CLASS=agent)" == "$agent" ]]
+# Module selection is independent of machine class.
+[[ "$(dry_run MACHINE_CLASS=personal bash "$repo_root/setup.sh" --dry-run)" == "$full" ]]
+[[ "$(dry_run MACHINE_CLASS=work bash "$repo_root/setup.sh" --dry-run)" == "$full" ]]
+[[ "$(dry_run MACHINE_CLASS=personal bash "$repo_root/setup.sh" --dry-run --only llm,go,akagent)" == 'Would run setup modules: llm go akagent' ]]
 
-# DOTS_SETUP_ONLY overrides the class default; --only overrides both.
-[[ "$(dry_run MACHINE_CLASS=agent DOTS_SETUP_ONLY=tmux,zsh)" == 'Would run setup modules: tmux zsh' ]]
-only_output=$(env -i HOME="$home" PATH="$PATH" DOTS_REPO="$repo_root" MACHINE_CLASS=agent DOTS_SETUP_ONLY=tmux \
-  bash "$repo_root/setup.sh" --dry-run --only glow 2>&1 | grep '^Would run')
-[[ "$only_output" == 'Would run setup modules: glow' ]]
+# Unknown modules are rejected.
+if dry_run bash "$repo_root/setup.sh" --dry-run --only nope >/dev/null; then exit 1; fi
 
-# Machine class can come from the machine env file.
-printf '%s\n' 'export MACHINE_CLASS="${MACHINE_CLASS:-agent}"' > "$tmpdir/machine.env"
-[[ "$(dry_run DOTS_MACHINE_ENV_FILE="$tmpdir/machine.env")" == "$agent" ]]
-
-# Unknown modules and unknown classes are rejected.
-if dry_run DOTS_SETUP_ONLY=nope >/dev/null; then exit 1; fi
-if env -i HOME="$home" PATH="$PATH" DOTS_REPO="$repo_root" MACHINE_CLASS=bogus \
-  bash "$repo_root/setup.sh" --dry-run >/dev/null 2>&1; then exit 1; fi
+# The generated bootstrap forwards its arguments to setup.sh.
+rg -q '\./setup\.sh "\$@"\)$' "$repo_root/bootstrap.sh"

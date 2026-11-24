@@ -4,10 +4,7 @@ echo
 echo "🍄 Dots setup.sh started..."
 
 setup_modules=(http aws vim tmux zsh llm opencode rbenv go tmuxinator glow ghostty akagent)
-# Modules for MACHINE_CLASS=agent machines when no explicit selection is given.
-agent_modules=(llm go akagent)
 selected_modules=("${setup_modules[@]}")
-modules_explicit=0
 dry_run=0
 changed_only=0
 setup_state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dots-setup"
@@ -15,10 +12,6 @@ setup_state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dots-setup"
 print_usage() {
   cat <<'EOF'
 Usage: ./setup.sh [--dry-run] [--changed] [--only module[,module...]]
-
-Module selection, highest precedence first: --only, the DOTS_SETUP_ONLY
-environment variable (same comma-separated format), the MACHINE_CLASS=agent
-default (llm,go,akagent), then every curated module.
 
 Options:
   --dry-run              Print the selected modules without making changes.
@@ -51,7 +44,6 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       IFS=',' read -r -a selected_modules <<< "$2"
-      modules_explicit=1
       shift
       ;;
     --help)
@@ -66,19 +58,6 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-
-if [[ "$modules_explicit" -eq 0 && -n "${DOTS_SETUP_ONLY:-}" ]]; then
-  IFS=',' read -r -a selected_modules <<< "$DOTS_SETUP_ONLY"
-  modules_explicit=1
-fi
-
-if [[ "$modules_explicit" -eq 0 ]]; then
-  # Classify the machine without refreshing packages (link-only env mode).
-  machine_class=$(DOTS_SETUP_ENV_ONLY=1 bash -c 'source "$1/setup/util.sh" >/dev/null && printf "%s" "$MACHINE_CLASS"' _ "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)") || exit 1
-  if [[ "$machine_class" == agent ]]; then
-    selected_modules=("${agent_modules[@]}")
-  fi
-fi
 
 for module in "${selected_modules[@]}"; do
   if [[ -z "$module" ]] || ! is_setup_module "$module"; then
