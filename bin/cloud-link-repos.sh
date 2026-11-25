@@ -33,6 +33,7 @@ for dir in "$attach_root"/*/; do
 done
 
 if [[ -d "$attach_root/akagent-cli" ]] && ! command -v akagent >/dev/null 2>&1; then
+  cloud_ensure_go || echo "no working go; akagent not built" >&2
   (cd "$attach_root/akagent-cli" && go build -o "$bin_dir/akagent" ./cmd/akagent)
   ln -sfn akagent "$bin_dir/aka"
   echo "built $bin_dir/akagent"

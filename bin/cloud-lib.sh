@@ -49,3 +49,26 @@ cloud_update_repos() {
     fi
   done
 }
+
+# cloud_ensure_go: make `go version` work. A cloud image can carry a different tool named `go` (an OpenAI
+# cloud session had /usr/bin/go answering "Go: Unknown option: build"), so `command -v go` proves nothing.
+# When `go version` does not report a Go toolchain, install GO_VERSION (default 1.25.9, as dots setup/go.sh)
+# from go.dev into ~/.local/go and link go and gofmt into ~/.local/bin, which is put first on PATH.
+cloud_ensure_go() {
+  local version=${GO_VERSION:-1.25.9} arch url
+  if go version 2>/dev/null | grep -q '^go version go'; then return 0; fi
+  [[ "$(uname -s)" == Linux ]] || { echo "cloud_ensure_go: no working go and automatic install supports Linux only" >&2; return 1; }
+  case "$(uname -m)" in
+    x86_64) arch=amd64 ;;
+    aarch64 | arm64) arch=arm64 ;;
+    *) echo "cloud_ensure_go: unsupported architecture $(uname -m)" >&2; return 1 ;;
+  esac
+  url="https://go.dev/dl/go${version}.linux-${arch}.tar.gz"
+  mkdir -p "$HOME/.local/bin"
+  rm -rf "$HOME/.local/go"
+  curl -fsSL "$url" | tar -xz -C "$HOME/.local" || { echo "cloud_ensure_go: could not install Go from $url" >&2; return 1; }
+  ln -sfn "$HOME/.local/go/bin/go" "$HOME/.local/bin/go"
+  ln -sfn "$HOME/.local/go/bin/gofmt" "$HOME/.local/bin/gofmt"
+  export PATH="$HOME/.local/bin:$PATH"
+  go version 2>/dev/null | grep -q '^go version go'
+}

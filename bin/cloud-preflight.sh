@@ -57,7 +57,10 @@ done
 
 printf '\n## Tools\n'
 for tool in git rg xh python3 go tmux hc akagent agent-workflow notes-task syncdots; do
-  if command -v "$tool" >/dev/null 2>&1; then printf '%s: present\n' "$tool"
+  if [[ "$tool" == go ]] && command -v go >/dev/null 2>&1; then
+    if go version 2>/dev/null | grep -q '^go version go'; then printf 'go: present (%s)\n' "$(go version | cut -d' ' -f3)"
+    else printf 'go: UNUSABLE (%s resolves but `go version` fails; setup installs a real Go)\n' "$(command -v go)"; status=1; fi
+  elif command -v "$tool" >/dev/null 2>&1; then printf '%s: present\n' "$tool"
   else printf '%s: absent\n' "$tool"; fi
 done
 
