@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Tracked pre-push hook: run the CI ShellCheck target before anything reaches the remote, including
+# direct pushes to main. Enabled with `git config core.hooksPath .githooks` (bin/install-git-hooks.sh).
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+if ! command -v shellcheck >/dev/null 2>&1; then
+  echo 'pre-push: shellcheck is required before pushing (pip install shellcheck-py)' >&2
+  exit 1
+fi
+make check

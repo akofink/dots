@@ -17,6 +17,7 @@ bash "$script_dir/cloud-link-repos.sh" "$attach_root" || { echo "cloud-link-repo
 if [[ "$llm" -eq 1 ]] && [[ -x "$script_dir/../setup.sh" ]]; then
   (cd "$script_dir/.." && ./setup.sh --only llm) || { echo "llm setup failed" >&2; status=1; }
 fi
+[[ -d "$attach_root/dots/.githooks" ]] && { bash "$script_dir/install-git-hooks.sh" "$attach_root/dots" || status=1; }
 # The dots gitconfig template turns on commit signing; cloud sessions have no key.
 git config --global commit.gpgsign false
 grep -q '.local/bin' ~/.bashrc 2>/dev/null || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc

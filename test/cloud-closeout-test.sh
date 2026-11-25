@@ -49,6 +49,6 @@ if CLOUD_PROVIDER=codex "$closeout" "$tmp/root" >/dev/null; then echo 'unmerged 
 source "$repo_root/bin/cloud-lib.sh"
 [[ "$(cloud_attach_root /x)" == /x ]]
 [[ "$(CLOUD_ATTACH_ROOT=/y cloud_attach_root)" == /y ]]
-[[ "$(CODEX_ENVIRONMENT_ID=e CLAUDE_CODE_REMOTE= CCR_AGENT_PROXY_ENABLED= cloud_provider)" != unknown ]]
+[[ "$(CODEX_ENVIRONMENT_ID=e CLAUDE_CODE_REMOTE="" CCR_AGENT_PROXY_ENABLED="" cloud_provider)" != unknown ]]
 
 printf 'cloud-closeout-test: ok\n'

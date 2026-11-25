@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Tracked pre-commit hook (enabled with `git config core.hooksPath .githooks`, see bin/install-git-hooks.sh).
+# Uses the pre-commit framework when installed (ShellCheck plus bootstrap regeneration, see
+# .pre-commit-config.yaml); otherwise runs ShellCheck directly on the staged shell scripts.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+if command -v pre-commit >/dev/null 2>&1 && [[ -f .pre-commit-config.yaml ]]; then
+  exec pre-commit run
+fi
+staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.sh$' || true)
+[[ -n "$staged" ]] || exit 0
+if ! command -v shellcheck >/dev/null 2>&1; then
+  echo 'pre-commit: shellcheck is required to commit shell scripts (pip install shellcheck-py)' >&2
+  exit 1
+fi
+# shellcheck disable=SC2086 # word splitting of the file list is intended
+shellcheck --severity=warning $staged
+if grep -q '^setup/' <<<"$staged"; then
+  ./create_bootstrap.sh >/dev/null
+  git add bootstrap.sh
+fi

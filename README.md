@@ -493,7 +493,13 @@ The `make check` target requires [`shellcheck`](https://www.shellcheck.net/) to 
 environment. It runs ShellCheck with `--severity=warning` so you see actionable warnings and errors
 without the noisier informational suggestions.
 
+#### Cloud environment setup script
+
+`templates/cloud/environment-setup.sh` is the canonical copy of the setup script pasted into the Claude Code cloud and OpenAI cloud environment settings. It delegates to `bin/cloud-session-setup.sh`; edit the file here and paste it into each provider's settings.
+
 #### pre-commit hooks
+
+Tracked hooks in `.githooks` (enabled by `bin/install-git-hooks.sh`, which `setup/git.sh` and the cloud session setup run) run ShellCheck on commit and `make check` before every push, so a push to `main` cannot reach CI with a ShellCheck failure. They defer to the pre-commit framework below when it is installed and configured.
 
 This repository ships with a [pre-commit](https://pre-commit.com/) configuration that runs ShellCheck
 before each commit. Enable it locally with:

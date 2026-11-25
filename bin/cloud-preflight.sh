@@ -60,7 +60,7 @@ done
 
 printf '\n## Context\n'
 printf 'commit.gpgsign=%s (cloud sessions need false; cloud-session-setup.sh sets it)\n' "$(git config --global commit.gpgsign 2>/dev/null || echo unset)"
-case ":$PATH:" in *":$HOME/.local/bin:"*) printf '~/.local/bin on PATH: yes\n' ;; *) printf '~/.local/bin on PATH: no\n' ;; esac
+case ":$PATH:" in *":$HOME/.local/bin:"*) printf '%s on PATH: yes\n' "$HOME/.local/bin" ;; *) printf '%s on PATH: no\n' "$HOME/.local/bin" ;; esac
 owners=$(for name in "${attached[@]}"; do git -C "$attach_root/$name" remote get-url origin 2>/dev/null; done |
   sed -E 's#.*[:/]([^/]+)/[^/]+(\.git)?$#\1#' | sort -u | paste -sd, -)
 printf 'remote owners: %s (work vs personal is the operator'"'"'s call; not inferred)\n' "${owners:-none}"

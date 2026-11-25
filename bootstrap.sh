@@ -474,6 +474,11 @@ elif [[ "$PLATFORM" == "Darwin" ]]; then
 fi
 export GIT_CREDENTIAL_HELPER=${GIT_CREDENTIAL_HELPER:-"store"}
 
+# Run ShellCheck on commit and push like CI does (tracked hooks in .githooks).
+if [[ -d "$DOTS_REPO/.githooks" ]]; then
+  bash "$DOTS_REPO/bin/install-git-hooks.sh" "$DOTS_REPO" || warn "Failed to enable dots git hooks"
+fi
+
 export GIT_SETUP_COMPLETE=1
 #!/usr/bin/env bash
 
