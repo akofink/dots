@@ -10,3 +10,12 @@
 - Do not edit generated `bootstrap.sh`. Edit its source scripts and regenerate it with `./create_bootstrap.sh`; the pre-commit hook does this when a `setup/*.sh` file is staged.
 - `eval_template` expands every environment variable unless its third argument explicitly limits substitution. Templates containing runtime shell variables must pass an explicit variable list, including `''` when no substitutions are intended.
 - `MACHINE_CLASS` is the only authoritative branch point for machine-role behavior. Keep `HAS_JAMF` detection in `setup/env.sh`; downstream code must consume `MACHINE_CLASS` rather than branch on `HAS_JAMF`.
+
+## Cloud session start
+
+In a cloud session (`CLAUDE_CODE_REMOTE=true` or `CODEX_ENVIRONMENT_ID` set), before other work bring the attached checkouts up to date and run the cloud setup, then read `agents/global-personal.md` in the notes checkout. This block is self-contained on purpose so a stale checkout can bootstrap itself; keep it stable.
+
+```sh
+for r in /workspace/*/ /home/user/*/; do [ -e "$r/.git" ] && [ -z "$(git -C "$r" status --porcelain)" ] && git -C "$r" fetch -q origin main && git -C "$r" merge -q --ff-only origin/main; done
+bash "$(ls -d /workspace/dots /home/user/dots 2>/dev/null | head -1)/bin/cloud-session-setup.sh"
+```

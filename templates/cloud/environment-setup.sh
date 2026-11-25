@@ -6,7 +6,9 @@
 # Best effort: a failure here must not block the session from starting.
 #
 # This file is the canonical copy of the setup script pasted into the Claude Code cloud
-# environment settings and the OpenAI cloud environment settings. Edit it here, then paste.
+# environment settings and the OpenAI cloud environment (install script) settings. Edit it here, then paste.
+# OpenAI cloud captures the prepared filesystem and may start tasks from that snapshot without rerunning
+# this script, so the repositories' AGENTS.md also carry a self-contained start-of-session bootstrap.
 # A cached container can hold stale checkouts (an OpenAI cloud session did), and a stale dots would not
 # contain the scripts below, so bring clean checkouts up to origin/main first (fast-forward only).
 for root in "$PWD" /workspace /home/user; do
