@@ -21,6 +21,15 @@ else
   printf 'cloud: yes (%s cloud, environment type %s)\n' "$provider" "${CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE:-${CODEX_PERMISSION_PROFILE:-unknown}}"
 fi
 printf 'attach root: %s\n' "$attach_root"
+scratch=$(cloud_scratch_dir)
+if cloud_home_writable; then
+  printf 'home writable: yes\n'
+  scratch_mode=0
+else
+  printf 'home writable: NO (read-only HOME; tools run in scratch mode from %s)\n' "$scratch"
+  scratch_mode=1
+  [[ -d "$scratch/bin" ]] && PATH="$scratch/bin:$PATH"
+fi
 printf 'cwd=%s uname=%s\n' "$PWD" "$(uname -sr)"
 printf 'candidate env names: %s\n' "$(env | cut -d= -f1 | grep -Ei 'codex|openai|ccr|remote|cloud|sandbox|proxy|workspace' | sort | tr '\n' ' ')"
 printf '\n## Attached repos (%s)\n' "$attach_root"
@@ -39,6 +48,15 @@ for dir in "$attach_root"/*/; do
 done
 [[ ${#attached[@]} -gt 0 ]] || printf '(none)\n'
 
+if [[ "$scratch_mode" -eq 1 ]]; then
+  printf '\n## Scratch mode (%s)\n' "$scratch"
+  if [[ -f "$scratch/env.sh" ]]; then
+    printf 'scratch env: ready (source %s/env.sh, or call %s/bin/<tool>)\n' "$scratch" "$scratch"
+  else
+    printf 'scratch env: missing\n'; status=1
+  fi
+  attached=()
+fi
 printf '\n## Path map (%s)\n' "$dev_repos"
 for name in "${attached[@]}"; do
   target="$dev_repos/$name"
@@ -65,10 +83,14 @@ for tool in git rg xh python3 go tmux hc akagent agent-workflow notes-task syncd
 done
 
 printf '\n## Context\n'
-printf 'commit.gpgsign=%s (cloud sessions need false; cloud-session-setup.sh sets it)\n' "$(git config --global commit.gpgsign 2>/dev/null || echo unset)"
-case ":$PATH:" in *":$HOME/.local/bin:"*) printf '%s on PATH: yes\n' "$HOME/.local/bin" ;; *) printf '%s on PATH: no\n' "$HOME/.local/bin" ;; esac
-owners=$(for name in "${attached[@]}"; do git -C "$attach_root/$name" remote get-url origin 2>/dev/null; done |
-  sed -E 's#.*[:/]([^/]+)/[^/]+(\.git)?$#\1#' | sort -u | paste -sd, -)
+if [[ "$scratch_mode" -eq 1 ]]; then
+  printf 'commit.gpgsign: set to false by the scratch env (GIT_CONFIG_*); PATH: use %s/bin/<tool>\n' "$scratch"
+else
+  printf 'commit.gpgsign=%s (cloud sessions need false; cloud-session-setup.sh sets it)\n' "$(git config --global commit.gpgsign 2>/dev/null || echo unset)"
+  case ":$PATH:" in *":$HOME/.local/bin:"*) printf '%s on PATH: yes\n' "$HOME/.local/bin" ;; *) printf '%s on PATH: no\n' "$HOME/.local/bin" ;; esac
+  owners=$(for name in "${attached[@]}"; do git -C "$attach_root/$name" remote get-url origin 2>/dev/null; done |
+    sed -E 's#.*[:/]([^/]+)/[^/]+(\.git)?$#\1#' | sort -u | paste -sd, -)
+fi
 printf 'remote owners: %s (work vs personal is the operator'"'"'s call; not inferred)\n' "${owners:-none}"
 printf 'push grants: not probed (read-only); a push needs a per-session grant per repo\n'
 if [[ "$status" -ne 0 ]]; then

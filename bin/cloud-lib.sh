@@ -72,3 +72,14 @@ cloud_ensure_go() {
   export PATH="$HOME/.local/bin:$PATH"
   go version 2>/dev/null | grep -q '^go version go'
 }
+
+# cloud_home_writable: true when HOME accepts new files under ~/.local/bin (OpenAI cloud's agent phase has a
+# read-only HOME while /workspace and /tmp are writable).
+cloud_home_writable() {
+  mkdir -p "$HOME/.local/bin" 2>/dev/null && [[ -w "$HOME/.local/bin" ]]
+}
+
+# cloud_scratch_dir: where scratch mode keeps its wrappers, state and clones (CLOUD_SCRATCH overrides).
+cloud_scratch_dir() {
+  printf '%s\n' "${CLOUD_SCRATCH:-${TMPDIR:-/tmp}/cloud-agent}"
+}

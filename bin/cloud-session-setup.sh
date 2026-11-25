@@ -14,11 +14,16 @@ attach_root=$(cloud_attach_root "${1:-}")
 status=0
 
 cloud_update_repos "$attach_root"
+[[ -d "$attach_root/dots/.githooks" ]] && { bash "$script_dir/install-git-hooks.sh" "$attach_root/dots" || status=1; }
+if ! cloud_home_writable; then
+  echo "HOME is not writable: using scratch mode"
+  bash "$script_dir/cloud-scratch-setup.sh" "$attach_root" || status=1
+  exit "$status"
+fi
 bash "$script_dir/cloud-link-repos.sh" "$attach_root" || { echo "cloud-link-repos failed" >&2; status=1; }
 if [[ "$llm" -eq 1 ]] && [[ -x "$script_dir/../setup.sh" ]]; then
   (cd "$script_dir/.." && ./setup.sh --only llm) || { echo "llm setup failed" >&2; status=1; }
 fi
-[[ -d "$attach_root/dots/.githooks" ]] && { bash "$script_dir/install-git-hooks.sh" "$attach_root/dots" || status=1; }
 # The dots gitconfig template turns on commit signing; cloud sessions have no key.
 git config --global commit.gpgsign false
 grep -q '.local/bin' ~/.bashrc 2>/dev/null || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc

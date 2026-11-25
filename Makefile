@@ -34,6 +34,7 @@ test:
 	bash test/dots-backups-test.sh
 	bash test/cloud-closeout-test.sh
 	bash test/git-hooks-test.sh
+	bash test/cloud-scratch-test.sh
 	bash test/dots-sync-test.sh
 	python3 test/notes-task-test.py
 	bash test/llm-skills-test.sh
