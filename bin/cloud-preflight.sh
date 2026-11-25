@@ -29,10 +29,13 @@ for dir in "$attach_root"/*/; do
   [[ -e "$dir/.git" ]] || continue
   name=$(basename "$dir")
   attached+=("$name")
-  printf '%s: branch=%s origin=%s dirty=%s\n' "$name" \
+  git -C "$dir" fetch -q origin main 2>/dev/null
+  behind=$(git -C "$dir" rev-list --count HEAD..origin/main 2>/dev/null || echo '?')
+  printf '%s: branch=%s origin=%s dirty=%s behind_origin_main=%s\n' "$name" \
     "$(git -C "$dir" branch --show-current 2>/dev/null)" \
     "$(git -C "$dir" remote get-url origin 2>/dev/null)" \
-    "$(git -C "$dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')"
+    "$(git -C "$dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')" "$behind"
+  [[ "$behind" == 0 || "$behind" == '?' ]] || status=1
 done
 [[ ${#attached[@]} -gt 0 ]] || printf '(none)\n'
 

@@ -13,6 +13,7 @@ if [[ "${1:-}" == "--llm" ]]; then llm=1; shift; fi
 attach_root=$(cloud_attach_root "${1:-}")
 status=0
 
+cloud_update_repos "$attach_root"
 bash "$script_dir/cloud-link-repos.sh" "$attach_root" || { echo "cloud-link-repos failed" >&2; status=1; }
 if [[ "$llm" -eq 1 ]] && [[ -x "$script_dir/../setup.sh" ]]; then
   (cd "$script_dir/.." && ./setup.sh --only llm) || { echo "llm setup failed" >&2; status=1; }

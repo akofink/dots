@@ -30,3 +30,22 @@ cloud_attach_root() {
   done
   printf '/home/user\n'
 }
+
+# cloud_update_repos <attach-root>: fast-forward each clean attached checkout to origin/main when its
+# current commit is an ancestor of origin/main (a cached container can hold stale checkouts, as an OpenAI
+# cloud session did). Never touches a dirty tree, a checkout with commits not on origin/main, or a diverged
+# branch. Prints one line per checkout that moved or could not be updated.
+cloud_update_repos() {
+  local root=$1 dir name
+  for dir in "$root"/*/; do
+    [[ -e "$dir/.git" ]] || continue
+    name=$(basename "$dir")
+    [[ -z "$(git -C "$dir" status --porcelain 2>/dev/null)" ]] || { echo "$name: dirty; not updated"; continue; }
+    git -C "$dir" fetch -q origin main 2>/dev/null || { echo "$name: fetch failed; not updated"; continue; }
+    if git -C "$dir" merge-base --is-ancestor HEAD origin/main && ! git -C "$dir" merge-base --is-ancestor origin/main HEAD; then
+      git -C "$dir" merge -q --ff-only origin/main && echo "$name: fast-forwarded to $(git -C "$dir" rev-parse --short HEAD)"
+    elif ! git -C "$dir" merge-base --is-ancestor HEAD origin/main; then
+      echo "$name: has commits not on origin/main; not updated"
+    fi
+  done
+}

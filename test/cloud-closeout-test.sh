@@ -45,8 +45,19 @@ CLOUD_PROVIDER=codex "$closeout" "$tmp/root" | grep -q 'harness branch work reta
 printf 'x' > x && git add x && git commit -qm x
 if CLOUD_PROVIDER=codex "$closeout" "$tmp/root" >/dev/null; then echo 'unmerged work branch passed' >&2; exit 1; fi
 
-# Attach root detection: an explicit root wins; CLOUD_ATTACH_ROOT is next.
+# A stale clean checkout is fast-forwarded; a dirty one is left alone.
 source "$repo_root/bin/cloud-lib.sh"
+(cd "$tmp/seed" && git pull -q origin main && printf n > n && git add n && git commit -qm n && git push -q origin main)
+git checkout -q -B stale origin/main~1
+out=$(cloud_update_repos "$tmp/root")
+grep -q 'fast-forwarded' <<<"$out"
+[[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]]
+git checkout -q -B stale2 origin/main~1
+printf d >> a
+grep -q 'dirty; not updated' <<<"$(cloud_update_repos "$tmp/root")"
+git checkout -q -- a
+
+# Attach root detection: an explicit root wins; CLOUD_ATTACH_ROOT is next.
 [[ "$(cloud_attach_root /x)" == /x ]]
 [[ "$(CLOUD_ATTACH_ROOT=/y cloud_attach_root)" == /y ]]
 [[ "$(CODEX_ENVIRONMENT_ID=e CLAUDE_CODE_REMOTE="" CCR_AGENT_PROXY_ENABLED="" cloud_provider)" != unknown ]]
