@@ -1,25 +1,26 @@
 #!/usr/bin/env bash
 # Read-only cloud-session preflight: reports the repo path map, tools present and
 # what must be linked before notes-task/akagent/syncdots can be used. Changes nothing.
-# Usage: cloud-preflight.sh [attach-root]   (default attach root: /home/user)
+# Usage: cloud-preflight.sh [attach-root]   (default: detected; see cloud-lib.sh)
 set -uo pipefail
 
-attach_root=${1:-/home/user}
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/cloud-lib.sh"
+attach_root=$(cloud_attach_root "${1:-}")
 dev_repos=${DEV_REPOS:-"$HOME/dev/repos"}
 status=0
 
 printf 'HOME=%s user=%s\n' "$HOME" "$(id -un)"
 
 printf '\n## Environment\n'
-# Known markers: Claude Code cloud sessions set CLAUDE_CODE_REMOTE=true (with
-# CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE), CCR_AGENT_PROXY_ENABLED, and ship /root/.ccr.
-# Other providers (for example OpenAI cloud environments) are not characterized yet: the
-# variable names below (names only, never values) are what to record from a first session there.
-if [[ "${CLAUDE_CODE_REMOTE:-}" == true || -n "${CCR_AGENT_PROXY_ENABLED:-}" || -d /root/.ccr ]]; then
-  printf 'cloud: yes (claude-code cloud, environment type %s)\n' "${CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE:-unknown}"
-else
+# Providers are detected by cloud-lib.sh (claude, codex). The variable names below (names only,
+# never values) are what to record from a first session on a new provider.
+provider=$(cloud_provider)
+if [[ "$provider" == unknown ]]; then
   printf 'cloud: no known marker (unrecognized provider, or a local machine)\n'
+else
+  printf 'cloud: yes (%s cloud, environment type %s)\n' "$provider" "${CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE:-${CODEX_PERMISSION_PROFILE:-unknown}}"
 fi
+printf 'attach root: %s\n' "$attach_root"
 printf 'cwd=%s uname=%s\n' "$PWD" "$(uname -sr)"
 printf 'candidate env names: %s\n' "$(env | cut -d= -f1 | grep -Ei 'codex|openai|ccr|remote|cloud|sandbox|proxy|workspace' | sort | tr '\n' ' ')"
 printf '\n## Attached repos (%s)\n' "$attach_root"
@@ -62,5 +63,8 @@ owners=$(for name in "${attached[@]}"; do git -C "$attach_root/$name" remote get
   sed -E 's#.*[:/]([^/]+)/[^/]+(\.git)?$#\1#' | sort -u | paste -sd, -)
 printf 'remote owners: %s (work vs personal is the operator'"'"'s call; not inferred)\n' "${owners:-none}"
 printf 'push grants: not probed (read-only); a push needs a per-session grant per repo\n'
+if [[ "$status" -ne 0 ]]; then
+  printf 'next: bash %s %s   (links the repos; then rerun this preflight)\n' "$(dirname "${BASH_SOURCE[0]}")/cloud-session-setup.sh" "$attach_root"
+fi
 
 exit "$status"

@@ -8,12 +8,18 @@
 #   - current branch not merged into origin/main: report, change nothing
 #   - otherwise: fast-forward main, check it out, delete the merged branch (git branch -d)
 # Exit 0 when every repo is clean on main; exit 1 when anything needs attention.
-# Usage: cloud-closeout.sh [--check] [attach-root]   (--check reports without changing; default root /home/user)
+# On providers other than Claude Code cloud (OpenAI cloud checks repos out on a `work` branch whose
+# role in the harness is unverified) the branch is never deleted or switched: it is reported and
+# retained, and only dirty trees, unpushed main and unmerged commits count as needing attention.
+# Usage: cloud-closeout.sh [--check] [attach-root]   (--check reports without changing; default root detected, see cloud-lib.sh)
 set -uo pipefail
 
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/cloud-lib.sh"
 check=0
 if [[ "${1:-}" == "--check" ]]; then check=1; shift; fi
-attach_root=${1:-/home/user}
+attach_root=$(cloud_attach_root "${1:-}")
+provider=$(cloud_provider)
+if [[ "$provider" != claude ]]; then check=1; fi
 status=0
 
 note() { printf '%s: %s\n' "$name" "$*"; }
@@ -42,6 +48,8 @@ for dir in "$attach_root"/*/; do
   if [[ "$check" -eq 1 ]]; then
     if [[ "$current" == main ]] && [[ "$(git -C "$dir" rev-parse HEAD)" == "$(git -C "$dir" rev-parse origin/main)" ]]; then
       note "ok (main at origin/main)"
+    elif [[ "$provider" != claude ]]; then
+      note "ok (harness branch ${current:-detached HEAD} retained; $provider cloud lifecycle unverified)"
     else
       attention "needs closeout (on ${current:-detached HEAD}); run without --check"
     fi

@@ -3,10 +3,11 @@
 # build akagent from the attached akagent-cli, and expose notes-task/syncdots.
 # Idempotent. Refuses to replace a duplicate clone that is dirty, off main or has
 # commits not on origin. Run bin/cloud-preflight.sh afterwards to verify. At the end of a session run bin/cloud-closeout.sh.
-# Usage: cloud-link-repos.sh [attach-root]   (default: /home/user)
+# Usage: cloud-link-repos.sh [attach-root]   (default: detected; see cloud-lib.sh)
 set -euo pipefail
 
-attach_root=${1:-/home/user}
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/cloud-lib.sh"
+attach_root=$(cloud_attach_root "${1:-}")
 dev_repos=${DEV_REPOS:-"$HOME/dev/repos"}
 bin_dir="$HOME/.local/bin"
 mkdir -p "$dev_repos" "$bin_dir"

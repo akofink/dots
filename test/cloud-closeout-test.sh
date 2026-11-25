@@ -36,4 +36,19 @@ git checkout -q -- a
 printf d > d && git add d && git commit -qm d
 if "$closeout" "$tmp/root" >/dev/null; then echo 'unpushed main passed' >&2; exit 1; fi
 
+# Non-Claude providers retain the harness branch and never switch or delete it.
+git reset -q --hard origin/main
+git checkout -q -b work
+CLOUD_PROVIDER=codex "$closeout" "$tmp/root" | grep -q 'harness branch work retained'
+[[ "$(git branch --show-current)" == work ]]
+[[ -n "$(git branch --list work)" ]]
+printf 'x' > x && git add x && git commit -qm x
+if CLOUD_PROVIDER=codex "$closeout" "$tmp/root" >/dev/null; then echo 'unmerged work branch passed' >&2; exit 1; fi
+
+# Attach root detection: an explicit root wins; CLOUD_ATTACH_ROOT is next.
+source "$repo_root/bin/cloud-lib.sh"
+[[ "$(cloud_attach_root /x)" == /x ]]
+[[ "$(CLOUD_ATTACH_ROOT=/y cloud_attach_root)" == /y ]]
+[[ "$(CODEX_ENVIRONMENT_ID=e CLAUDE_CODE_REMOTE= CCR_AGENT_PROXY_ENABLED= cloud_provider)" != unknown ]]
+
 printf 'cloud-closeout-test: ok\n'
